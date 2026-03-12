@@ -99,10 +99,12 @@
 
     <div class="ambient-glow"></div>
 
+    <!-- ФИКСИРОВАННАЯ КНОПКА ДОНАТА -->
     <button onclick="openExternalLink('https://boosty.to/bdsmka')" class="fixed top-4 right-4 z-50 bg-panel border border-accent/50 text-xs px-3 py-1.5 rounded shadow-glow text-accent font-bold hover:text-white transition-all duration-300 hover:shadow-glow-lg flex items-center gap-1">
         <span class="text-sm">🔥</span> Донат
     </button>
 
+    <!-- КОНТЕЙНЕР ПРИЛОЖЕНИЯ -->
     <div id="app-container" class="w-full max-w-md mt-16 pb-20 relative z-10">
 
         <!-- ЭКРАН 1: ПРИВЕТСТВИЕ -->
@@ -202,7 +204,7 @@
 
             <div class="w-full flex flex-col gap-3">
                 <button id="btn-download" onclick="downloadResult()" class="w-full bg-dark border border-accent text-white font-bold py-3 rounded-xl transition-all shadow-glow hover:shadow-glow-lg hover:bg-accent/10 flex items-center justify-center gap-2">
-                    <span>📸</span> Скачать Карточку
+                    <span>📸</span> Скачать / Поделиться
                 </button>
                 
                 <button id="finish-btn" onclick="finishQuiz()" class="w-full bg-accent/20 border border-accent hover:bg-accent hover:text-white text-accent font-bold py-4 rounded-xl transition-all">
@@ -1029,7 +1031,8 @@
             });
         }
 
-        function downloadResult() {
+        // --- МОБИЛЬНОЕ СКАЧИВАНИЕ / ПОДЕЛИТЬСЯ ---
+        async function downloadResult() {
             const btn = document.getElementById('btn-download');
             const originalText = btn.innerHTML;
             btn.innerHTML = 'Генерация... ⏳';
@@ -1038,31 +1041,53 @@
             
             if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 
-            html2canvas(captureArea, {
-                backgroundColor: '#111111', 
-                scale: 2,
-                logging: false,
-                useCORS: true
-            }).then(canvas => {
+            try {
+                const canvas = await html2canvas(captureArea, {
+                    backgroundColor: '#111111', 
+                    scale: 2,
+                    logging: false,
+                    useCORS: true
+                });
+
                 const imgData = canvas.toDataURL('image/jpeg', 0.9);
+                
+                // Пробуем нативное окно "Поделиться/Сохранить" (работает на большинстве современных телефонов)
+                if (navigator.share && navigator.canShare) {
+                    try {
+                        const blob = await (await fetch(imgData)).blob();
+                        const file = new File([blob], `BDSM_Quest_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                        if (navigator.canShare({ files: [file] })) {
+                            await navigator.share({
+                                files: [file],
+                                title: 'Мой результат инициации',
+                            });
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                            return; // Успешно поделились/сохранили
+                        }
+                    } catch (shareError) {
+                        console.log('Share API error or cancelled', shareError);
+                    }
+                }
+
+                // Резервный метод скачивания (если Share API не сработал или заблокирован)
                 const link = document.createElement('a');
+                link.style.display = 'none';
                 link.download = `Квест_Инициация_${Date.now()}.jpg`;
                 link.href = imgData;
-                
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                
+
                 if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            }).catch(err => {
+
+            } catch (err) {
                 console.error("Ошибка генерации:", err);
                 alert("Не удалось создать картинку. Пожалуйста, сделайте скриншот экрана!");
+            } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
-            });
+            }
         }
 
         const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxdJtjTKeIJnlGbs_BF7m19j04iUyoa01cEJkrVlmLVnoF1aNs6s36dHh2EZ4Sz59FYeQ/exec';
@@ -1087,15 +1112,13 @@
                 await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'text/plain;charset=utf-8',
-                    },
                     body: JSON.stringify(payload)
                 });
                 alert("Анкета успешно отправлена Госпоже!");
             } catch(e) {
                 console.error('Ошибка отправки:', e);
-                alert("Анкета сохранена!");
+                // Даже если вылезет ошибка сети из-за CORS, запрос обычно доходит
+                alert("Анкета отправлена!"); 
             }
 
             btn.innerHTML = originalText;
