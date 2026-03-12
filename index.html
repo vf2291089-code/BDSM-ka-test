@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>БДСМ-ка | Квест</title>
+    
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#050505',
+                        panel: '#111111',
+                        accent: 'rgba(var(--color-accent), 1)',
+                    },
+                    boxShadow: {
+                        'glow': '0 0 15px rgba(var(--color-accent), 0.3)',
+                        'glow-lg': '0 0 30px rgba(var(--color-accent), 0.5)'
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Chart.js для Радара -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2canvas для скачивания карточки -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root { --color-accent: 139, 0, 0; }
+        body.theme-submissive { --color-accent: 0, 191, 255; }
+        body.theme-dominant { --color-accent: 255, 120, 0; }
+
+        body {
+            background-color: #050505;
+            color: #e5e5e5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.5s ease;
+            overflow-x: hidden;
+        }
+
+        .ambient-glow {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100vw; height: 100vw;
+            background: radial-gradient(circle, rgba(var(--color-accent), 0.08) 0%, transparent 60%);
+            z-index: -1;
+            pointer-events: none;
+            transition: background 0.8s ease;
+        }
+
+        .fade-in { animation: fadeIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(var(--color-accent), 0.8); border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-4 transition-colors duration-700">
+
+    <div class="ambient-glow"></div>
+
+    <!-- ФИКСИРОВАННАЯ КНОПКА ДОНАТА -->
+    <button onclick="openExternalLink('https://boosty.to/bdsmka')" class="fixed top-4 right-4 z-50 bg-panel border border-accent/50 text-xs px-3 py-1.5 rounded shadow-glow text-accent font-bold hover:text-white transition-all duration-300 hover:shadow-glow-lg flex items-center gap-1">
+        <span class="text-sm">🔥</span> Донат
+    </button>
+
+    <!-- КОНТЕЙНЕР ПРИЛОЖЕНИЯ -->
+    <div id="app-container" class="w-full max-w-md mt-16 pb-20 relative z-10">
+
+        <!-- ЭКРАН 1: ПРИВЕТСТВИЕ -->
+        <div id="screen-welcome" class="fade-in hidden flex flex-col items-center text-center">
+            
+            <!-- Кликабельный логотип группы (Без рамок и фона) -->
+            <button onclick="openExternalLink('https://vk.com/bdsmkaaa')" class="self-start ml-2 mb-6 transition-transform hover:scale-105 active:scale-95">
+                <img src="logo.png" alt="BDSM-ka" class="w-36 h-auto object-contain" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 150 50\'><text x=\'75\' y=\'32\' font-family=\'sans-serif\' font-size=\'20\' fill=\'%23555\' text-anchor=\'middle\'>VK LOGO</text></svg>'">
+            </button>
+
+            <h1 class="text-4xl font-bold text-white mb-2 tracking-widest uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">Инициация</h1>
+            <p class="text-gray-400 mb-10 text-sm px-4">Ответь честно. Узнай свое истинное предназначение и получи Карточку БДСМ-ки.</p>
+            
+            <div class="w-full flex flex-col gap-5 px-2">
+                <button onclick="startQuiz('submissive', event)" class="relative w-full bg-[#001a22] border-2 border-[#00bfff]/50 hover:border-[#00bfff] p-5 rounded-xl text-left flex justify-between items-center group transition-all duration-300 shadow-[0_0_20px_rgba(0,191,255,0.15)] hover:shadow-[0_0_30px_rgba(0,191,255,0.4)] animate-pulse-slow overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#00bfff]/0 to-[#00bfff]/10 group-hover:to-[#00bfff]/20 transition-all"></div>
+                    <div class="flex flex-col relative z-10">
+                        <span class="text-xl font-bold text-[#00bfff] tracking-wide">ПУТЬ НИЖНЕГО</span>
+                        <span class="text-xs text-gray-400 mt-1">Отдать контроль и служить</span>
+                    </div>
+                    <span class="text-[#00bfff] text-2xl relative z-10 transition-transform group-hover:translate-x-2">→</span>
+                </button>
+
+                <button onclick="startQuiz('dominant', event)" class="relative w-full bg-[#220d00] border-2 border-[#ff7800]/50 hover:border-[#ff7800] p-5 rounded-xl text-left flex justify-between items-center group transition-all duration-300 shadow-[0_0_20px_rgba(255,120,0,0.15)] hover:shadow-[0_0_30px_rgba(255,120,0,0.4)] animate-pulse-slow overflow-hidden" style="animation-delay: 1.5s;">
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#ff7800]/0 to-[#ff7800]/10 group-hover:to-[#ff7800]/20 transition-all"></div>
+                    <div class="flex flex-col relative z-10">
+                        <span class="text-xl font-bold text-[#ff7800] tracking-wide">ПУТЬ ВЕРХНЕГО</span>
+                        <span class="text-xs text-gray-400 mt-1">Взять контроль и властвовать</span>
+                    </div>
+                    <span class="text-[#ff7800] text-2xl relative z-10 transition-transform group-hover:translate-x-2">→</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 2: КВЕСТ (ВОПРОСЫ) -->
+        <div id="screen-quiz" class="hidden flex flex-col">
+            <div class="mb-6 flex justify-between items-center text-xs text-gray-400 uppercase tracking-widest px-2">
+                <span id="role-indicator" class="text-accent font-bold drop-shadow-[0_0_5px_rgba(var(--color-accent),0.5)]">Роль</span>
+                <button onclick="resetApp(event)" class="hover:text-white transition-colors">Прервать ✕</button>
+            </div>
+            
+            <div class="bg-panel/90 backdrop-blur-md p-6 rounded-2xl border border-accent/30 shadow-glow fade-in relative overflow-hidden" id="question-container">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent to-transparent opacity-50"></div>
+                <h2 id="question-text" class="text-lg font-medium text-white mb-8 leading-relaxed"></h2>
+                <div id="options-container" class="flex flex-col gap-3 relative z-10"></div>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 3: РЕЗУЛЬТАТ (ЗВАНИЕ + КАРТОЧКА) -->
+        <div id="screen-result" class="hidden flex flex-col items-center text-center fade-in w-full">
+            
+            <!-- Блок для генерации картинки -->
+            <div id="capture-area" class="w-full bg-panel p-6 pb-32 rounded-2xl border border-accent/40 shadow-glow relative overflow-hidden text-left mb-6">
+                <!-- Декоративная линия -->
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent to-transparent opacity-50"></div>
+                
+                <!-- Водяные знаки, Лого и QR код (УВЕЛИЧЕННЫЕ) -->
+                <div class="absolute bottom-5 left-0 w-full px-6 flex justify-between items-end z-10 opacity-95">
+                    
+                    <!-- Левый угол -->
+                    <div class="flex flex-col items-start gap-1">
+                        <span class="text-[11px] text-gray-400 font-mono tracking-widest drop-shadow-md pl-1">@bdsmkaaa</span>
+                        <img src="logo.png" alt="VK" class="w-32 h-auto object-contain" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 40\'><text x=\'50\' y=\'25\' font-family=\'sans-serif\' font-size=\'16\' fill=\'%23555\' text-anchor=\'middle\'>VK</text></svg>'">
+                    </div>
+
+                    <!-- Правый угол -->
+                    <div class="flex flex-col items-end">
+                        <img src="qr_tg.png" alt="QR" class="w-24 h-24 rounded-lg bg-white p-1.5 border-2 border-accent/50 shadow-glow object-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%23fff\'/><text x=\'50\' y=\'55\' font-family=\'sans-serif\' font-size=\'30\' fill=\'%23333\' text-anchor=\'middle\'>QR</text></svg>'">
+                    </div>
+
+                </div>
+
+                <div class="text-center mb-6">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Инициация пройдена</p>
+                    <h1 id="result-title" class="text-2xl font-bold text-accent drop-shadow-glow">Звание</h1>
+                </div>
+                
+                <p id="result-desc" class="text-[13px] text-gray-300 leading-relaxed italic border-l-2 border-accent/50 pl-3 mb-6 relative z-10">
+                    Описание
+                </p>
+
+                <!-- Контейнер для Графика -->
+                <div class="relative w-full aspect-square mb-2 z-0">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Кнопки действий -->
+            <div class="w-full flex flex-col gap-3">
+                <button onclick="downloadResult()" class="w-full bg-dark border border-accent text-white font-bold py-3 rounded-xl transition-all shadow-glow hover:shadow-glow-lg hover:bg-accent/10 flex items-center justify-center gap-2">
+                    <span>📸</span> Скачать Карточку
+                </button>
+                
+                <button id="finish-btn" onclick="finishQuiz()" class="w-full bg-accent/20 border border-accent hover:bg-accent hover:text-white text-accent font-bold py-4 rounded-xl transition-all">
+                    Завершить Сеанс
+                </button>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 4: БЛОКИРОВКА 24 ЧАСА -->
+        <div id="screen-cooldown" class="hidden flex flex-col items-center text-center mt-10 fade-in">
+            <div class="text-6xl mb-6 text-accent drop-shadow-glow">⏳</div>
+            <h2 class="text-2xl font-bold text-white mb-2 uppercase tracking-wide">Сеанс окончен</h2>
+            <p class="text-gray-400 mb-8 text-sm">Ты уже проходил инициацию. По правилам, возвращаться сюда можно только раз в 24 часа.</p>
+            
+            <div class="bg-panel/80 backdrop-blur px-8 py-5 rounded-xl border border-accent/40 shadow-glow">
+                <p class="text-xs text-accent uppercase tracking-widest mb-2 font-bold">Доступ откроется через:</p>
+                <div id="countdown-timer" class="text-3xl font-mono text-white tracking-wider">00:00:00</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        function openExternalLink(url) {
+            if (tg && tg.openLink) {
+                tg.openLink(url);
+            } else {
+                window.open(url, '_blank');
+            }
+        }
+
+        function spawnParticles(e, forceColorStr = null) {
+            const x = e ? e.clientX : window.innerWidth / 2;
+            const y = e ? e.clientY : window.innerHeight / 2;
+            for (let i = 0; i < 20; i++) {
+                const p = document.createElement('div');
+                document.body.appendChild(p);
+                const size = Math.random() * 4 + 2;
+                const colorStr = forceColorStr || `rgb(${getComputedStyle(document.body).getPropertyValue('--color-accent')})`;
+                p.style.cssText = `position: fixed; pointer-events: none; border-radius: 50%; z-index: 9999; width: ${size}px; height: ${size}px; background: ${colorStr}; box-shadow: 0 0 ${size*2}px ${colorStr}; left: ${x}px; top: ${y}px;`;
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 80 + 30;
+                p.animate([
+                    { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+                    { transform: `translate(calc(-50% + ${Math.cos(angle) * velocity}px), calc(-50% + ${Math.sin(angle) * velocity}px)) scale(0)`, opacity: 0 }
+                ], { duration: Math.random() * 500 + 400, easing: 'cubic-bezier(0.25, 1, 0.5, 1)' }).onfinish = () => p.remove();
+            }
+        }
+
+        // --- БАЗА ЗВАНИЙ ---
+        const titlesData = {
+            submissive: [
+                { id: "s1", title: "«Безупречный Слуга»", traits: ['service', 'submission'], desc: "Этот мужчина — мечта для Госпожи, ценящей идеальный порядок и тотальный контроль. Он готов взять на себя всю грязную работу, соблюдать строжайший дресс-код и сдавать ежедневные отчеты." },
+                { id: "s2", title: "«Финансовый Донор»", traits: ['findom'], desc: "Он находит глубокое наслаждение в том, чтобы оплачивать капризы своей Госпожи. Он готов опустошать свой кошелек по первому щелчку Её пальцев." },
+                { id: "s3", title: "«Узник Похоти»", traits: ['chastity'], desc: "Его похоть больше ему не принадлежит. Этот нижний готов добровольно запереть себя в пояс верности и отдать ключ Госпоже." },
+                { id: "s4", title: "«Неутомимая Груша»", traits: ['masochism'], desc: "У этого мужчины невероятно высокий болевой порог. Он жаждет носить на своем теле кровоподтеки, синяки и рубцы как доказательства Её власти." },
+                { id: "s5", title: "«Одержимый Жрец»", traits: ['oral'], desc: "Тело Госпожи — это священный храм, а его язык — безотказный инструмент. Он готов часами вылизывать Её до полного изнеможения." },
+                { id: "s6", title: "«Дерзкая Игрушка»", traits: ['brat'], desc: "Этот мужчина обожает проверять нервы Госпожи на прочность. Тот самый строптивый зверь, которого невероятно сладко ставить на колени." },
+                { id: "s7", title: "«Живая Мебель»", traits: ['objectification'], desc: "Он добровольно отказывается от права называться человеком. Он жаждет тотальной объективизации: быть пепельницей, ковриком или стулом." },
+                { id: "s8", title: "«Покорная Сучка»", traits: ['pegging'], desc: "Этот мужчина готов отдать Госпоже свою мужскую гордость. Он мечтает о тотальной инверсии ролей и пеггинге." },
+                { id: "s9", title: "«Публичный Пёс»", traits: ['public'], desc: "Адреналин публичного унижения слаще любой порки. Риск быть пойманным с анальной пробкой или ошейником в ресторане доводит его до дрожи." },
+                { id: "s10", title: "«Сломанная Воля»", traits: ['mindfuck'], desc: "Ему не нужны цепи. Этот мужчина жаждет жесткого психологического доминирования, газлайтинга и словесного унижения." },
+                { id: "s11", title: "«Покорный Зритель»", traits: ['cuckold'], desc: "Его величайшая фантазия — осознавать свою ничтожность на фоне других мужчин Госпожи." },
+                { id: "s12", title: "«Хороший Мальчик»", traits: ['praise'], desc: "Ему нужны четкие правила, строгие выговоры и ласковые поглаживания по голове за послушание (Mommy Dom)." },
+                { id: "s13", title: "«Чистый Холст»", traits: ['newbie'], desc: "У него мало опыта, но колоссальное желание принадлежать. Идеальный 'чистый лист' для Госпожи-Скульптора." },
+                { id: "s14", title: "«Узник Темноты»", traits: ['deprivation'], desc: "Он жаждет абсолютной сенсорной беспомощности. Жесткое шибари, кляпы и игры с дыханием — его стихия." },
+                { id: "s15", title: "«Виртуальный Раб»", traits: ['online'], desc: "Идеальный актив для дистанционного служения. Выполняет унизительные задания по видео и скидывает отчеты." }
+            ],
+            dominant: [
+                { id: "d1", title: "«Абсолютный Владелец»", traits: ['control'], desc: "Он живет властью 24/7. Нижняя — не партнер, а личная собственность. Он обеспечивает её, требуя тотального послушания." },
+                { id: "d2", title: "«Властный Покровитель»", traits: ['daddy'], desc: "Строгий Daddy, чья власть строится на опеке и уважении. Щедр на ласку, но за проступок накажет ледяным тоном." },
+                { id: "d3", title: "«Изощрённый Эстет»", traits: ['sadism'], desc: "Садист-художник, для которого тело — холст для красивой боли. Плети, воск, метки на коже." },
+                { id: "d4", title: "«Искусный Кукловод»", traits: ['mindfuck'], desc: "Мастер разума, ломающий сознание. Питается уязвимостью, обожает разрушенные оргазмы и грязные слова." },
+                { id: "d5", title: "«Азартный Укротитель»", traits: ['brat_tamer'], desc: "Хищник, охотящийся на строптивых. Обожает процесс укрощения, когда девочка дерзит." },
+                { id: "d6", title: "«Порочный Режиссёр»", traits: ['public'], desc: "Риск быть пойманными заводит его. Публичные игры с виброяйцом, видеоархивы или куколдизм." },
+                { id: "d7", title: "«Хранитель Оков»", traits: ['bondage'], desc: "Мастер тотальной фиксации и бондажа. Шибари, колодки, мумификация." },
+                { id: "d8", title: "«Тёмный Скульптор»", traits: ['teacher'], desc: "Терпеливый Наставник, ищущий 'чистый лист'. Шаг за шагом мягко, но уверенно перепрошивает границы." },
+                { id: "d9", title: "«Первобытный Хищник»", traits: ['primal'], desc: "Чистая инстинктивная власть. Не признает девайсы, только свои руки, укусы и асфиксию." },
+                { id: "d10", title: "«Ледяной Диктатор»", traits: ['strict'], desc: "Бескомпромиссный надзиратель. Требует покорности с первой секунды. Выражает недовольство ледяным тоном." }
+            ]
+        };
+
+        // --- СЛОВАРЬ ПЕРЕВОДА КИНКОВ ДЛЯ РАДАРА ---
+        const traitLabels = {
+            submission: 'Покорность', service: 'Служение', findom: 'Финдом', 
+            chastity: 'Воздержание', masochism: 'Мазохизм', oral: 'Орал', 
+            brat: 'Строптивость', objectification: 'Объективизация', pegging: 'Инверсия', 
+            public: 'Эксгибиционизм', mindfuck: 'Игры разума', cuckold: 'Куколдизм', 
+            praise: 'Похвала', newbie: 'Неопытность', deprivation: 'Депривация', 
+            online: 'Онлайн', degradation: 'Унижение', control: 'Контроль', 
+            daddy: 'Опека', sadism: 'Садизм', brat_tamer: 'Укрощение', 
+            bondage: 'Бондаж', teacher: 'Наставник', primal: 'Инстинкты', strict: 'Строгость'
+        };
+
+        // --- БАЗА ВОПРОСОВ ---
+        const questData = {
+            submissive: {
+                q1: {
+                    text: "1. Давай узнаем самое главное. Ты ищешь БДСМ-отношения 24/7, где ты всегда в подчинении у своей Госпожи? Или для тебя это ограничивается только сессиями и сексом?",
+                    options: [
+                        { text: "В теме 24/7. Мое подчинение Ей не заканчивается за дверями спальни.", nextId: "q1_1", scores: { submission: +2, service: +1 } },
+                        { text: "Делаем это только тогда, когда у Неё есть настроение или заранее оговорена сессия.", nextId: "q1_2", scores: { submission: +1 } }
+                    ]
+                },
+                q1_1: {
+                    text: "1.1 Как ты хочешь, чтобы Верхняя контролировала твою повседневную жизнь?",
+                    options: [
+                        { text: "Жесткий регламент: дресс-код, отчеты, контроль общения. Тотальный надзор.", nextId: "q2", scores: { service: +3, submission: +2 } },
+                        { text: "На уровне энергетики: я признаю Её авторитет, но без строгой бюрократии.", nextId: "q2", scores: { submission: +1 } }
+                    ]
+                },
+                q1_2: {
+                    text: "1.2 А после жесткой сессии? Как ты возвращаешься в реальный мир?",
+                    options: [
+                        { text: "Мне жизненно необходим афтеркеа (aftercare): чтобы Она обняла и похвалила.", nextId: "q2", scores: { praise: +2 } },
+                        { text: "Я легко переключаюсь. Снимаем 'ошейник' и можем пойти смотреть кино.", nextId: "q2", scores: {} }
+                    ]
+                },
+                q2: {
+                    text: "2. Ты хочешь принадлежать Госпоже как личная собственность, покорная вещь? Или для тебя важно оставаться личностью?",
+                    options: [
+                        { text: "Я хочу быть вещью, инструментом для Её удовлетворения.", nextId: "q2_1", scores: { objectification: +3 } },
+                        { text: "Я хочу подчиняться, но считаю, что заслуживаю заботу и уважение.", nextId: "q2_2", scores: { praise: +1 } }
+                    ]
+                },
+                q2_1: {
+                    text: "2.1 Готов ли ты подкреплять свое служение материально (Findom)?",
+                    options: [
+                        { text: "Да. Идеально — отдать Госпоже контроль над моими финансами и платить за право служить.", nextId: "q3", scores: { findom: +4 } },
+                        { text: "Готов дарить подарки и оплачивать сессии, но основные доходы у меня.", nextId: "q3", scores: { findom: +1 } },
+                        { text: "Нет, мое служение касается только тела.", nextId: "q3", scores: {} }
+                    ]
+                },
+                q2_2: {
+                    text: "2.2 Какой формат заботы от Верхней тебя привлекает больше?",
+                    options: [
+                        { text: "Формат «Властная Мамочка»: опекает, балует, но строго наказывает за проступки.", nextId: "q3", scores: { praise: +3 } },
+                        { text: "Мы равные взрослые люди вне постели.", nextId: "q3", scores: {} }
+                    ]
+                },
+                q3: {
+                    text: "3. Как ты отнесешься к тому, если Госпожа будет использовать жесткие слова, обзывать и унижать тебя?",
+                    options: [
+                        { text: "Обожаю это. Грубые оскорбления помогают уйти в саб-космос. Я Её грязная игрушка.", nextId: "q3_1", scores: { mindfuck: +3, degradation: +2 } },
+                        { text: "Предпочитаю быть «хорошим мальчиком». Больше заводит Её похвала.", nextId: "q3_2", scores: { praise: +3 } }
+                    ]
+                },
+                q3_1: {
+                    text: "3.1 Насколько жестоким может быть это словесное унижение?",
+                    options: [
+                        { text: "Пусть бьет по реальным мужским комплексам. Тотальное подавление (mindfuck).", nextId: "q4", scores: { mindfuck: +4 } },
+                        { text: "Только грязный мат (dirty talk) в процессе секса.", nextId: "q4", scores: { mindfuck: +1 } }
+                    ]
+                },
+                q3_2: {
+                    text: "3.2 А если ты провинишься, как Госпожа должна тебя отчитать?",
+                    options: [
+                        { text: "Ледяным тоном, от которого сгорю от стыда.", nextId: "q4", scores: { submission: +1 } },
+                        { text: "Игнорированием. Лишит внимания, пока не заслужу прощение.", nextId: "q4", scores: { praise: +2 } }
+                    ]
+                },
+                q4: {
+                    text: "4. Насколько тебе нравится быть физически обездвиженным? Связывание, бондаж?",
+                    options: [
+                        { text: "Обожаю. Чувство полной беспомощности перед Госпожой меня заводит.", nextId: "q4_1", scores: { bondage: +3 } },
+                        { text: "Меня пугает потеря свободы. Я хочу свободно двигаться и прислуживать.", nextId: "q5", scores: { service: +2 } }
+                    ]
+                },
+                q4_1: {
+                    text: "4.1 Какой уровень фиксации ты предпочитаешь?",
+                    options: [
+                        { text: "Легкий: наручники, шелковые ленты.", nextId: "q5", scores: { bondage: +1 } },
+                        { text: "Жесткий: шибари, мумификация, вакуумные кровати (полное обездвиживание).", nextId: "q5", scores: { bondage: +4, deprivation: +2 } }
+                    ]
+                },
+                q5: {
+                    text: "5. Оргазмический контроль. Тебе нравится, когда Верхняя запрещает разрядку?",
+                    options: [
+                        { text: "Да, мой оргазм принадлежит Ей. Пояс верности (chastity) — моя мечта.", nextId: "end", scores: { chastity: +4 } },
+                        { text: "Нет, оргазм — важная часть процесса.", nextId: "end", scores: {} }
+                    ]
+                }
+            },
+            dominant: {
+                q1: {
+                    text: "1. БДСМ-отношения 24-7, где ты всегда Верхний? Или только во время сессий?",
+                    options: [
+                        { text: "В теме 24-7. Всегда.", nextId: "q1_1", scores: { control: +2 } },
+                        { text: "Делаем это когда хотим/есть желание.", nextId: "q2", scores: {} }
+                    ]
+                },
+                q1_1: {
+                    text: "1.1 Как именно выражается твой контроль вне спальни?",
+                    options: [
+                        { text: "Жесткий регламент, отчеты, тотальный надзор.", nextId: "q2", scores: { control: +4 } },
+                        { text: "Мое слово закон, но без строгой бюрократии.", nextId: "q2", scores: { control: +1 } }
+                    ]
+                },
+                q2: {
+                    text: "2. Отношение к телу. Как ты наказываешь?",
+                    options: [
+                        { text: "Люблю оставлять синяки и рубцы девайсами (плети, стэки).", nextId: "q3", scores: { sadism: +4 } },
+                        { text: "Только мои руки. Агрессия и инстинкты.", nextId: "q3", scores: { primal: +4 } },
+                        { text: "Лишением удовольствия и ледяным тоном.", nextId: "q3", scores: { strict: +3, daddy: +1 } }
+                    ]
+                },
+                q3: {
+                    text: "3. Игры со страхом и разумом. Заводит ли тебя паника в глазах нижней?",
+                    options: [
+                        { text: "Да, жесткое придушивание, игры с дыханием. Жизнь в моих руках.", nextId: "end", scores: { primal: +2, sadism: +2 } },
+                        { text: "Люблю ломать психологически, бить по комплексам.", nextId: "end", scores: { mindfuck: +4 } },
+                        { text: "Нет, я терпеливый наставник. Люблю воспитывать.", nextId: "end", scores: { teacher: +4 } }
+                    ]
+                }
+            }
+        };
+
+        // --- СОСТОЯНИЕ И ЛОГИКА ---
+        let currentRole = null;
+        let userAnswers = [];
+        let currentScores = {};
+        let cooldownInterval;
+        let radarChartInstance = null;
+        let finalTitle = ""; 
+
+        function showScreen(screenId) {
+            ['screen-welcome', 'screen-quiz', 'screen-result', 'screen-cooldown'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+                document.getElementById(id).classList.remove('fade-in');
+            });
+            const screen = document.getElementById(screenId);
+            screen.classList.remove('hidden');
+            void screen.offsetWidth;
+            screen.classList.add('fade-in');
+        }
+
+        const COOLDOWN_HOURS = 24;
+        function checkCooldown() {
+            const lastPlayed = parseInt(localStorage.getItem('bdsm_quest_last_played'), 10);
+            if (!lastPlayed) return false;
+            const diffHours = (Date.now() - lastPlayed) / (1000 * 60 * 60);
+            if (diffHours < COOLDOWN_HOURS) {
+                startCountdown(lastPlayed + (COOLDOWN_HOURS * 60 * 60 * 1000));
+                return true;
+            }
+            return false;
+        }
+
+        function setCooldown() {
+            localStorage.setItem('bdsm_quest_last_played', Date.now().toString());
+        }
+
+        function startCountdown(targetTimeMs) {
+            if(cooldownInterval) clearInterval(cooldownInterval);
+            const timerEl = document.getElementById('countdown-timer');
+            cooldownInterval = setInterval(() => {
+                const diff = targetTimeMs - Date.now();
+                if (diff <= 0) {
+                    clearInterval(cooldownInterval);
+                    localStorage.removeItem('bdsm_quest_last_played');
+                    initApp();
+                    return;
+                }
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+                timerEl.textContent = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function startQuiz(role, event) {
+            if(event) spawnParticles(event, role === 'submissive' ? '#00bfff' : '#ff7800');
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+            currentRole = role;
+            userAnswers = [];
+            currentScores = {};
+            document.body.className = `min-h-screen flex flex-col items-center justify-start p-4 transition-colors duration-700 theme-${role}`;
+            document.getElementById('role-indicator').textContent = role === 'submissive' ? 'Путь Нижнего' : 'Путь Верхнего';
+            
+            setTimeout(() => { showScreen('screen-quiz'); renderQuestion('q1'); }, 300);
+        }
+
+        function renderQuestion(questionId) {
+            if (questionId === 'end') { calculateAndShowResult(); return; }
+
+            const qData = questData[currentRole][questionId];
+            const container = document.getElementById('question-container');
+            container.classList.remove('fade-in'); void container.offsetWidth; container.classList.add('fade-in');
+
+            document.getElementById('question-text').textContent = qData.text;
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            qData.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full bg-dark/50 border border-gray-800 hover:border-accent hover:bg-accent/10 transition-all duration-300 p-4 rounded-xl text-left text-sm text-gray-300 hover:text-white leading-snug hover:shadow-glow relative overflow-hidden';
+                btn.textContent = opt.text;
+                btn.onclick = (e) => handleAnswer(questionId, opt, e);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(questionId, opt, event) {
+            userAnswers.push({ qId: questionId, answer: opt.text });
+            
+            if (opt.scores) {
+                for (const [trait, value] of Object.entries(opt.scores)) {
+                    currentScores[trait] = (currentScores[trait] || 0) + value;
+                }
+            }
+
+            if(event) spawnParticles(event);
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            setTimeout(() => { renderQuestion(opt.nextId); }, 250);
+        }
+
+        function calculateAndShowResult() {
+            let bestTitle = titlesData[currentRole][0];
+            let maxScore = -1;
+
+            titlesData[currentRole].forEach(titleObj => {
+                let currentTitleScore = 0;
+                titleObj.traits.forEach(trait => {
+                    currentTitleScore += (currentScores[trait] || 0);
+                });
+                if (currentTitleScore > maxScore) {
+                    maxScore = currentTitleScore;
+                    bestTitle = titleObj;
+                }
+            });
+
+            finalTitle = bestTitle.title; 
+
+            document.getElementById('result-title').textContent = bestTitle.title;
+            document.getElementById('result-desc').textContent = bestTitle.desc;
+            
+            showScreen('screen-result');
+            drawRadarChart();
+        }
+
+        function drawRadarChart() {
+            let sortedTraits = Object.keys(currentScores).sort((a,b) => currentScores[b] - currentScores[a]).slice(0, 6);
+            
+            const defaults = currentRole === 'submissive' 
+                ? ['submission', 'masochism', 'service', 'chastity', 'mindfuck', 'degradation'] 
+                : ['control', 'sadism', 'strict', 'teacher', 'bondage', 'primal'];
+            
+            if(sortedTraits.length < 3) {
+                defaults.forEach(d => { if(!sortedTraits.includes(d)) sortedTraits.push(d); });
+                sortedTraits = sortedTraits.slice(0, 6);
+            }
+
+            const labels = sortedTraits.map(t => traitLabels[t] || t);
+            const data = sortedTraits.map(t => (currentScores[t] || 0) + 1);
+
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            if(radarChartInstance) radarChartInstance.destroy();
+            
+            const rgbColor = getComputedStyle(document.body).getPropertyValue('--color-accent').trim();
+
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Интенсивность',
+                        data: data,
+                        backgroundColor: `rgba(${rgbColor}, 0.25)`,
+                        borderColor: `rgba(${rgbColor}, 1)`,
+                        pointBackgroundColor: `rgba(${rgbColor}, 1)`,
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: `rgba(${rgbColor}, 1)`,
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            pointLabels: { 
+                                color: 'rgba(255, 255, 255, 0.8)', 
+                                font: { size: 10, family: "sans-serif" } 
+                            },
+                            ticks: { display: false, min: 0 } 
+                        }
+                    },
+                    plugins: { legend: { display: false } },
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        function downloadResult() {
+            const captureArea = document.getElementById('capture-area');
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+            html2canvas(captureArea, {
+                backgroundColor: '#111111', 
+                scale: 2,
+                logging: false,
+                useCORS: true
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = `Квест_Инициация_${Date.now()}.png`;
+                link.href = imgData;
+                link.click();
+                if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            }).catch(err => {
+                console.error("Ошибка генерации:", err);
+                alert("Не удалось сохранить картинку. Сделай скриншот экрана!");
+            });
+        }
+
+        // --- ВАШ WEBHOOK URL ОТ GOOGLE APPS SCRIPT ---
+        // ЗАМЕНИ эту ссылку на ту, что получишь в Шаге 3 из инструкции!
+        const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxdJtjTKeIJnlGbs_BF7m19j04iUyoa01cEJkrVlmLVnoF1aNs6s36dHh2EZ4Sz59FYeQ/exec';
+
+        async function finishQuiz() {
+            const btn = document.getElementById('finish-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Отправка данных... ⏳';
+            btn.disabled = true;
+
+            const tgUser = tg.initDataUnsafe?.user || {};
+
+            const payload = {
+                tgId: tgUser.id || 'Аноним',
+                tgUsername: tgUser.username ? '@' + tgUser.username : (tgUser.first_name || 'Без имени'),
+                role: currentRole === 'submissive' ? 'Нижний' : 'Верхний',
+                title: finalTitle,
+                answers: JSON.stringify(userAnswers)
+            };
+
+            try {
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch(e) {
+                console.error('Ошибка отправки:', e);
+            }
+
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+
+            setCooldown();
+            showScreen('screen-cooldown');
+            checkCooldown();
+        }
+
+        function resetApp(event) {
+            if(confirm('Точно прервать инициацию?')) {
+                if(event) spawnParticles(event, '#ffffff');
+                currentRole = null; userAnswers = []; currentScores = {};
+                document.body.className = 'min-h-screen flex flex-col items-center justify-start p-4 transition-colors duration-700';
+                showScreen('screen-welcome');
+            }
+        }
+
+        function initApp() {
+            document.body.className = 'min-h-screen flex flex-col items-center justify-start p-4 transition-colors duration-700';
+            if (checkCooldown()) showScreen('screen-cooldown'); else showScreen('screen-welcome');
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
