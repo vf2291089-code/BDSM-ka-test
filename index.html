@@ -33,8 +33,6 @@
     
     <!-- Chart.js для Радара -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- html2canvas для скачивания карточки -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         :root { --color-accent: 139, 0, 0; }
@@ -99,7 +97,7 @@
 
     <div class="ambient-glow"></div>
 
-    <button onclick="openExternalLink('https://boosty.to/bdsmka')" class="fixed top-4 right-4 z-50 bg-panel border border-accent/50 text-xs px-3 py-1.5 rounded shadow-glow text-accent font-bold hover:text-white transition-all duration-300 hover:shadow-glow-lg flex items-center gap-1">
+    <button id="donate-btn" onclick="openExternalLink('https://boosty.to/bdsmka')" class="fixed top-4 right-4 z-50 bg-panel border border-accent/50 text-xs px-3 py-1.5 rounded shadow-glow text-accent font-bold hover:text-white transition-all duration-300 hover:shadow-glow-lg flex items-center gap-1">
         <span class="text-sm">🔥</span> Донат
     </button>
 
@@ -151,7 +149,6 @@
                 <button onclick="resetApp(event)" class="hover:text-white transition-colors">Прервать ✕</button>
             </div>
             
-            <!-- Жидкая Шкала Прогресса -->
             <div class="w-full bg-dark rounded-full h-3 mb-6 border border-gray-800 relative overflow-hidden">
                 <div id="progress-bar-fill" class="liquid-bar w-0"></div>
             </div>
@@ -164,18 +161,26 @@
         </div>
 
         <!-- ЭКРАН 3: РЕЗУЛЬТАТ -->
-        <div id="screen-result" class="hidden flex flex-col items-center text-center fade-in w-full">
+        <div id="screen-result" class="hidden flex flex-col items-center text-center fade-in w-full relative">
             
-            <div id="capture-area" class="w-full bg-panel p-6 pb-32 rounded-2xl border border-accent/40 shadow-glow relative overflow-hidden text-left mb-6">
+            <!-- Подсказка для скриншота (Скрыта по умолчанию) -->
+            <div id="screenshot-hint" class="hidden fixed top-8 left-0 w-full flex justify-center z-50 animate-pulse pointer-events-none">
+                <div class="bg-black/90 border border-accent/80 text-white px-5 py-3 rounded-full text-sm font-bold shadow-glow-lg backdrop-blur-sm">
+                    📸 Сделайте скриншот. Коснитесь экрана для возврата.
+                </div>
+            </div>
+
+            <!-- Блок Карточки (остается на экране всегда) -->
+            <div id="capture-area" class="w-full bg-panel p-6 pb-24 rounded-2xl border border-accent/40 shadow-glow relative overflow-hidden text-left mb-6 transition-all duration-300">
                 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent to-transparent opacity-50"></div>
                 
                 <div class="absolute bottom-5 left-0 w-full px-6 flex justify-between items-end z-10 opacity-95">
                     <div class="flex flex-col items-start gap-1">
                         <span class="text-[11px] text-gray-400 font-mono tracking-widest drop-shadow-md pl-1">@bdsmkaaa</span>
-                        <img src="logo.png" alt="VK" class="w-32 h-auto object-contain" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 40\'><text x=\'50\' y=\'25\' font-family=\'sans-serif\' font-size=\'16\' fill=\'%23555\' text-anchor=\'middle\'>VK</text></svg>'">
+                        <img src="logo.png" alt="VK" class="w-28 h-auto object-contain" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 40\'><text x=\'50\' y=\'25\' font-family=\'sans-serif\' font-size=\'16\' fill=\'%23555\' text-anchor=\'middle\'>VK</text></svg>'">
                     </div>
                     <div class="flex flex-col items-end">
-                        <img src="qr_tg.png" alt="QR" class="w-24 h-24 rounded-lg bg-white p-1.5 border-2 border-accent/50 shadow-glow object-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%23fff\'/><text x=\'50\' y=\'55\' font-family=\'sans-serif\' font-size=\'30\' fill=\'%23333\' text-anchor=\'middle\'>QR</text></svg>'">
+                        <img src="qr_tg.png" alt="QR" class="w-20 h-20 rounded-lg bg-white p-1 border-2 border-accent/50 shadow-glow object-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%23fff\'/><text x=\'50\' y=\'55\' font-family=\'sans-serif\' font-size=\'30\' fill=\'%23333\' text-anchor=\'middle\'>QR</text></svg>'">
                     </div>
                 </div>
 
@@ -184,7 +189,6 @@
                     <h1 id="result-title" class="text-2xl font-bold text-accent drop-shadow-glow leading-tight">Звание</h1>
                 </div>
 
-                <!-- БЕЙДЖ ДОМИНИРУЮЩЕЙ ЧЕРТЫ -->
                 <div id="dominant-trait-container" class="text-center w-full mb-4">
                     <div class="inline-block bg-accent/10 border border-accent/60 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-glow">
                         <span class="text-gray-400 font-normal mr-1">Основа:</span> <span id="dominant-trait-text" class="text-accent">Черта</span>
@@ -200,9 +204,10 @@
                 </div>
             </div>
 
-            <div class="w-full flex flex-col gap-3">
-                <button id="btn-download" onclick="downloadResult()" class="w-full bg-dark border border-accent text-white font-bold py-3 rounded-xl transition-all shadow-glow hover:shadow-glow-lg hover:bg-accent/10 flex items-center justify-center gap-2">
-                    <span>📸</span> Скачать Карточку
+            <!-- Кнопки действий -->
+            <div id="result-buttons" class="w-full flex flex-col gap-3">
+                <button onclick="enterScreenshotMode()" class="w-full bg-dark border border-accent text-white font-bold py-3 rounded-xl transition-all shadow-glow hover:shadow-glow-lg hover:bg-accent/10 flex items-center justify-center gap-2">
+                    <span>📸</span> Подготовить для скриншота
                 </button>
                 
                 <button id="finish-btn" onclick="finishQuiz()" class="w-full bg-accent/20 border border-accent hover:bg-accent hover:text-white text-accent font-bold py-4 rounded-xl transition-all">
@@ -211,22 +216,6 @@
             </div>
         </div>
 
-    </div>
-
-    <!-- НОВЫЙ БЛОК: ОВЕРЛЕЙ ДЛЯ СОХРАНЕНИЯ КАРТИНКИ -->
-    <div id="image-overlay" class="hidden fixed inset-0 z-[200] bg-black/95 flex flex-col items-center justify-center p-4 fade-in">
-        <div class="w-full max-w-sm flex flex-col items-center">
-            <div class="bg-accent/20 border border-accent text-accent px-4 py-2 rounded-lg mb-4 text-center animate-pulse">
-                <p class="font-bold text-sm">👇 Зажми картинку пальцем,</p>
-                <p class="text-xs">чтобы «Сохранить» или «Переслать»</p>
-            </div>
-            
-            <img id="final-rendered-image" class="w-full rounded-2xl shadow-glow-lg border-2 border-accent mb-6" />
-            
-            <button onclick="closeImageOverlay()" class="w-full bg-dark border border-gray-700 text-white font-bold py-4 rounded-xl transition-all hover:bg-gray-800">
-                ✕ Закрыть и вернуться
-            </button>
-        </div>
     </div>
 
     <script>
@@ -350,533 +339,69 @@
             dominant: ['control', 'strict', 'sadism', 'mind_control', 'bondage', 'edgeplay']
         };
 
-        // --- ОГРОМНАЯ БАЗА ВОПРОСОВ (ПО 4 ВАРИАНТА, МАКСИМАЛЬНЫЙ РАЗБРОС ОЧКОВ) ---
+        // --- ОГРОМНАЯ БАЗА ВОПРОСОВ ---
         const questData = {
             submissive: {
-                q1: { 
-                    text: "1. Давай узнаем самое главное. Какого уровня погружения ты ищешь? БДСМ для тебя — это образ жизни 24/7 или лишь яркая приправа к сексу?", 
-                    options: [ 
-                        { text: "В теме 24/7. Я дышу служением. Мое подчинение Ей не заканчивается за дверями спальни, оно длится всегда.", nextId: "q1_1", scores: { submission: +10, service: +8, control: +5 } }, 
-                        { text: "Четкий график. Мне нравится служить Ей по выходным или в заранее оговоренное время. В остальном мы на равных.", nextId: "q1_2", scores: { submission: +4, service: +3 } },
-                        { text: "Только секс. Меня заводит тематика, жесткость и фетиши, но в повседневной жизни мне не нужен контроль.", nextId: "q2", scores: { masochism: +5, risk: +3 } },
-                        { text: "Онлайн формат. Я ищу виртуальную Госпожу, чтобы служить Ей дистанционно, не нарушая свою обычную жизнь.", nextId: "q1_3", scores: { online: +10, submission: +4 } }
-                    ] 
-                },
-                q1_1: { 
-                    text: "1.1 Если мы в формате 24/7, как именно ты хочешь, чтобы Она контролировала твою повседневную жизнь?", 
-                    options: [ 
-                        { text: "Тотальный микро-контроль: Она диктует мне дресс-код, меню, требует фото-отчеты и контролирует мои переписки.", nextId: "q2", scores: { service: +10, degradation: +5, submission: +8 } }, 
-                        { text: "Духовное лидерство: я признаю Её безусловный авторитет, Её слово — закон, но без удушающей ежедневной бюрократии.", nextId: "q2", scores: { submission: +6, praise: +4 } },
-                        { text: "Финансовый контроль: Она должна забрать мою зарплату и выдавать мне ровно столько, сколько посчитает нужным.", nextId: "q2", scores: { findom: +12, submission: +5, degradation: +3 } },
-                        { text: "Абсурдные правила: хочу просить у Неё разрешения на поход в туалет или глоток воды. Я ничто без Её команды.", nextId: "q2", scores: { degradation: +8, submission: +10, mind_control: +6 } }
-                    ] 
-                },
-                q1_2: { 
-                    text: "1.2 А после жесткой сессии? Как твоя психика возвращается в реальный мир?", 
-                    options: [ 
-                        { text: "Мне жизненно необходим долгий афтеркеа (aftercare): чтобы Госпожа обняла, погладила по голове и успокоила.", nextId: "q2", scores: { praise: +8, daddy: +5 } }, 
-                        { text: "Легко переключаюсь. Снимаем 'ошейник', идем пить кофе и обсуждать бытовые дела.", nextId: "q2", scores: { } },
-                        { text: "Я хочу, чтобы сессия заканчивалась резко и холодно. Оставьте меня одного приходить в себя в углу.", nextId: "q2", scores: { degradation: +6, masochism: +3 } },
-                        { text: "Меня заводит, когда после сессии Она сразу использует меня как прислугу: заставляет убрать игрушки и вымыть полы.", nextId: "q2", scores: { service: +10, degradation: +4 } }
-                    ] 
-                },
-                q1_3: {
-                    text: "1.3 Онлайн подчинение... В чем оно будет выражаться ярче всего?",
-                    options: [
-                        { text: "Финансовые подношения. Моя карточка принадлежит Ей, я перевожу деньги по первому требованию (Findom).", nextId: "q2", scores: { findom: +10, service: +4 } },
-                        { text: "Унизительные задания по видео. Я буду стоять на коленях перед камерой и выполнять всё, что Она скажет.", nextId: "q2", scores: { degradation: +8, online: +8, exhibitionism: +4 } },
-                        { text: "Оргазмический контроль. Я надену пояс верности и буду умолять Её разблокировать замок через приложение.", nextId: "q2", scores: { chastity: +10, online: +6 } },
-                        { text: "Интеллектуальное служение. Я буду помогать Ей с работой, делать таблицы, писать тексты — быть Её личным секретарем.", nextId: "q2", scores: { service: +8, submission: +4 } }
-                    ]
-                },
-                q2: { 
-                    text: "2. Кем ты видишь себя рядом с Ней? Ты хочешь принадлежать Ей как личная собственность или тебе важно оставаться личностью?", 
-                    options: [ 
-                        { text: "Я хочу быть безвольной вещью, живым инструментом для Её удовлетворения. У меня нет своих желаний.", nextId: "q2_1", scores: { degradation: +10, submission: +10, objectification: +10 } }, 
-                        { text: "Я преданный раб, но считаю, что заслуживаю заботу, ласку и уважение в ответ на мое безупречное служение.", nextId: "q2_2", scores: { praise: +6, service: +4 } },
-                        { text: "Я её игрушка для битья. Моя личность не важна, главное — сколько боли я смогу вытерпеть ради Неё.", nextId: "q3", scores: { masochism: +10, degradation: +4 } },
-                        { text: "Я строптивый питомец (Brat). Я личность, которая обожает бросать Ей вызов, чтобы быть жестко поставленным на место.", nextId: "q3", scores: { brat: +10, risk: +4 } }
-                    ] 
-                },
-                q2_1: { 
-                    text: "2.1 Если ты Её вещь, как Она должна распоряжаться тобой при чужих людях?", 
-                    options: [ 
-                        { text: "Она может сдавать меня в «аренду» своим подругам. Мое тело принадлежит Ей, Она решает, кто меня использует.", nextId: "q3", scores: { cuckold: +8, degradation: +10, risk: +5 } }, 
-                        { text: "Она должна хвастаться мной: водить на поводке на вечеринки, показывать всем, насколько я дрессирован.", nextId: "q3", scores: { risk: +8, service: +5, objectification: +6 } },
-                        { text: "Никак. Я Её личный, тайный секрет. Мое служение должно оставаться за закрытыми дверями.", nextId: "q3", scores: { submission: +4 } },
-                        { text: "Я должен прислуживать Ей и Её гостям: подносить напитки на коленях, молча убирать за ними, не поднимая глаз.", nextId: "q3", scores: { service: +10, degradation: +6 } }
-                    ] 
-                },
-                q2_2: { 
-                    text: "2.2 Какой формат заботы от Верхней тебя привлекает?", 
-                    options: [ 
-                        { text: "Формат «Властная Мамочка / Mommy»: Она всё решает за меня, балует, но и строго порет ремнем за двойки.", nextId: "q3", scores: { praise: +10, daddy: +8, strict: +4 } }, 
-                        { text: "Формат Наставницы: Она холодна, но справедлива. Она лепит из меня идеального саба через строгие уроки.", nextId: "q3", scores: { teacher: +8, strict: +6, submission: +4 } },
-                        { text: "Дружеский. В жизни мы смеемся и общаемся на равных, а в спальне Она превращается в Демона.", nextId: "q3", scores: { risk: +2 } },
-                        { text: "Мне не нужна забота. Мне нужен ледяной диктатор, чье малейшее одобрение я буду вымаливать годами.", nextId: "q3", scores: { mind_control: +8, submission: +6 } }
-                    ] 
-                },
-                q3: { 
-                    text: "3. Психологическое давление (Mindfuck). Как ты отнесешься к тому, если Госпожа начнет обзывать, унижать тебя и ломать твое эго?", 
-                    options: [ 
-                        { text: "Это мой абсолютный идеал. Пусть бьет по моим реальным комплексам, газлайтит и внушает свою реальность.", nextId: "q3_1", scores: { mind_control: +10, degradation: +8, submission: +5 } }, 
-                        { text: "Предпочитаю только классический грязный мат (dirty talk) строго в процессе секса. Без перехода на реальные личности.", nextId: "q4", scores: { mind_control: +2, risk: +1 } },
-                        { text: "Я ненавижу словесные унижения. Я «хороший мальчик», меня заводит Её похвала и ласковый, но властный тон.", nextId: "q3_2", scores: { praise: +10, strict: +2 } },
-                        { text: "Мне нравится, когда Она унижает не меня, а мою мужественность (sissification). Заставляет носить женское белье.", nextId: "q4", scores: { degradation: +10, pegging: +5 } }
-                    ] 
-                },
-                q3_1: { 
-                    text: "3.1 Насколько глубоко Она может залезть в твой разум?", 
-                    options: [ 
-                        { text: "Она может читать все мои переписки, удалить моих друзей и стать единственным центром моей вселенной.", nextId: "q4", scores: { mind_control: +10, submission: +8, isolation: +5 } }, 
-                        { text: "Она может использовать шантаж: держать у себя мой компромат, чтобы я жил в вечном страхе разоблачения.", nextId: "q4", scores: { risk: +10, mind_control: +8, edgeplay: +4 } },
-                        { text: "Только вербальное унижение во время сессий. Вне игры моя психика должна быть в безопасности.", nextId: "q4", scores: { degradation: +4 } },
-                        { text: "Пусть заставляет меня повторять унизительные мантры («Я ничтожество, я просто вещь») сотни раз перед зеркалом.", nextId: "q4", scores: { degradation: +8, mind_control: +6 } }
-                    ] 
-                },
-                q3_2: { 
-                    text: "3.2 А если ты серьезно провинишься, как Она должна тебя отчитать?", 
-                    options: [ 
-                        { text: "Ледяным, спокойным тоном, от которого мурашки по коже. Я должен сам сгореть от стыда под Её взглядом.", nextId: "q4", scores: { strict: +8, submission: +5 } }, 
-                        { text: "Игнорированием. Хуже всего, если Она лишит меня своего внимания, пока я не заслужу прощение на коленях.", nextId: "q4", scores: { praise: +8, mind_control: +4 } },
-                        { text: "Заставить меня писать объяснительные записки и стоять голым в углу с поднятыми руками.", nextId: "q4", scores: { service: +6, strict: +6, degradation: +3 } },
-                        { text: "Взять в руки тяжелый ремень. Никаких слов, только физическое наказание, пока я не усвою урок.", nextId: "q4", scores: { masochism: +8 } }
-                    ] 
-                },
-                q4: { 
-                    text: "4. Ограничение свободы. Насколько тебе нравится быть физически обездвиженным в Её руках (Бондаж)?", 
-                    options: [ 
-                        { text: "Обожаю. Чем сложнее и жестче фиксация, тем лучше. Чувство полной беспомощности перед Ней сводит меня с ума.", nextId: "q4_1", scores: { bondage: +10, submission: +4 } }, 
-                        { text: "Меня пугает потеря свободы. Я хочу иметь возможность двигаться, трогать Её и активно прислуживать.", nextId: "q4_2", scores: { service: +8, risk: -2 } },
-                        { text: "Легкий бондаж — да. Наручники на спинку кровати, чтобы я просто не мешал Ей брать то, что Она хочет.", nextId: "q5", scores: { bondage: +4 } },
-                        { text: "Только психологический бондаж. Она скажет «Замри» — и я не посмею даже моргнуть без веревок.", nextId: "q5", scores: { mind_control: +8, strict: +6, submission: +5 } }
-                    ] 
-                },
-                q4_1: { 
-                    text: "4.1 Какой уровень фиксации ты предпочитаешь и что при этом чувствуешь?", 
-                    options: [ 
-                        { text: "Сложное японское шибари. Мне важна эстетика веревок, давление на узлы и искусство связывания.", nextId: "q5", scores: { bondage: +8, masochism: +3 } }, 
-                        { text: "Колодки или стальные цепи. Хочу чувствовать холод металла и абсолютную невозможность вырваться.", nextId: "q5", scores: { bondage: +9, degradation: +4 } },
-                        { text: "Мумификация или вакуумная кровать. Быть полностью запечатанным в латекс, как безмолвная кукла.", nextId: "q5", scores: { bondage: +10, deprivation: +8, degradation: +5 } },
-                        { text: "Подвешивание (Suspension). Я хочу болтаться в воздухе, полностью отдав свой вес и жизнь в Её руки.", nextId: "q5", scores: { bondage: +10, edgeplay: +6, risk: +5 } }
-                    ] 
-                },
-                q4_2: { 
-                    text: "4.2 Если ты не любишь бондаж, то как Госпоже удерживать твой контроль во время сессии?", 
-                    options: [ 
-                        { text: "Через боль. Каждый раз, когда я дернусь без разрешения, Она должна наносить жесткий удар плетью.", nextId: "q5", scores: { masochism: +8, strict: +4 } }, 
-                        { text: "Через приказы. Я буду преданно держать позу, даже если у меня сводит мышцы. Это моя обязанность.", nextId: "q5", scores: { service: +8, submission: +6 } },
-                        { text: "Через оргазмический контроль. Если я ослушаюсь, Она лишит меня разрядки на неделю.", nextId: "q5", scores: { chastity: +6, mind_control: +4 } },
-                        { text: "Я вообще не люблю жесткий контроль. Я хочу дикой, страстной борьбы, где Она побеждает меня своей энергией.", nextId: "q5", scores: { risk: +6, brat: +4 } }
-                    ] 
-                },
-                q5: { 
-                    text: "5. Оргазмический контроль (Chastity). Твое отношение к запрету на разрядку?", 
-                    options: [ 
-                        { text: "Мой оргазм принадлежит Ей. Мечтаю запереть член в клетку (пояс верности) и навсегда отдать Ей ключ.", nextId: "q5_1", scores: { chastity: +10, submission: +6, degradation: +3 } }, 
-                        { text: "Люблю тизинг (tease and denial) в рамках одной сессии: Она доводит меня до грани часами, а потом запрещает кончать.", nextId: "q5_2", scores: { chastity: +6, mind_control: +4 } },
-                        { text: "Оргазм для меня — важная и обязательная часть. Я не хочу его лишаться, иначе теряю мотивацию.", nextId: "q6", scores: { } },
-                        { text: "Я готов терпеть запреты, только если в конце Она жестоко «выдоит» меня, заставив кончать снова и снова.", nextId: "q5_2", scores: { masochism: +6, edgeplay: +4 } }
-                    ] 
-                },
-                q5_1: { 
-                    text: "5.1 Готов ли ты носить пояс верности 24/7 в обычной жизни (на работе, в зале)?", 
-                    options: [ 
-                        { text: "Да. Идеальная пытка. Хочу сходить с ума от стояка в офисе, зная, что клетка врезается в плоть.", nextId: "q6", scores: { chastity: +10, risk: +6, masochism: +5 } }, 
-                        { text: "Готов носить постоянно, но прошу Госпожу не провоцировать меня фото и видео в рабочее время — я сойду с ума.", nextId: "q6", scores: { chastity: +8 } },
-                        { text: "Буду носить его только дома или на выходных в качестве наказания за проступки.", nextId: "q6", scores: { chastity: +4, strict: +3 } },
-                        { text: "Я надену его, но буду постоянно ныть и умолять снять его. Обожаю быть жалким попрошайкой.", nextId: "q6", scores: { chastity: +6, brat: +4, degradation: +5 } }
-                    ] 
-                },
-                q5_2: { 
-                    text: "5.2 Полное лишение оргазма (Ruined Orgasm) или гиперстимуляция?", 
-                    options: [ 
-                        { text: "Ruined Orgasm. За секунду до разрядки Она бьет меня или резко бросает. Оргазм смазывается, оставляя пустоту.", nextId: "q6", scores: { mind_control: +8, degradation: +6 } }, 
-                        { text: "Гиперстимуляция. Заставить меня кончать с помощью вибратора 3-4 раза подряд, когда мне уже больно.", nextId: "q6", scores: { masochism: +8, edgeplay: +5 } },
-                        { text: "Финансовый шантаж. Я должен платить крупную сумму за каждую секунду прикосновения к моему члену.", nextId: "q6", scores: { findom: +10, chastity: +4 } },
-                        { text: "Просто классический долгий тизинг. Без жести, просто сладкая пытка ожиданием.", nextId: "q6", scores: { praise: +3 } }
-                    ] 
-                },
-                q6: { 
-                    text: "6. Боль и Порка. Каков твой болевой порог и отношение к физическому воздействию?", 
-                    options: [ 
-                        { text: "Я хардкорный мазохист. Мне нужна кровь, синяки, глубокие рубцы от плетей. Боль — это мой экстаз.", nextId: "q6_1", scores: { masochism: +10, edgeplay: +6 } }, 
-                        { text: "Я люблю эстетичную боль: обжигающий воск, лед, укусы, царапины, звонкие пощечиины. Без расчлененки.", nextId: "q6_2", scores: { masochism: +6, objectification: +3 } },
-                        { text: "Я вообще не люблю боль. Меня заводит исключительно психологическое давление, унижение и служение.", nextId: "q7", scores: { mind_control: +8, degradation: +4 } },
-                        { text: "Я люблю, когда бьют не меня, а по моей гордости. Удары по лицу или плевки — это унижение, а не боль.", nextId: "q7", scores: { degradation: +10, masochism: +2 } }
-                    ] 
-                },
-                q6_1: { 
-                    text: "6.1 Маркировка тела. Ты хочешь носить Её метки?", 
-                    options: [ 
-                        { text: "Да! Я хочу, чтобы Она вырезала скальпелем свои инициалы на моей груди или сделала мне клеймо.", nextId: "q7", scores: { edgeplay: +10, masochism: +8, risk: +5 } }, 
-                        { text: "Обожаю синяки и засосы на видимых местах (шея, ключицы), чтобы все на работе видели, что у меня есть Владелица.", nextId: "q7", scores: { risk: +8, masochism: +5, exhibitionism: +4 } },
-                        { text: "Предпочитаю, чтобы следы от порки оставались только на спине и бедрах, скрытые под одеждой.", nextId: "q7", scores: { masochism: +6 } },
-                        { text: "Согласен на постоянные метки в виде тематических татуировок (штрихкод, Её имя).", nextId: "q7", scores: { submission: +8, objectification: +6 } }
-                    ] 
-                },
-                q6_2: { 
-                    text: "6.2 Если боль эстетичная, то какой инструмент в Её руках пугает и заводит больше всего?", 
-                    options: [ 
-                        { text: "Медицинские иглы (Play-piercing). Хочу, чтобы Она протыкала мою кожу сотнями иголок.", nextId: "q7", scores: { edgeplay: +8, masochism: +6 } }, 
-                        { text: "Огонь и раскаленный воск. Контраст температур сводит меня с ума.", nextId: "q7", scores: { masochism: +5, risk: +2 } },
-                        { text: "Электростимуляция (Violet Wand). Удары током, пронизывающие всё тело.", nextId: "q7", scores: { masochism: +6, bondage: +2 } },
-                        { text: "Её острые длинные ногти и тяжелые пощечины. Мне нужен прямой телесный контакт хищницы.", nextId: "q7", scores: { primal: +8, degradation: +3 } }
-                    ] 
-                },
-                q7: { 
-                    text: "7. Риск и Публичность (Public play). Насколько ты готов рисковать своим статусом ради Неё?", 
-                    options: [ 
-                        { text: "Безумно готов. Хочу гулять с анальной пробкой, выполнять грязные команды в ТЦ и целовать Её туфли при всех.", nextId: "q7_1", scores: { risk: +10, degradation: +8 } }, 
-                        { text: "Люблю легкий экстрим: когда Она незаметно отдает приказы взглядом на званом ужине, и я дрожу от страха.", nextId: "q8", scores: { risk: +5, mind_control: +4 } },
-                        { text: "Только приватность. Я серьезный человек в жизни, мое подчинение остается строго за закрытыми дверями.", nextId: "q8", scores: { strict: +2 } },
-                        { text: "Хочу, чтобы Она выкладывала мои унизительные фото или видео на свой Boosty или в закрытые каналы.", nextId: "q7_2", scores: { risk: +8, degradation: +10, online: +6 } }
-                    ] 
-                },
-                q7_1: { 
-                    text: "7.1 А если вас кто-то заметит в ресторане?", 
-                    options: [ 
-                        { text: "В этом весь смысл! Публичное унижение, стыд и осуждение прохожих — это мой главный фетиш.", nextId: "q8", scores: { risk: +10, degradation: +10 } }, 
-                        { text: "Я сгорю со стыда и буду умолять Её прекратить, но именно это Её и позабавит.", nextId: "q8", scores: { brat: +4, degradation: +6, risk: +6 } },
-                        { text: "Всё должно быть на грани фола, но так виртуозно, чтобы никто не смог предъявить нам претензии.", nextId: "q8", scores: { mind_control: +5, risk: +4 } },
-                        { text: "Если нас заметят, я буду защищать Её репутацию любой ценой, возьму весь удар на себя.", nextId: "q8", scores: { service: +8, submission: +5 } }
-                    ] 
-                },
-                q7_2: { 
-                    text: "7.2 Если Она снимет тебя на видео, как Она должна его использовать?", 
-                    options: [ 
-                        { text: "Для жесткого шантажа. «Сделай это, или я разошлю это видео твоим коллегам».", nextId: "q8", scores: { mind_control: +10, risk: +10 } }, 
-                        { text: "Продавать его другим сабам, чтобы они видели, какая у меня властная Госпожа (Findom + Cuckold).", nextId: "q8", scores: { findom: +6, cuckold: +6, degradation: +5 } },
-                        { text: "Оставить строго для личного архива, чтобы пересматривать долгими вечерами.", nextId: "q8", scores: { submission: +4 } },
-                        { text: "Заставить меня пересматривать это видео каждый день, чтобы я помнил, насколько я жалок.", nextId: "q8", scores: { degradation: +8, mind_control: +5 } }
-                    ] 
-                },
-                q8: { 
-                    text: "8. Опасные игры (Edgeplay) и Дыхание. Готов ли ты заглянуть в глаза настоящему страху?", 
-                    options: [ 
-                        { text: "Да, я обожаю жесткое придушивание (асфиксию) до потемнения в глазах. Моя жизнь буквально в Её руках.", nextId: "q8_1", scores: { edgeplay: +10, risk: +6, masochism: +4 } }, 
-                        { text: "Боюсь удушья, но люблю сенсорную депривацию: плотные кляпы и глухие маски. Неизвестность пугает до дрожи.", nextId: "q9", scores: { deprivation: +10, bondage: +5 } },
-                        { text: "Я люблю игры с ножами (Knifeplay). Когда холодное лезвие скользит по горлу, я чувствую абсолютную власть.", nextId: "q9", scores: { edgeplay: +10, risk: +8 } },
-                        { text: "Нет, я никогда не играю со своим здоровьем и жизнью. Только безопасный БДСМ без экстрима.", nextId: "q9", scores: { strict: +4 } }
-                    ] 
-                },
-                q8_1: { 
-                    text: "8.1 Как именно ты хочешь, чтобы Она перекрывала тебе кислород?", 
-                    options: [ 
-                        { text: "Только Её руками. Хочу чувствовать тепло Её кожи и видеть в Её глазах животную власть (Primal).", nextId: "q9", scores: { primal: +8, edgeplay: +6 } }, 
-                        { text: "Её ногами. Хочу, чтобы Она наступила мне каблуком на горло или душила бедрами (Facesitting).", nextId: "q9", scores: { oral: +6, objectification: +5, edgeplay: +5 } },
-                        { text: "Кожаными ошейниками, веревками или цепями. Меня заводит визуальная жесткость девайсов.", nextId: "q9", scores: { bondage: +6, masochism: +4 } },
-                        { text: "Противогазами или пластиковыми пакетами (Breath control). Тотальная изоляция.", nextId: "q9", scores: { deprivation: +8, edgeplay: +8 } }
-                    ] 
-                },
-                q9: { 
-                    text: "9. Эксклюзивность. Ты принадлежишь только Ей, или тебя заводит идея «делиться»?", 
-                    options: [ 
-                        { text: "Я принадлежу только Ей. Я полностью моногамен в подчинении, мысли о других людях вызывают отторжение.", nextId: "q9_1", scores: { submission: +8 } }, 
-                        { text: "Куколдизм (Cuckold). Хочу сидеть в клетке и смотреть, как Она занимается сексом с настоящими альфа-самцами.", nextId: "q9_2", scores: { cuckold: +10, degradation: +8, risk: +4 } },
-                        { text: "Аренда. Я Её вещь, и Она может сдать меня в использование своим подругам-Госпожам на вечер.", nextId: "q9_2", scores: { objectification: +10, degradation: +6, service: +5 } },
-                        { text: "Групповые унижения. Хочу, чтобы Она позвала гостей, и они все вместе смеялись надо мной и плевали в меня.", nextId: "q9_2", scores: { degradation: +10, risk: +8 } }
-                    ] 
-                },
-                q9_1: { 
-                    text: "9.1 Насколько глубоко Её чувство собственничества должно проникать в твою жизнь?", 
-                    options: [ 
-                        { text: "Она решает, с кем я дружу, куда хожу и что ем. Моя жизнь полностью спроектирована Ей.", nextId: "q10", scores: { control: +10, strict: +8, submission: +6 } }, 
-                        { text: "Я верен Ей сексуально и тематически, но в работе и дружбе я принимаю решения сам.", nextId: "q10", scores: { } },
-                        { text: "Она должна поставить мне гео-трекер на телефон и следить за каждым моим шагом круглосуточно.", nextId: "q10", scores: { mind_control: +8, service: +4 } },
-                        { text: "Её контроль выражается в том, что я обязан постоянно присылать видео-отчеты о том, чем я занят.", nextId: "q10", scores: { online: +6, service: +5 } }
-                    ] 
-                },
-                q9_2: { 
-                    text: "9.2 Если Она использует тебя в играх с другими (Куколд/Аренда), какова твоя роль?", 
-                    options: [ 
-                        { text: "Я молчаливая мебель. Стою на четвереньках в качестве столика, пока они пьют вино.", nextId: "q10", scores: { objectification: +10, degradation: +8 } }, 
-                        { text: "Я жалкий уборщик (Cleanup). После того, как чужие мужчины закончат, я вылизываю Её дочиста.", nextId: "q10", scores: { cuckold: +10, degradation: +10, oral: +6 } },
-                        { text: "Я био-вибратор. Она использует мой рот, пока другой мужчина имеет Её сзади.", nextId: "q10", scores: { oral: +8, cuckold: +6, service: +5 } },
-                        { text: "Я финансовый спонсор. Я оплачиваю Её свидания с другими мужчинами, отели и их подарки.", nextId: "q10", scores: { findom: +10, cuckold: +8, degradation: +4 } }
-                    ] 
-                },
-                q10: { 
-                    text: "10. Инверсия ролей и Пеггинг. Готов ли ты отдать контроль над своей задницей?", 
-                    options: [ 
-                        { text: "Да, это моя мечта. Раздвинуть ноги, принять Её страпон и быть использованным как покорная сучка.", nextId: "q10_1", scores: { pegging: +10, degradation: +6, submission: +5 } }, 
-                        { text: "Меня это заводит, но у меня мало опыта. Если Госпожа будет нежна и терпелива на первых этапах — я Ваш.", nextId: "q11", scores: { pegging: +4, praise: +4 } },
-                        { text: "Нет, жесткое табу. Моя простата и мужественность неприкосновенны.", nextId: "q11", scores: { } },
-                        { text: "Только жесткий фистинг (Fisting) или огромные игрушки. Я хочу, чтобы Она растянула меня до предела.", nextId: "q10_1", scores: { masochism: +8, edgeplay: +6, pegging: +5 } }
-                    ] 
-                },
-                q10_1: { 
-                    text: "10.1 Какого отношения в процессе пеггинга ты ждешь?", 
-                    options: [ 
-                        { text: "Жесткое доминирование. Пусть берет меня грубо, тянет за волосы, называет шлюхой и вбивается без жалости.", nextId: "q11", scores: { degradation: +8, masochism: +6 } }, 
-                        { text: "Физиологическое служение. Хочу, чтобы Она методично стимулировала простату до 'hands-free' оргазма (доение).", nextId: "q11", scores: { pegging: +8, service: +4 } },
-                        { text: "Ролевая игра (Sissification). Я должен быть накрашен, в женском белье и парике, чтобы полностью потерять мужское эго.", nextId: "q11", scores: { degradation: +10, mind_control: +5 } },
-                        { text: "Тотальный бондаж. Связать меня в позу 'лягушки', чтобы я даже не мог дернуться, когда Она входит.", nextId: "q11", scores: { bondage: +8, deprivation: +4 } }
-                    ] 
-                },
-                q11: { 
-                    text: "11. Территория твоего служения и финансы. Где и как проходят встречи?", 
-                    options: [ 
-                        { text: "У меня дома. Я вымою полы, подготовлю еду и сделаю всё, чтобы Госпоже было комфортно меня использовать.", nextId: "q12", scores: { service: +8 } }, 
-                        { text: "В дорогих БДСМ-отелях. Я сам найду, забронирую и оплачу лучшую VIP-студию для Неё.", nextId: "q12", scores: { findom: +8, service: +6 } },
-                        { text: "Я готов делить расходы на аренду 50/50, ведь мы оба получаем от сессии удовольствие.", nextId: "q12", scores: { } },
-                        { text: "Я приеду к Ней домой, если Она позволит, и буду выполнять обязанности по дому (уборка, готовка).", nextId: "q12", scores: { service: +10, submission: +5 } }
-                    ] 
-                },
-                q12: { 
-                    text: "12. Расстояния. Что, если идеальная Владелица живет в другом городе?", 
-                    options: [ 
-                        { text: "Расстояние не преграда. Я буду летать к Ней по выходным или полностью перееду, бросив всё.", nextId: "q13", scores: { submission: +8, risk: +4 } }, 
-                        { text: "Идеально! Я ищу виртуальное подчинение (Online). Буду служить по видеосвязи и слать деньги.", nextId: "q13", scores: { online: +10, findom: +6 } },
-                        { text: "Только мой город. Виртуальные романы и перелеты — это трата времени.", nextId: "q13", scores: { } },
-                        { text: "Я буду оплачивать Ей билеты бизнес-класса, чтобы Она прилетала ко мне, когда захочет.", nextId: "q13", scores: { findom: +8, service: +4 } }
-                    ] 
-                },
-                q13: { 
-                    text: "13. Бытовое служение. Если Госпожа прикажет вымыть полы в Её доме зубной щеткой?", 
-                    options: [ 
-                        { text: "Я сделаю это с радостью и рвением. Тяжелое, бессмысленное бытовое служение очищает мой разум.", nextId: "q14", scores: { service: +10, degradation: +4 } }, 
-                        { text: "Я пришел в БДСМ за сексом, наручниками и страстью, а не для того, чтобы работать бесплатным уборщиком.", nextId: "q14", scores: { risk: +2, brat: +2 } },
-                        { text: "Сделаю, но буду тихо ныть и жаловаться, ожидая, пока Она не шлепнет меня по губам за дерзость.", nextId: "q14", scores: { brat: +8, masochism: +3 } },
-                        { text: "Я лучше найму Ей профессиональную клининговую компанию за свой счет. Мое время стоит дороже.", nextId: "q14", scores: { findom: +6 } }
-                    ] 
-                },
-                q14: { 
-                    text: "14. Животные отыгрыши (Petplay). Если Она наденет на тебя собачий ошейник, миску на пол и прикажет лаять?", 
-                    options: [ 
-                        { text: "Я стану Её верным, преданным Псом (Puppy play). Буду спать в ногах кровати и радостно вилять хвостом.", nextId: "q15", scores: { objectification: +8, degradation: +6, submission: +5 } }, 
-                        { text: "Я скорее Кот. Своенравный, ласковый, трусь о колени, но могу и выпустить когти, если Она не обращает внимания.", nextId: "q15", scores: { brat: +6, praise: +5 } },
-                        { text: "Я Свинья (Pigplay). Обожаю ползать в грязи, жрать с пола и хрюкать, пока Она смеется надо мной.", nextId: "q15", scores: { degradation: +10, objectification: +8 } },
-                        { text: "Нет, зоо-ролевые игры и имитация животных меня абсолютно не привлекают.", nextId: "q15", scores: { } }
-                    ] 
-                },
-                q15: { 
-                    text: "15. Твой «пробег». Какой у тебя реальный опыт подчинения женщине?", 
-                    options: [ 
-                        { text: "Я опытный нижний. Знаю протокол, умею служить, понимаю свои лимиты и не задаю лишних вопросов.", nextId: "q16", scores: { service: +4 } }, 
-                        { text: "Я «чистый лист». Опыта нет совсем, но у меня огромное желание учиться. Ищу мудрую Наставницу.", nextId: "q16", scores: { newbie: +10, submission: +4 } },
-                        { text: "Я теоретик. Пересмотрел гигабайты порно, прочитал все паблики, но в реальности боюсь сделать первый шаг.", nextId: "q16", scores: { newbie: +8, online: +4 } },
-                        { text: "У меня огромный опыт, но я «сломанный» саб с травмами из прошлых отношений. Мне нужна жесткая перезагрузка.", nextId: "q16", scores: { mind_control: +6, degradation: +4 } }
-                    ] 
-                },
-                q16: { 
-                    text: "16. Безопасность и Стоп-слово. Как ты относишься к своим собственным границам?", 
-                    options: [ 
-                        { text: "Я знаю свои лимиты. Если я произнесу стоп-слово («Красный»), Госпожа должна немедленно всё остановить.", nextId: "q17", scores: { strict: +2 } }, 
-                        { text: "CNC (Игнорирование стопа). Я даю согласие на насилие. Даже если я плачу и умоляю, Она сама решает, когда хватит.", nextId: "q17", scores: { mind_control: +10, risk: +8, edgeplay: +6 } },
-                        { text: "Я вообще не использую стоп-слова. Моя жизнь, мое здоровье и мое тело полностью в Её распоряжении.", nextId: "q17", scores: { submission: +10, risk: +6, degradation: +4 } },
-                        { text: "Мой стоп-кран — это мои деньги. Я плачу за сессию: если мне не нравится, я просто ухожу.", nextId: "q17", scores: { brat: +4 } }
-                    ] 
-                },
-                q17: { 
-                    text: "17. Ритуалы преданности. Что ты должен делать, когда Госпожа входит в комнату?", 
-                    options: [ 
-                        { text: "Мгновенно упасть на колени, опустить глаза в пол и ждать Её первого приказа, не смея заговорить первым.", nextId: "q18", scores: { submission: +8, service: +6, strict: +4 } }, 
-                        { text: "Подойти и нежно поцеловать Её туфли или сапоги, выражая свою любовь и поклонение.", nextId: "q18", scores: { service: +5, praise: +3 } },
-                        { text: "Я не люблю излишнюю театральщину. Я просто поздороваюсь с уважением.", nextId: "q18", scores: { } },
-                        { text: "Радостно подбежать, как щенок, обнять Её за ноги и умолять погладить меня.", nextId: "q18", scores: { objectification: +4, praise: +6 } }
-                    ] 
-                },
-                q18: { 
-                    text: "18. Оральное служение. Насколько глубоко ты готов уйти в поклонение Её телу?", 
-                    options: [ 
-                        { text: "Фейсситтинг (Facesitting). Она садится мне на лицо всем весом. Я задыхаюсь без кислорода, но продолжаю лизать.", nextId: "q19", scores: { oral: +10, edgeplay: +6, deprivation: +5 } }, 
-                        { text: "Долгий куннилингус. Я готов работать языком часами, пока у меня не сведет челюсть. Это моя главная обязанность.", nextId: "q19", scores: { oral: +8, service: +6 } },
-                        { text: "Деградация. Если Она кончит, я должен слизать Её соки с Её туфель или прямо с грязного пола.", nextId: "q19", scores: { oral: +6, degradation: +10 } },
-                        { text: "Оральные ласки — это взаимный, чувственный процесс, а не слепое служение. Без фанатизма.", nextId: "q19", scores: { } }
-                    ] 
-                },
-                q19: { 
-                    text: "19. Твои «Красные флаги». Что заставит тебя навсегда уйти от Госпожи?", 
-                    options: [ 
-                        { text: "Если Она покажет свою слабость, начнет плакать, жаловаться на жизнь или попросит меня принять мужское решение.", nextId: "q20", scores: { submission: +6 } }, 
-                        { text: "Неуважение к моим жестким лимитам (например, если Она попытается пустить мне кровь, а я предупреждал, что боюсь).", nextId: "q20", scores: { } },
-                        { text: "Холодность и отсутствие афтеркеа. Если Она будет относиться ко мне как к пустому месту после сессии, я выгорю.", nextId: "q20", scores: { praise: +8 } },
-                        { text: "Если Она откажется от моей финансовой помощи. Для меня невозможно служить той, кто не берет мои деньги.", nextId: "q20", scores: { findom: +8 } }
-                    ] 
-                },
-                q20: { 
-                    text: "20. Финал близок. Какую эмоцию ты хочешь испытывать после встречи с Ней чаще всего?", 
-                    options: [ 
-                        { text: "Тотальное опустошение и катарсис от пережитой невыносимой боли.", nextId: "end", scores: { masochism: +8, edgeplay: +4 } }, 
-                        { text: "Глубокий стыд, ощущение собственной ничтожности и использованности.", nextId: "end", scores: { degradation: +10, mind_control: +6 } },
-                        { text: "Тепло, умиротворение и чувство, что я 'хороший мальчик', заслуживший Её любовь.", nextId: "end", scores: { praise: +10, daddy: +4 } },
-                        { text: "Адреналин, дрожь в коленях и страх от того, что мы творили на глазах у всех.", nextId: "end", scores: { risk: +10 } }
-                    ] 
-                }
+                q1: { text: "1. Давай узнаем самое главное. Какого уровня погружения ты ищешь? БДСМ для тебя — это образ жизни 24/7 или лишь яркая приправа к сексу?", options: [ { text: "В теме 24/7. Я дышу служением. Мое подчинение Ей не заканчивается за дверями спальни, оно длится всегда.", nextId: "q1_1", scores: { submission: +10, service: +8, control: +5 } }, { text: "Четкий график. Мне нравится служить Ей по выходным или в заранее оговоренное время. В остальном мы на равных.", nextId: "q1_2", scores: { submission: +4, service: +3 } }, { text: "Только секс. Меня заводит тематика, жесткость и фетиши, но в повседневной жизни мне не нужен контроль.", nextId: "q2", scores: { masochism: +5, risk: +3 } }, { text: "Онлайн формат. Я ищу виртуальную Госпожу, чтобы служить Ей дистанционно, не нарушая свою обычную жизнь.", nextId: "q1_3", scores: { online: +10, submission: +4 } } ] },
+                q1_1: { text: "1.1 Если мы в формате 24/7, как именно ты хочешь, чтобы Она контролировала твою повседневную жизнь?", options: [ { text: "Тотальный микро-контроль: Она диктует мне дресс-код, меню, требует фото-отчеты и контролирует мои переписки.", nextId: "q2", scores: { service: +10, degradation: +5, submission: +8 } }, { text: "Духовное лидерство: я признаю Её безусловный авторитет, Её слово — закон, но без удушающей ежедневной бюрократии.", nextId: "q2", scores: { submission: +6, praise: +4 } }, { text: "Финансовый контроль: Она должна забрать мою зарплату и выдавать мне ровно столько, сколько посчитает нужным.", nextId: "q2", scores: { findom: +12, submission: +5, degradation: +3 } }, { text: "Абсурдные правила: хочу просить у Неё разрешения на поход в туалет или глоток воды. Я ничто без Её команды.", nextId: "q2", scores: { degradation: +8, submission: +10, mind_control: +6 } } ] },
+                q1_2: { text: "1.2 А после жесткой сессии? Как твоя психика возвращается в реальный мир?", options: [ { text: "Мне жизненно необходим долгий афтеркеа (aftercare): чтобы Госпожа обняла, погладила по голове и успокоила.", nextId: "q2", scores: { praise: +8, daddy: +5 } }, { text: "Легко переключаюсь. Снимаем 'ошейник', идем пить кофе и обсуждать бытовые дела.", nextId: "q2", scores: { } }, { text: "Я хочу, чтобы сессия заканчивалась резко и холодно. Оставьте меня одного приходить в себя в углу.", nextId: "q2", scores: { degradation: +6, masochism: +3 } }, { text: "Меня заводит, когда после сессии Она сразу использует меня как прислугу: заставляет убрать игрушки и вымыть полы.", nextId: "q2", scores: { service: +10, degradation: +4 } } ] },
+                q1_3: { text: "1.3 Онлайн подчинение... В чем оно будет выражаться ярче всего?", options: [ { text: "Финансовые подношения. Моя карточка принадлежит Ей, я перевожу деньги по первому требованию (Findom).", nextId: "q2", scores: { findom: +10, service: +4 } }, { text: "Унизительные задания по видео. Я буду стоять на коленях перед камерой и выполнять всё, что Она скажет.", nextId: "q2", scores: { degradation: +8, online: +8, exhibitionism: +4 } }, { text: "Оргазмический контроль. Я надену пояс верности и буду умолять Её разблокировать замок через приложение.", nextId: "q2", scores: { chastity: +10, online: +6 } }, { text: "Интеллектуальное служение. Я буду помогать Ей с работой, делать таблицы, писать тексты — быть Её личным секретарем.", nextId: "q2", scores: { service: +8, submission: +4 } } ] },
+                q2: { text: "2. Кем ты видишь себя рядом с Ней? Ты хочешь принадлежать Ей как личная собственность или тебе важно оставаться личностью?", options: [ { text: "Я хочу быть безвольной вещью, живым инструментом для Её удовлетворения. У меня нет своих желаний.", nextId: "q2_1", scores: { degradation: +10, submission: +10, objectification: +10 } }, { text: "Я преданный раб, но считаю, что заслуживаю заботу, ласку и уважение в ответ на мое безупречное служение.", nextId: "q2_2", scores: { praise: +6, service: +4 } }, { text: "Я её игрушка для битья. Моя личность не важна, главное — сколько боли я смогу вытерпеть ради Неё.", nextId: "q3", scores: { masochism: +10, degradation: +4 } }, { text: "Я строптивый питомец (Brat). Я личность, которая обожает бросать Ей вызов, чтобы быть жестко поставленным на место.", nextId: "q3", scores: { brat: +10, risk: +4 } } ] },
+                q2_1: { text: "2.1 Если ты Её вещь, как Она должна распоряжаться тобой при чужих людях?", options: [ { text: "Она может сдавать меня в «аренду» своим подругам. Мое тело принадлежит Ей, Она решает, кто меня использует.", nextId: "q3", scores: { cuckold: +8, degradation: +10, risk: +5 } }, { text: "Она должна хвастаться мной: водить на поводке на вечеринки, показывать всем, насколько я дрессирован.", nextId: "q3", scores: { risk: +8, service: +5, objectification: +6 } }, { text: "Никак. Я Её личный, тайный секрет. Мое служение должно оставаться за закрытыми дверями.", nextId: "q3", scores: { submission: +4 } }, { text: "Я должен прислуживать Ей и Её гостям: подносить напитки на коленях, молча убирать за ними, не поднимая глаз.", nextId: "q3", scores: { service: +10, degradation: +6 } } ] },
+                q2_2: { text: "2.2 Какой формат заботы от Верхней тебя привлекает?", options: [ { text: "Формат «Властная Мамочка / Mommy»: Она всё решает за меня, балует, но и строго порет ремнем за двойки.", nextId: "q3", scores: { praise: +10, daddy: +8, strict: +4 } }, { text: "Формат Наставницы: Она холодна, но справедлива. Она лепит из меня идеального саба через строгие уроки.", nextId: "q3", scores: { teacher: +8, strict: +6, submission: +4 } }, { text: "Дружеский. В жизни мы смеемся и общаемся на равных, а в спальне Она превращается в Демона.", nextId: "q3", scores: { risk: +2 } }, { text: "Мне не нужна забота. Мне нужен ледяной диктатор, чье малейшее одобрение я буду вымаливать годами.", nextId: "q3", scores: { mind_control: +8, submission: +6 } } ] },
+                q3: { text: "3. Психологическое давление (Mindfuck). Как ты отнесешься к тому, если Госпожа начнет обзывать, унижать тебя и ломать твое эго?", options: [ { text: "Это мой абсолютный идеал. Пусть бьет по моим реальным комплексам, газлайтит и внушает свою реальность.", nextId: "q3_1", scores: { mind_control: +10, degradation: +8, submission: +5 } }, { text: "Предпочитаю только классический грязный мат (dirty talk) строго в процессе секса. Без перехода на реальные личности.", nextId: "q4", scores: { mind_control: +2, risk: +1 } }, { text: "Я ненавижу словесные унижения. Я «хороший мальчик», меня заводит Её похвала и ласковый, но властный тон.", nextId: "q3_2", scores: { praise: +10, strict: +2 } }, { text: "Мне нравится, когда Она унижает не меня, а мою мужественность (sissification). Заставляет носить женское белье.", nextId: "q4", scores: { degradation: +10, pegging: +5 } } ] },
+                q3_1: { text: "3.1 Насколько глубоко Она может залезть в твой разум?", options: [ { text: "Она может читать все мои переписки, удалить моих друзей и стать единственным центром моей вселенной.", nextId: "q4", scores: { mind_control: +10, submission: +8, isolation: +5 } }, { text: "Она может использовать шантаж: держать у себя мой компромат, чтобы я жил в вечном страхе разоблачения.", nextId: "q4", scores: { risk: +10, mind_control: +8, edgeplay: +4 } }, { text: "Только вербальное унижение во время сессий. Вне игры моя психика должна быть в безопасности.", nextId: "q4", scores: { degradation: +4 } }, { text: "Пусть заставляет меня повторять унизительные мантры («Я ничтожество, я просто вещь») сотни раз перед зеркалом.", nextId: "q4", scores: { degradation: +8, mind_control: +6 } } ] },
+                q3_2: { text: "3.2 А если ты серьезно провинишься, как Она должна тебя отчитать?", options: [ { text: "Ледяным, спокойным тоном, от которого мурашки по коже. Я должен сам сгореть от стыда под Её взглядом.", nextId: "q4", scores: { strict: +8, submission: +5 } }, { text: "Игнорированием. Хуже всего, если Она лишит меня своего внимания, пока я не заслужу прощение на коленях.", nextId: "q4", scores: { praise: +8, mind_control: +4 } }, { text: "Заставить меня писать объяснительные записки и стоять голым в углу с поднятыми руками.", nextId: "q4", scores: { service: +6, strict: +6, degradation: +3 } }, { text: "Взять в руки тяжелый ремень. Никаких слов, только физическое наказание, пока я не усвою урок.", nextId: "q4", scores: { masochism: +8 } } ] },
+                q4: { text: "4. Ограничение свободы. Насколько тебе нравится быть физически обездвиженным в Её руках (Бондаж)?", options: [ { text: "Обожаю. Чем сложнее и жестче фиксация, тем лучше. Чувство полной беспомощности перед Ней сводит меня с ума.", nextId: "q4_1", scores: { bondage: +10, submission: +4 } }, { text: "Меня пугает потеря свободы. Я хочу иметь возможность двигаться, трогать Её и активно прислуживать.", nextId: "q4_2", scores: { service: +8, risk: -2 } }, { text: "Легкий бондаж — да. Наручники на спинку кровати, чтобы я просто не мешал Ей брать то, что Она хочет.", nextId: "q5", scores: { bondage: +4 } }, { text: "Только психологический бондаж. Она скажет «Замри» — и я не посмею даже моргнуть без веревок.", nextId: "q5", scores: { mind_control: +8, strict: +6, submission: +5 } } ] },
+                q4_1: { text: "4.1 Какой уровень фиксации ты предпочитаешь и что при этом чувствуешь?", options: [ { text: "Сложное японское шибари. Мне важна эстетика веревок, давление на узлы и искусство связывания.", nextId: "q5", scores: { bondage: +8, masochism: +3 } }, { text: "Колодки или стальные цепи. Хочу чувствовать холод металла и абсолютную невозможность вырваться.", nextId: "q5", scores: { bondage: +9, degradation: +4 } }, { text: "Мумификация или вакуумная кровать. Быть полностью запечатанным в латекс, как безмолвная кукла.", nextId: "q5", scores: { bondage: +10, deprivation: +8, degradation: +5 } }, { text: "Подвешивание (Suspension). Я хочу болтаться в воздухе, полностью отдав свой вес и жизнь в Её руки.", nextId: "q5", scores: { bondage: +10, edgeplay: +6, risk: +5 } } ] },
+                q4_2: { text: "4.2 Если ты не любишь бондаж, то как Госпоже удерживать твой контроль во время сессии?", options: [ { text: "Через боль. Каждый раз, когда я дернусь без разрешения, Она должна наносить жесткий удар плетью.", nextId: "q5", scores: { masochism: +8, strict: +4 } }, { text: "Через приказы. Я буду преданно держать позу, даже если у меня сводит мышцы. Это моя обязанность.", nextId: "q5", scores: { service: +8, submission: +6 } }, { text: "Через оргазмический контроль. Если я ослушаюсь, Она лишит меня разрядки на неделю.", nextId: "q5", scores: { chastity: +6, mind_control: +4 } }, { text: "Я вообще не люблю жесткий контроль. Я хочу дикой, страстной борьбы, где Она побеждает меня своей энергией.", nextId: "q5", scores: { risk: +6, brat: +4 } } ] },
+                q5: { text: "5. Оргазмический контроль (Chastity). Твое отношение к запрету на разрядку?", options: [ { text: "Мой оргазм принадлежит Ей. Мечтаю запереть член в клетку (пояс верности) и навсегда отдать Ей ключ.", nextId: "q5_1", scores: { chastity: +10, submission: +6, degradation: +3 } }, { text: "Люблю тизинг (tease and denial) в рамках одной сессии: Она доводит меня до грани часами, а потом запрещает кончать.", nextId: "q5_2", scores: { chastity: +6, mind_control: +4 } }, { text: "Оргазм для меня — важная и обязательная часть. Я не хочу его лишаться, иначе теряю мотивацию.", nextId: "q6", scores: { } }, { text: "Я готов терпеть запреты, только если в конце Она жестоко «выдоит» меня, заставив кончать снова и снова.", nextId: "q5_2", scores: { masochism: +6, edgeplay: +4 } } ] },
+                q5_1: { text: "5.1 Готов ли ты носить пояс верности 24/7 в обычной жизни (на работе, в зале)?", options: [ { text: "Да. Идеальная пытка. Хочу сходить с ума от стояка в офисе, зная, что клетка врезается в плоть.", nextId: "q6", scores: { chastity: +10, risk: +6, masochism: +5 } }, { text: "Готов носить постоянно, но прошу Госпожу не провоцировать меня фото и видео в рабочее время — я сойду с ума.", nextId: "q6", scores: { chastity: +8 } }, { text: "Буду носить его только дома или на выходных в качестве наказания за проступки.", nextId: "q6", scores: { chastity: +4, strict: +3 } }, { text: "Я надену его, но буду постоянно ныть и умолять снять его. Обожаю быть жалким попрошайкой.", nextId: "q6", scores: { chastity: +6, brat: +4, degradation: +5 } } ] },
+                q5_2: { text: "5.2 Полное лишение оргазма (Ruined Orgasm) или гиперстимуляция?", options: [ { text: "Ruined Orgasm. За секунду до разрядки Она бьет меня или резко бросает. Оргазм смазывается, оставляя пустоту.", nextId: "q6", scores: { mind_control: +8, degradation: +6 } }, { text: "Гиперстимуляция. Заставить меня кончать с помощью вибратора 3-4 раза подряд, когда мне уже больно.", nextId: "q6", scores: { masochism: +8, edgeplay: +5 } }, { text: "Финансовый шантаж. Я должен платить крупную сумму за каждую секунду прикосновения к моему члену.", nextId: "q6", scores: { findom: +10, chastity: +4 } }, { text: "Просто классический долгий тизинг. Без жести, просто сладкая пытка ожиданием.", nextId: "q6", scores: { praise: +3 } } ] },
+                q6: { text: "6. Боль и Порка. Каков твой болевой порог и отношение к физическому воздействию?", options: [ { text: "Я хардкорный мазохист. Мне нужна кровь, синяки, глубокие рубцы от плетей. Боль — это мой экстаз.", nextId: "q6_1", scores: { masochism: +10, edgeplay: +6 } }, { text: "Я люблю эстетичную боль: обжигающий воск, лед, укусы, царапины, звонкие пощечиины. Без расчлененки.", nextId: "q6_2", scores: { masochism: +6, objectification: +3 } }, { text: "Я вообще не люблю боль. Меня заводит исключительно психологическое давление, унижение и служение.", nextId: "q7", scores: { mind_control: +8, degradation: +4 } }, { text: "Я люблю, когда бьют не меня, а по моей гордости. Удары по лицу или плевки — это унижение, а не боль.", nextId: "q7", scores: { degradation: +10, masochism: +2 } } ] },
+                q6_1: { text: "6.1 Маркировка тела. Ты хочешь носить Её метки?", options: [ { text: "Да! Я хочу, чтобы Она вырезала скальпелем свои инициалы на моей груди или сделала мне клеймо.", nextId: "q7", scores: { edgeplay: +10, masochism: +8, risk: +5 } }, { text: "Обожаю синяки и засосы на видимых местах (шея, ключицы), чтобы все на работе видели, что у меня есть Владелица.", nextId: "q7", scores: { risk: +8, masochism: +5, exhibitionism: +4 } }, { text: "Предпочитаю, чтобы следы от порки оставались только на спине и бедрах, скрытые под одеждой.", nextId: "q7", scores: { masochism: +6 } }, { text: "Согласен на постоянные метки в виде тематических татуировок (штрихкод, Её имя).", nextId: "q7", scores: { submission: +8, objectification: +6 } } ] },
+                q6_2: { text: "6.2 Если боль эстетичная, то какой инструмент в Её руках пугает и заводит больше всего?", options: [ { text: "Медицинские иглы (Play-piercing). Хочу, чтобы Она протыкала мою кожу сотнями иголок.", nextId: "q7", scores: { edgeplay: +8, masochism: +6 } }, { text: "Огонь и раскаленный воск. Контраст температур сводит меня с ума.", nextId: "q7", scores: { masochism: +5, risk: +2 } }, { text: "Электростимуляция (Violet Wand). Удары током, пронизывающие всё тело.", nextId: "q7", scores: { masochism: +6, bondage: +2 } }, { text: "Её острые длинные ногти и тяжелые пощечины. Мне нужен прямой телесный контакт хищницы.", nextId: "q7", scores: { primal: +8, degradation: +3 } } ] },
+                q7: { text: "7. Риск и Публичность (Public play). Насколько ты готов рисковать своим статусом ради Неё?", options: [ { text: "Безумно готов. Хочу гулять с анальной пробкой, выполнять грязные команды в ТЦ и целовать Её туфли при всех.", nextId: "q7_1", scores: { risk: +10, degradation: +8 } }, { text: "Люблю легкий экстрим: когда Она незаметно отдает приказы взглядом на званом ужине, и я дрожу от страха.", nextId: "q8", scores: { risk: +5, mind_control: +4 } }, { text: "Только приватность. Я серьезный человек в жизни, мое подчинение остается строго за закрытыми дверями.", nextId: "q8", scores: { strict: +2 } }, { text: "Хочу, чтобы Она выкладывала мои унизительные фото или видео на свой Boosty или в закрытые каналы.", nextId: "q7_2", scores: { risk: +8, degradation: +10, online: +6 } } ] },
+                q7_1: { text: "7.1 А если вас кто-то заметит в ресторане?", options: [ { text: "В этом весь смысл! Публичное унижение, стыд и осуждение прохожих — это мой главный фетиш.", nextId: "q8", scores: { risk: +10, degradation: +10 } }, { text: "Я сгорю со стыда и буду умолять Её прекратить, но именно это Её и позабавит.", nextId: "q8", scores: { brat: +4, degradation: +6, risk: +6 } }, { text: "Всё должно быть на грани фола, но так виртуозно, чтобы никто не смог предъявить нам претензии.", nextId: "q8", scores: { mind_control: +5, risk: +4 } }, { text: "Если нас заметят, я буду защищать Её репутацию любой ценой, возьму весь удар на себя.", nextId: "q8", scores: { service: +8, submission: +5 } } ] },
+                q7_2: { text: "7.2 Если Она снимет тебя на видео, как Она должна его использовать?", options: [ { text: "Для жесткого шантажа. «Сделай это, или я разошлю это видео твоим коллегам».", nextId: "q8", scores: { mind_control: +10, risk: +10 } }, { text: "Продавать его другим сабам, чтобы они видели, какая у меня властная Госпожа (Findom + Cuckold).", nextId: "q8", scores: { findom: +6, cuckold: +6, degradation: +5 } }, { text: "Оставить строго для личного архива, чтобы пересматривать долгими вечерами.", nextId: "q8", scores: { submission: +4 } }, { text: "Заставить меня пересматривать это видео каждый день, чтобы я помнил, насколько я жалок.", nextId: "q8", scores: { degradation: +8, mind_control: +5 } } ] },
+                q8: { text: "8. Опасные игры (Edgeplay) и Дыхание. Готов ли ты заглянуть в глаза настоящему страху?", options: [ { text: "Да, я обожаю жесткое придушивание (асфиксию) до потемнения в глазах. Моя жизнь буквально в Её руках.", nextId: "q8_1", scores: { edgeplay: +10, risk: +6, masochism: +4 } }, { text: "Боюсь удушья, но люблю сенсорную депривацию: плотные кляпы и глухие маски. Неизвестность пугает до дрожи.", nextId: "q9", scores: { deprivation: +10, bondage: +5 } }, { text: "Я люблю игры с ножами (Knifeplay). Когда холодное лезвие скользит по горлу, я чувствую абсолютную власть.", nextId: "q9", scores: { edgeplay: +10, risk: +8 } }, { text: "Нет, я никогда не играю со своим здоровьем и жизнью. Только безопасный БДСМ без экстрима.", nextId: "q9", scores: { strict: +4 } } ] },
+                q8_1: { text: "8.1 Как именно ты хочешь, чтобы Она перекрывала тебе кислород?", options: [ { text: "Только Её руками. Хочу чувствовать тепло Её кожи и видеть в Её глазах животную власть (Primal).", nextId: "q9", scores: { primal: +8, edgeplay: +6 } }, { text: "Её ногами. Хочу, чтобы Она наступила мне каблуком на горло или душила бедрами (Facesitting).", nextId: "q9", scores: { oral: +6, objectification: +5, edgeplay: +5 } }, { text: "Кожаными ошейниками, веревками или цепями. Меня заводит визуальная жесткость девайсов.", nextId: "q9", scores: { bondage: +6, masochism: +4 } }, { text: "Противогазами или пластиковыми пакетами (Breath control). Тотальная изоляция.", nextId: "q9", scores: { deprivation: +8, edgeplay: +8 } } ] },
+                q9: { text: "9. Эксклюзивность. Ты принадлежишь только Ей, или тебя заводит идея «делиться»?", options: [ { text: "Я принадлежу только Ей. Я полностью моногамен в подчинении, мысли о других людях вызывают отторжение.", nextId: "q9_1", scores: { submission: +8 } }, { text: "Куколдизм (Cuckold). Хочу сидеть в клетке и смотреть, как Она занимается сексом с настоящими альфа-самцами.", nextId: "q9_2", scores: { cuckold: +10, degradation: +8, risk: +4 } }, { text: "Аренда. Я Её вещь, и Она может сдать меня в использование своим подругам-Госпожам на вечер.", nextId: "q9_2", scores: { objectification: +10, degradation: +6, service: +5 } }, { text: "Групповые унижения. Хочу, чтобы Она позвала гостей, и они все вместе смеялись надо мной и плевали в меня.", nextId: "q9_2", scores: { degradation: +10, risk: +8 } } ] },
+                q9_1: { text: "9.1 Насколько глубоко Её чувство собственничества должно проникать в твою жизнь?", options: [ { text: "Она решает, с кем я дружу, куда хожу и что ем. Моя жизнь полностью спроектирована Ей.", nextId: "q10", scores: { control: +10, strict: +8, submission: +6 } }, { text: "Я верен Ей сексуально и тематически, но в работе и дружбе я принимаю решения сам.", nextId: "q10", scores: { } }, { text: "Она должна поставить мне гео-трекер на телефон и следить за каждым моим шагом круглосуточно.", nextId: "q10", scores: { mind_control: +8, service: +4 } }, { text: "Её контроль выражается в том, что я обязан постоянно присылать видео-отчеты о том, чем я занят.", nextId: "q10", scores: { online: +6, service: +5 } } ] },
+                q9_2: { text: "9.2 Если Она использует тебя в играх с другими (Куколд/Аренда), какова твоя роль?", options: [ { text: "Я молчаливая мебель. Стою на четвереньках в качестве столика, пока они пьют вино.", nextId: "q10", scores: { objectification: +10, degradation: +8 } }, { text: "Я жалкий уборщик (Cleanup). После того, как чужие мужчины закончат, я вылизываю Её дочиста.", nextId: "q10", scores: { cuckold: +10, degradation: +10, oral: +6 } }, { text: "Я био-вибратор. Она использует мой рот, пока другой мужчина имеет Её сзади.", nextId: "q10", scores: { oral: +8, cuckold: +6, service: +5 } }, { text: "Я финансовый спонсор. Я оплачиваю Её свидания с другими мужчинами, отели и их подарки.", nextId: "q10", scores: { findom: +10, cuckold: +8, degradation: +4 } } ] },
+                q10: { text: "10. Инверсия ролей и Пеггинг. Готов ли ты отдать контроль над своей задницей?", options: [ { text: "Да, это моя мечта. Раздвинуть ноги, принять Её страпон и быть использованным как покорная сучка.", nextId: "q10_1", scores: { pegging: +10, degradation: +6, submission: +5 } }, { text: "Меня это заводит, но у меня мало опыта. Если Госпожа будет нежна и терпелива на первых этапах — я Ваш.", nextId: "q11", scores: { pegging: +4, praise: +4 } }, { text: "Нет, жесткое табу. Моя простата и мужественность неприкосновенны.", nextId: "q11", scores: { } }, { text: "Только жесткий фистинг (Fisting) или огромные игрушки. Я хочу, чтобы Она растянула меня до предела.", nextId: "q10_1", scores: { masochism: +8, edgeplay: +6, pegging: +5 } } ] },
+                q10_1: { text: "10.1 Какого отношения в процессе пеггинга ты ждешь?", options: [ { text: "Жесткое доминирование. Пусть берет меня грубо, тянет за волосы, называет шлюхой и вбивается без жалости.", nextId: "q11", scores: { degradation: +8, masochism: +6 } }, { text: "Физиологическое служение. Хочу, чтобы Она методично стимулировала простату до 'hands-free' оргазма (доение).", nextId: "q11", scores: { pegging: +8, service: +4 } }, { text: "Ролевая игра (Sissification). Я должен быть накрашен, в женском белье и парике, чтобы полностью потерять мужское эго.", nextId: "q11", scores: { degradation: +10, mind_control: +5 } }, { text: "Тотальный бондаж. Связать меня в позу 'лягушки', чтобы я даже не мог дернуться, когда Она входит.", nextId: "q11", scores: { bondage: +8, deprivation: +4 } } ] },
+                q11: { text: "11. Территория твоего служения и финансы. Где и как проходят встречи?", options: [ { text: "У меня дома. Я вымою полы, подготовлю еду и сделаю всё, чтобы Госпоже было комфортно меня использовать.", nextId: "q12", scores: { service: +8 } }, { text: "В дорогих БДСМ-отелях. Я сам найду, забронирую и оплачу лучшую VIP-студию для Неё.", nextId: "q12", scores: { findom: +8, service: +6 } }, { text: "Я готов делить расходы на аренду 50/50, ведь мы оба получаем от сессии удовольствие.", nextId: "q12", scores: { } }, { text: "Я приеду к Ней домой, если Она позволит, и буду выполнять обязанности по дому (уборка, готовка).", nextId: "q12", scores: { service: +10, submission: +5 } } ] },
+                q12: { text: "12. Расстояния. Что, если идеальная Владелица живет в другом городе?", options: [ { text: "Расстояние не преграда. Я буду летать к Ней по выходным или полностью перееду, бросив всё.", nextId: "q13", scores: { submission: +8, risk: +4 } }, { text: "Идеально! Я ищу виртуальное подчинение (Online). Буду служить по видеосвязи и слать деньги.", nextId: "q13", scores: { online: +10, findom: +6 } }, { text: "Только мой город. Виртуальные романы и перелеты — это трата времени.", nextId: "q13", scores: { } }, { text: "Я буду оплачивать Ей билеты бизнес-класса, чтобы Она прилетала ко мне, когда захочет.", nextId: "q13", scores: { findom: +8, service: +4 } } ] },
+                q13: { text: "13. Бытовое служение. Если Госпожа прикажет вымыть полы в Её доме зубной щеткой?", options: [ { text: "Я сделаю это с радостью и рвением. Тяжелое, бессмысленное бытовое служение очищает мой разум.", nextId: "q14", scores: { service: +10, degradation: +4 } }, { text: "Я пришел в БДСМ за сексом, наручниками и страстью, а не для того, чтобы работать бесплатным уборщиком.", nextId: "q14", scores: { risk: +2, brat: +2 } }, { text: "Сделаю, но буду тихо ныть и жаловаться, ожидая, пока Она не шлепнет меня по губам за дерзость.", nextId: "q14", scores: { brat: +8, masochism: +3 } }, { text: "Я лучше найму Ей профессиональную клининговую компанию за свой счет. Мое время стоит дороже.", nextId: "q14", scores: { findom: +6 } } ] },
+                q14: { text: "14. Животные отыгрыши (Petplay). Если Она наденет на тебя собачий ошейник, миску на пол и прикажет лаять?", options: [ { text: "Я стану Её верным, преданным Псом (Puppy play). Буду спать в ногах кровати и радостно вилять хвостом.", nextId: "q15", scores: { objectification: +8, degradation: +6, submission: +5 } }, { text: "Я скорее Кот. Своенравный, ласковый, трусь о колени, но могу и выпустить когти, если Она не обращает внимания.", nextId: "q15", scores: { brat: +6, praise: +5 } }, { text: "Я Свинья (Pigplay). Обожаю ползать в грязи, жрать с пола и хрюкать, пока Она смеется надо мной.", nextId: "q15", scores: { degradation: +10, objectification: +8 } }, { text: "Нет, зоо-ролевые игры и имитация животных меня абсолютно не привлекают.", nextId: "q15", scores: { } } ] },
+                q15: { text: "15. Твой «пробег». Какой у тебя реальный опыт подчинения женщине?", options: [ { text: "Я опытный нижний. Знаю протокол, умею служить, понимаю свои лимиты и не задаю лишних вопросов.", nextId: "q16", scores: { service: +4 } }, { text: "Я «чистый лист». Опыта нет совсем, но у меня огромное желание учиться. Ищу мудрую Наставницу.", nextId: "q16", scores: { newbie: +10, submission: +4 } }, { text: "Я теоретик. Пересмотрел гигабайты порно, прочитал все паблики, но в реальности боюсь сделать первый шаг.", nextId: "q16", scores: { newbie: +8, online: +4 } }, { text: "У меня огромный опыт, но я «сломанный» саб с травмами из прошлых отношений. Мне нужна жесткая перезагрузка.", nextId: "q16", scores: { mind_control: +6, degradation: +4 } } ] },
+                q16: { text: "16. Безопасность и Стоп-слово. Как ты относишься к своим собственным границам?", options: [ { text: "Я знаю свои лимиты. Если я произнесу стоп-слово («Красный»), Госпожа должна немедленно всё остановить.", nextId: "q17", scores: { strict: +2 } }, { text: "CNC (Игнорирование стопа). Я даю согласие на насилие. Даже если я плачу и умоляю, Она сама решает, когда хватит.", nextId: "q17", scores: { mind_control: +10, risk: +8, edgeplay: +6 } }, { text: "Я вообще не использую стоп-слова. Моя жизнь, мое здоровье и мое тело полностью в Её распоряжении.", nextId: "q17", scores: { submission: +10, risk: +6, degradation: +4 } }, { text: "Мой стоп-кран — это мои деньги. Я плачу за сессию: если мне не нравится, я просто ухожу.", nextId: "q17", scores: { brat: +4 } } ] },
+                q17: { text: "17. Ритуалы преданности. Что ты должен делать, когда Госпожа входит в комнату?", options: [ { text: "Мгновенно упасть на колени, опустить глаза в пол и ждать Её первого приказа, не смея заговорить первым.", nextId: "q18", scores: { submission: +8, service: +6, strict: +4 } }, { text: "Подойти и нежно поцеловать Её туфли или сапоги, выражая свою любовь и поклонение.", nextId: "q18", scores: { service: +5, praise: +3 } }, { text: "Я не люблю излишнюю театральщину. Я просто поздороваюсь с уважением.", nextId: "q18", scores: { } }, { text: "Радостно подбежать, как щенок, обнять Её за ноги и умолять погладить меня.", nextId: "q18", scores: { objectification: +4, praise: +6 } } ] },
+                q18: { text: "18. Оральное служение. Насколько глубоко ты готов уйти в поклонение Её телу?", options: [ { text: "Фейсситтинг (Facesitting). Она садится мне на лицо всем весом. Я задыхаюсь без кислорода, но продолжаю лизать.", nextId: "q19", scores: { oral: +10, edgeplay: +6, deprivation: +5 } }, { text: "Долгий куннилингус. Я готов работать языком часами, пока у меня не сведет челюсть. Это моя главная обязанность.", nextId: "q19", scores: { oral: +8, service: +6 } }, { text: "Деградация. Если Она кончит, я должен слизать Её соки с Её туфель или прямо с грязного пола.", nextId: "q19", scores: { oral: +6, degradation: +10 } }, { text: "Оральные ласки — это взаимный, чувственный процесс, а не слепое служение. Без фанатизма.", nextId: "q19", scores: { } } ] },
+                q19: { text: "19. Твои «Красные флаги». Что заставит тебя навсегда уйти от Госпожи?", options: [ { text: "Если Она покажет свою слабость, начнет плакать, жаловаться на жизнь или попросит меня принять мужское решение.", nextId: "q20", scores: { submission: +6 } }, { text: "Неуважение к моим жестким лимитам (например, если Она попытается пустить мне кровь, а я предупреждал, что боюсь).", nextId: "q20", scores: { } }, { text: "Холодность и отсутствие афтеркеа. Если Она будет относиться ко мне как к пустому месту после сессии, я выгорю.", nextId: "q20", scores: { praise: +8 } }, { text: "Если Она откажется от моей финансовой помощи. Для меня невозможно служить той, кто не берет мои деньги.", nextId: "q20", scores: { findom: +8 } } ] },
+                q20: { text: "20. Финал близок. Какую эмоцию ты хочешь испытывать после встречи с Ней чаще всего?", options: [ { text: "Тотальное опустошение и катарсис от пережитой невыносимой боли.", nextId: "end", scores: { masochism: +8, edgeplay: +4 } }, { text: "Глубокий стыд, ощущение собственной ничтожности и использованности.", nextId: "end", scores: { degradation: +10, mind_control: +6 } }, { text: "Тепло, умиротворение и чувство, что я 'хороший мальчик', заслуживший Её любовь.", nextId: "end", scores: { praise: +10, daddy: +4 } }, { text: "Адреналин, дрожь в коленях и страх от того, что мы творили на глазах у всех.", nextId: "end", scores: { risk: +10 } } ] }
             },
             dominant: {
-                q1: { 
-                    text: "1. Давай узнаем самое главное. Какого формата власти ты ищешь? Твое доминирование — это круглосуточная работа или ролевая игра?", 
-                    options: [ 
-                        { text: "Власть 24/7. Я не снимаю корону. Она моя собственность, и я контролирую её жизнь даже когда мы не рядом.", nextId: "q1_1", scores: { control: +10, strict: +8 } }, 
-                        { text: "Тематические сессии. В спальне я тиран и бог, но за дверью мы партнеры, друзья и на равных.", nextId: "q2", scores: { sadism: +4 } },
-                        { text: "Онлайн-Империя. Я ищу дистанционных рабынь, которые будут слать мне видео-отчеты и переводить деньги.", nextId: "q1_2", scores: { control: +6, mind_control: +4 } },
-                        { text: "Спонтанный контроль (Primal). Я беру власть только тогда, когда во мне просыпается первобытный инстинкт.", nextId: "q2", scores: { primal: +8, edgeplay: +4 } }
-                    ] 
-                },
-                q1_1: { 
-                    text: "1.1 В формате 24/7, как именно выражается твой микро-контроль в повседневной жизни?", 
-                    options: [ 
-                        { text: "Диктатура: Она обязана носить ошейник под одеждой, соблюдать диету, ложиться спать по команде и писать ежедневные отчеты.", nextId: "q2", scores: { control: +10, strict: +10 } }, 
-                        { text: "Финансовый контроль: Она отдает мне свою зарплату, а я решаю, сколько ей оставить на проезд и кофе.", nextId: "q2", scores: { control: +6, mind_control: +5 } },
-                        { text: "Духовное руководство: Я не требую бумажек и отчетов. Мой авторитет давит так, что она сама боится сделать шаг без спроса.", nextId: "q2", scores: { mind_control: +8, daddy: +4 } },
-                        { text: "Изоляция: Я контролирую её круг общения, читаю переписки и постепенно отрезаю её от внешнего мира.", nextId: "q2", scores: { mind_control: +10, control: +8, risk: +5 } }
-                    ] 
-                },
-                q1_2: { 
-                    text: "1.2 Если формат Онлайн, то как ты заставляешь её чувствовать свою власть через экран?", 
-                    options: [ 
-                        { text: "Заставляю выполнять унизительные задания (писать мое имя на теле, портить свою одежду) по видеосвязи.", nextId: "q2", scores: { degradation: +8, mind_control: +6 } }, 
-                        { text: "Шантаж. Она скидывает мне самый жесткий компромат, и теперь её жизнь висит на волоске от моего настроения.", nextId: "q2", scores: { risk: +10, mind_control: +8, edgeplay: +5 } },
-                        { text: "Оргазмический контроль. Я управляю замком её пояса верности через Bluetooth. Она кончит, только когда я нажму кнопку.", nextId: "q2", scores: { control: +8, bondage: +4 } },
-                        { text: "Словесное унижение и газлайтинг. Я ломаю её психику текстом и голосовыми, заставляя рыдать над телефоном.", nextId: "q2", scores: { mind_control: +10, sadism: +4 } }
-                    ] 
-                },
-                q2: { 
-                    text: "2. Отношение к нижней. Она для тебя — живой человек, требующий заботы, или просто кусок мяса для утех?", 
-                    options: [ 
-                        { text: "Она моя любимая вещь. Я содержу её, балую, слежу за её здоровьем, но требую идеального послушания (Daddy).", nextId: "q3", scores: { daddy: +10, control: +6, praise: +5 } }, 
-                        { text: "Она — расходный материал. Если она сломается или не выдержит моих требований, я просто найду новую.", nextId: "q3", scores: { sadism: +8, degradation: +6, strict: +6 } },
-                        { text: "Она — пластилин. Я наставник (Teacher), который терпеливо и методично вылепит из неё идеальную рабыню.", nextId: "q3", scores: { teacher: +10, strict: +4 } },
-                        { text: "Она — моя добыча. Меня заводит её сопротивление, я хочу ломать её и укрощать каждый день (Brat Tamer).", nextId: "q3", scores: { brat_tamer: +10, primal: +6, sadism: +4 } }
-                    ] 
-                },
-                q3: { 
-                    text: "3. Психология боли. Твоя истинная цель, когда ты берешь в руки плеть?", 
-                    options: [ 
-                        { text: "Эстетика и искусство. Я рисую синяками и рубцами. Я хочу провести её по грани эндорфинового транса.", nextId: "q4", scores: { sadism: +8, teacher: +4 } }, 
-                        { text: "Разрушение воли. Я бью, чтобы увидеть её слезы, услышать мольбы о пощаде и почувствовать свою абсолютную власть.", nextId: "q4", scores: { sadism: +10, mind_control: +8 } },
-                        { text: "Наказание. Плеть — это не игра. Это инструмент дисциплины, который применяется только за нарушение правил.", nextId: "q4", scores: { strict: +10, control: +6 } },
-                        { text: "Животная агрессия. Мне не нужны плети. Я бью руками, кусаю до крови и душу. Это первобытный инстинкт.", nextId: "q4", scores: { primal: +10, edgeplay: +8 } }
-                    ] 
-                },
-                q4: { 
-                    text: "4. Игры разума (Mindfuck). Любишь ли ты манипулировать сознанием нижней?", 
-                    options: [ 
-                        { text: "Да, это мое любимое. Газлайтинг, словесное унижение, внушение ложных воспоминаний. Я сломаю её эго.", nextId: "q5", scores: { mind_control: +10, degradation: +6 } }, 
-                        { text: "Использую только жесткий грязный мат (dirty talk) в постели, чтобы завести нас обоих. Без травм для психики.", nextId: "q5", scores: { sadism: +2 } },
-                        { text: "Нет, я строг, но адекватен. Моя власть строится на уважении и четких правилах, а не на токсичных манипуляциях.", nextId: "q5", scores: { strict: +6, daddy: +4 } },
-                        { text: "Я играю на её страхах. Люблю пугать её неизвестностью, внезапными наказаниями и паранойей.", nextId: "q5", scores: { mind_control: +8, risk: +5 } }
-                    ] 
-                },
-                q5: { 
-                    text: "5. Бондаж и фиксация. Каков твой подход к ограничению её свободы?", 
-                    options: [ 
-                        { text: "Мастер Шибари. Веревки — это философия. Я связываю её так красиво и сложно, что это похоже на искусство.", nextId: "q6", scores: { bondage: +10, teacher: +3 } }, 
-                        { text: "Тотальная депривация. Колодки, смирительные рубашки, глухие шлемы. Она не должна ни видеть, ни двигаться.", nextId: "q6", scores: { bondage: +8, deprivation: +10, mind_control: +5 } },
-                        { text: "Минимализм. Наручники к батарее — этого достаточно, чтобы она не мешала мне брать её жестко.", nextId: "q6", scores: { bondage: +3, primal: +2 } },
-                        { text: "Психологический бондаж. Я не использую веревки. Я говорю «Сидеть» — и она сидит в неудобной позе часами.", nextId: "q6", scores: { strict: +8, mind_control: +6, control: +5 } }
-                    ] 
-                },
-                q6: { 
-                    text: "6. Оргазмический контроль. Как ты распоряжаешься её разрядкой?", 
-                    options: [ 
-                        { text: "Полный запрет (Chastity/Denial). Она может неделями жить с разрушенными оргазмами. Разрядка — это редкая привилегия.", nextId: "q7", scores: { mind_control: +8, strict: +5 } }, 
-                        { text: "Пытка удовольствием (Overstimulation). Я заставлю её кончать 5, 10 раз подряд, пока она не начнет плакать от гиперчувствительности.", nextId: "q7", scores: { sadism: +8, edgeplay: +4 } },
-                        { text: "Я щедрый Папочка. Я доведу её до сумасшествия, но в конце всегда подарю мощный, заслуженный оргазм.", nextId: "q7", scores: { daddy: +8 } },
-                        { text: "Я использую её оргазм как инструмент дрессировки. Хорошо служишь — кончаешь. Ошиблась — лишаешься на месяц.", nextId: "q7", scores: { strict: +8, control: +6 } }
-                    ] 
-                },
-                q7: { 
-                    text: "7. Публичные игры и Экстрим. Рискнешь ли ты вывести её 'в свет'?", 
-                    options: [ 
-                        { text: "Обязательно. Надену на неё виброяйцо с пультом, ошейник под шарф и выведу в дорогой ресторан. Риск заводит.", nextId: "q7_1", scores: { risk: +10, degradation: +5 } }, 
-                        { text: "Только скрытый контроль. Буду отдавать ей тайные команды взглядом или шепотом, чтобы никто из гостей не понял.", nextId: "q8", scores: { mind_control: +6, risk: +3 } },
-                        { text: "БДСМ — это интимный процесс. Никаких публичных игр, всё остается строго в моей звукоизолированной спальне.", nextId: "q8", scores: { strict: +4 } },
-                        { text: "Публичное унижение — мой конек. Заставлю её встать на колени прямо в безлюдном парке или подъезде.", nextId: "q7_1", scores: { risk: +10, degradation: +10 } }
-                    ] 
-                },
-                q7_1: { 
-                    text: "7.1 А если вас случайно кто-то заметит за этим занятием?", 
-                    options: [ 
-                        { text: "Это вершина возбуждения (Exhibitionism). Пусть смотрят, как я распоряжаюсь своей собственностью.", nextId: "q8", scores: { risk: +10, degradation: +8 } }, 
-                        { text: "Я моментально всё прекращу. Я люблю ходить по грани, но проблемы с законом и скандалы мне не нужны.", nextId: "q8", scores: { control: +4 } },
-                        { text: "Я сделаю вид, что всё нормально, а ей прикажу замереть и молчать. Это отличный стресс-тест для её психики.", nextId: "q8", scores: { mind_control: +8, risk: +6 } },
-                        { text: "Буду агрессивно защищать нашу территорию, прогоню зевак матом. Она — моя добыча.", nextId: "q8", scores: { primal: +8, risk: +4 } }
-                    ] 
-                },
-                q8: { 
-                    text: "8. Опасные практики (Edgeplay). Насколько близко к смертельной грани ты готов её подвести?", 
-                    options: [ 
-                        { text: "Я живу на грани. Жесткая асфиксия (удушье) до потери сознания, ножи (Knifeplay), бладплей. Это чистый адреналин.", nextId: "q9", scores: { edgeplay: +10, primal: +8, sadism: +6 } }, 
-                        { text: "Игры с дыханием (Breath control) — да, но строго контролируемо, без потери сознания. Кровь и ножи — табу.", nextId: "q9", scores: { edgeplay: +5, control: +4 } },
-                        { text: "Никаких опасных практик. Я несу за неё ответственность. Мой БДСМ — это строгие правила и безопасная порка.", nextId: "q9", scores: { daddy: +6, strict: +5 } },
-                        { text: "Люблю игры с огнем и раскаленным металлом (Fireplay/Branding). Оставить клеймо на её теле — высшая эстетика.", nextId: "q9", scores: { edgeplay: +8, sadism: +8 } }
-                    ] 
-                },
-                q9: { 
-                    text: "9. Эксклюзивность тела. Она принадлежит только тебе, или ты готов 'делиться' её телом?", 
-                    options: [ 
-                        { text: "Она только моя. Я убью любого, кто просто посмотрит на то, что принадлежит мне. Жуткий собственник.", nextId: "q10", scores: { control: +10, primal: +5 } }, 
-                        { text: "Куколдизм (Cuckold). Меня безумно заводит режиссировать, как её жестко используют другие мужчины у меня на глазах.", nextId: "q9_1", scores: { cuckold: +10, risk: +6, mind_control: +4 } },
-                        { text: "Я могу сдать её в 'аренду' или использовать как подстилку для своих друзей, чтобы тотально унизить её.", nextId: "q9_1", scores: { degradation: +10, cuckold: +6, objectification: +8 } },
-                        { text: "Мы свингеры/в открытых отношениях, но БДСМ-сессии она проводит исключительно со мной.", nextId: "q10", scores: { } }
-                    ] 
-                },
-                q9_1: { 
-                    text: "9.1 В процессе 'использования другими' какова твоя роль?", 
-                    options: [ 
-                        { text: "Я сижу в кресле с сигарой и просто наблюдаю, заставляя её смотреть мне в глаза, пока её имеют.", nextId: "q10", scores: { mind_control: +8, cuckold: +6 } }, 
-                        { text: "Я Порочный Режиссер. Я активно отдаю команды и ей, и приглашенным мужчинам. Я контролирую весь процесс.", nextId: "q10", scores: { control: +8, risk: +5 } },
-                        { text: "Я снимаю всё на камеру, чтобы потом заставить её пересматривать свое падение и деградацию.", nextId: "q10", scores: { degradation: +8, mind_control: +6 } },
-                        { text: "Я присоединяюсь к процессу. Двойное проникновение, жесткое доминирование втроем.", nextId: "q10", scores: { primal: +6, sadism: +4 } }
-                    ] 
-                },
-                q10: { 
-                    text: "10. Наказания без применения физической силы (БДСМ без боли). Твой метод?", 
-                    options: [ 
-                        { text: "Жесткая физическая нагрузка: стоять в планке или сидеть в 'стульчике', пока не подкосятся ноги и она не заплачет.", nextId: "q11", scores: { strict: +8, control: +4 } }, 
-                        { text: "Сенсорная депривация. Закрою в темной комнате в наручниках и кляпе на несколько часов. Пусть посидит в тишине.", nextId: "q11", scores: { deprivation: +10, mind_control: +6 } },
-                        { text: "Унизительные бытовые задания: заставлю вычистить туалет зубной щеткой голышом или вылизывать мои ботинки.", nextId: "q11", scores: { degradation: +10, strict: +5 } },
-                        { text: "Игнорирование. Я просто перестану с ней разговаривать. Холодность ломает женщин быстрее любых плетей.", nextId: "q11", scores: { mind_control: +8, strict: +6 } }
-                    ] 
-                },
-                q11: { 
-                    text: "11. Провокации (Bratting). Что ты делаешь, когда нижняя начинает дерзить, закатывать глаза и бунтовать?", 
-                    options: [ 
-                        { text: "Обожаю это! Это моя любимая игра (Brat Tamer). Я с наслаждением сломаю её сопротивление жесткой поркой.", nextId: "q12", scores: { brat_tamer: +10, sadism: +6 } }, 
-                        { text: "Не потерплю ни секунды дерзости. Выпишу жесточайший штраф или наказание. Власть не обсуждается.", nextId: "q12", scores: { strict: +10, control: +8 } },
-                        { text: "Психологически загоню в угол. Я не буду бить, я задавлю её интеллектом и тоном так, что она сама приползет извиняться.", nextId: "q12", scores: { mind_control: +8, strict: +4 } },
-                        { text: "Поддержу игру. Начну щекотать, шлепать и превращу конфликт в бурный, страстный, животный секс.", nextId: "q12", scores: { primal: +8, brat_tamer: +4 } }
-                    ] 
-                },
-                q12: { 
-                    text: "12. Твой идеальный 'материал'. Какую нижнюю ты ищешь в плане опыта?", 
-                    options: [ 
-                        { text: "Чистый лист. Неопытную, наивную девочку, чьи границы я смогу лепить и перепрошивать с нуля (Teacher).", nextId: "q13", scores: { teacher: +10, daddy: +4 } }, 
-                        { text: "Опытную сабу, которая уже знает протокол, не задает тупых вопросов и готова к хардкору с первой минуты.", nextId: "q13", scores: { strict: +6, sadism: +4 } },
-                        { text: "Сломанную куклу с травмами. Меня привлекает процесс 'починки' и полного переподчинения её психики себе.", nextId: "q13", scores: { mind_control: +10, teacher: +6 } },
-                        { text: "Опыт не имеет значения. Мне важна только химическая реакция, животная страсть и её готовность отдаться.", nextId: "q13", scores: { primal: +8 } }
-                    ] 
-                },
-                q13: { 
-                    text: "13. Финансы в BDSM. Кто оплачивает студии, игрушки и логистику?", 
-                    options: [ 
-                        { text: "Я мужчина и я Доминант. Я полностью беру на себя все расходы. Моя нижняя не должна ни в чем нуждаться.", nextId: "q14", scores: { daddy: +10, control: +4 } }, 
-                        { text: "Мы делим расходы на аренду и отели пополам. Удовольствие получают оба, это справедливо.", nextId: "q14", scores: { } },
-                        { text: "Финансовое подчинение (Findom). Она обязана оплачивать мне студии, дарить девайсы и переводить дань за сессии.", nextId: "q14", scores: { mind_control: +6, degradation: +4 } },
-                        { text: "Если она хочет, чтобы я её красиво порол, пусть сама арендует VIP-студию. Мое время и навыки стоят дороже.", nextId: "q14", scores: { strict: +4 } }
-                    ] 
-                },
-                q14: { 
-                    text: "14. Безопасность и стоп-слова. Если в разгар жесткой сессии она в панике кричит «Стоп!»?", 
-                    options: [ 
-                        { text: "Мгновенно останавливаюсь, отбрасываю плеть, снимаю фиксацию и переключаюсь на мягкую заботу и успокоение.", nextId: "q15", scores: { daddy: +8, teacher: +4 } }, 
-                        { text: "Снижу темп до минимума и строгим тоном спрошу, что не так. Иногда сабы пугаются своих же фантазий.", nextId: "q15", scores: { strict: +6, teacher: +5 } },
-                        { text: "Практикую CNC (игнорирование стоп-слова). Я заранее предупреждаю: если мы начали, я закончу только тогда, когда решу сам.", nextId: "q15", scores: { edgeplay: +8, mind_control: +8, sadism: +6 } },
-                        { text: "Остановлю сессию, но буду зол. Если она прервала процесс без веской причины, она будет наказана за слабость.", nextId: "q15", scores: { strict: +8, sadism: +4 } }
-                    ] 
-                },
-                q15: { 
-                    text: "15. Твои 'Красные флаги'. Что заставит тебя навсегда выгнать нижнюю?", 
-                    options: [ 
-                        { text: "Ложь и скрытность. Моя власть строится на 100% доверии. Соврала один раз — прощай навсегда.", nextId: "end", scores: { control: +8, strict: +8 } }, 
-                        { text: "Попытка манипулировать мной (bottoming from the bottom). Если она начнет указывать, как мне доминировать.", nextId: "end", scores: { strict: +10, primal: +4 } },
-                        { text: "Эмоциональное 'бревно'. Если она не кричит, не извивается и не дает мне энергетической отдачи от боли.", nextId: "end", scores: { sadism: +8, primal: +6 } },
-                        { text: "Отказ выполнять грязные или унизительные приказы. Я не потерплю брезгливости в служении.", nextId: "end", scores: { degradation: +8, mind_control: +5 } }
-                    ] 
-                }
+                q1: { text: "1. Давай узнаем самое главное. Какого формата власти ты ищешь? Твое доминирование — это круглосуточная работа или ролевая игра?", options: [ { text: "Власть 24/7. Я не снимаю корону. Она моя собственность, и я контролирую её жизнь даже когда мы не рядом.", nextId: "q1_1", scores: { control: +10, strict: +8 } }, { text: "Тематические сессии. В спальне я тиран и бог, но за дверью мы партнеры, друзья и на равных.", nextId: "q2", scores: { sadism: +4 } }, { text: "Онлайн-Империя. Я ищу дистанционных рабынь, которые будут слать мне видео-отчеты и переводить деньги.", nextId: "q1_2", scores: { control: +6, mind_control: +4 } }, { text: "Спонтанный контроль (Primal). Я беру власть только тогда, когда во мне просыпается первобытный инстинкт.", nextId: "q2", scores: { primal: +8, edgeplay: +4 } } ] },
+                q1_1: { text: "1.1 В формате 24/7, как именно выражается твой микро-контроль в повседневной жизни?", options: [ { text: "Диктатура: Она обязана носить ошейник под одеждой, соблюдать диету, ложиться спать по команде и писать ежедневные отчеты.", nextId: "q2", scores: { control: +10, strict: +10 } }, { text: "Финансовый контроль: Она отдает мне свою зарплату, а я решаю, сколько ей оставить на проезд и кофе.", nextId: "q2", scores: { control: +6, mind_control: +5 } }, { text: "Духовное руководство: Я не требую бумажек и отчетов. Мой авторитет давит так, что она сама боится сделать шаг без спроса.", nextId: "q2", scores: { mind_control: +8, daddy: +4 } }, { text: "Изоляция: Я контролирую её круг общения, читаю переписки и постепенно отрезаю её от внешнего мира.", nextId: "q2", scores: { mind_control: +10, control: +8, risk: +5 } } ] },
+                q1_2: { text: "1.2 Если формат Онлайн, то как ты заставляешь её чувствовать свою власть через экран?", options: [ { text: "Заставляю выполнять унизительные задания (писать мое имя на теле, портить свою одежду) по видеосвязи.", nextId: "q2", scores: { degradation: +8, mind_control: +6 } }, { text: "Шантаж. Она скидывает мне самый жесткий компромат, и теперь её жизнь висит на волоске от моего настроения.", nextId: "q2", scores: { risk: +10, mind_control: +8, edgeplay: +5 } }, { text: "Оргазмический контроль. Я управляю замком её пояса верности через Bluetooth. Она кончит, только когда я нажму кнопку.", nextId: "q2", scores: { control: +8, bondage: +4 } }, { text: "Словесное унижение и газлайтинг. Я ломаю её психику текстом и голосовыми, заставляя рыдать над телефоном.", nextId: "q2", scores: { mind_control: +10, sadism: +4 } } ] },
+                q2: { text: "2. Отношение к нижней. Она для тебя — живой человек, требующий заботы, или просто кусок мяса для утех?", options: [ { text: "Она моя любимая вещь. Я содержу её, балую, слежу за её здоровьем, но требую идеального послушания (Daddy).", nextId: "q3", scores: { daddy: +10, control: +6, praise: +5 } }, { text: "Она — расходный материал. Если она сломается или не выдержит моих требований, я просто найду новую.", nextId: "q3", scores: { sadism: +8, degradation: +6, strict: +6 } }, { text: "Она — пластилин. Я наставник (Teacher), который терпеливо и методично вылепит из неё идеальную рабыню.", nextId: "q3", scores: { teacher: +10, strict: +4 } }, { text: "Она — моя добыча. Меня заводит её сопротивление, я хочу ломать её и укрощать каждый день (Brat Tamer).", nextId: "q3", scores: { brat_tamer: +10, primal: +6, sadism: +4 } } ] },
+                q3: { text: "3. Психология боли. Твоя истинная цель, когда ты берешь в руки плеть?", options: [ { text: "Эстетика и искусство. Я рисую синяками и рубцами. Я хочу провести её по грани эндорфинового транса.", nextId: "q4", scores: { sadism: +8, teacher: +4 } }, { text: "Разрушение воли. Я бью, чтобы увидеть её слезы, услышать мольбы о пощаде и почувствовать свою абсолютную власть.", nextId: "q4", scores: { sadism: +10, mind_control: +8 } }, { text: "Наказание. Плеть — это не игра. Это инструмент дисциплины, который применяется только за нарушение правил.", nextId: "q4", scores: { strict: +10, control: +6 } }, { text: "Животная агрессия. Мне не нужны плети. Я бью руками, кусаю до крови и душу. Это первобытный инстинкт.", nextId: "q4", scores: { primal: +10, edgeplay: +8 } } ] },
+                q4: { text: "4. Игры разума (Mindfuck). Любишь ли ты манипулировать сознанием нижней?", options: [ { text: "Да, это мое любимое. Газлайтинг, словесное унижение, внушение ложных воспоминаний. Я сломаю её эго.", nextId: "q5", scores: { mind_control: +10, degradation: +6 } }, { text: "Использую только жесткий грязный мат (dirty talk) в постели, чтобы завести нас обоих. Без травм для психики.", nextId: "q5", scores: { sadism: +2 } }, { text: "Нет, я строг, но адекватен. Моя власть строится на уважении и четких правилах, а не на токсичных манипуляциях.", nextId: "q5", scores: { strict: +6, daddy: +4 } }, { text: "Я играю на её страхах. Люблю пугать её неизвестностью, внезапными наказаниями и паранойей.", nextId: "q5", scores: { mind_control: +8, risk: +5 } } ] },
+                q5: { text: "5. Бондаж и фиксация. Каков твой подход к ограничению её свободы?", options: [ { text: "Мастер Шибари. Веревки — это философия. Я связываю её так красиво и сложно, что это похоже на искусство.", nextId: "q6", scores: { bondage: +10, teacher: +3 } }, { text: "Тотальная депривация. Колодки, смирительные рубашки, глухие шлемы. Она не должна ни видеть, ни двигаться.", nextId: "q6", scores: { bondage: +8, deprivation: +10, mind_control: +5 } }, { text: "Минимализм. Наручники к батарее — этого достаточно, чтобы она не мешала мне брать её жестко.", nextId: "q6", scores: { bondage: +3, primal: +2 } }, { text: "Психологический бондаж. Я не использую веревки. Я говорю «Сидеть» — и она сидит в неудобной позе часами.", nextId: "q6", scores: { strict: +8, mind_control: +6, control: +5 } } ] },
+                q6: { text: "6. Оргазмический контроль. Как ты распоряжаешься её разрядкой?", options: [ { text: "Полный запрет (Chastity/Denial). Она может неделями жить с разрушенными оргазмами. Разрядка — это редкая привилегия.", nextId: "q7", scores: { mind_control: +8, strict: +5 } }, { text: "Пытка удовольствием (Overstimulation). Я заставлю её кончать 5, 10 раз подряд, пока она не начнет плакать от гиперчувствительности.", nextId: "q7", scores: { sadism: +8, edgeplay: +4 } }, { text: "Я щедрый Папочка. Я доведу её до сумасшествия, но в конце всегда подарю мощный, заслуженный оргазм.", nextId: "q7", scores: { daddy: +8 } }, { text: "Я использую её оргазм как инструмент дрессировки. Хорошо служишь — кончаешь. Ошиблась — лишаешься на месяц.", nextId: "q7", scores: { strict: +8, control: +6 } } ] },
+                q7: { text: "7. Публичные игры и Экстрим. Рискнешь ли ты вывести её 'в свет'?", options: [ { text: "Обязательно. Надену на неё виброяйцо с пультом, ошейник под шарф и выведу в дорогой ресторан. Риск заводит.", nextId: "q7_1", scores: { risk: +10, degradation: +5 } }, { text: "Только скрытый контроль. Буду отдавать ей тайные команды взглядом или шепотом, чтобы никто из гостей не понял.", nextId: "q8", scores: { mind_control: +6, risk: +3 } }, { text: "БДСМ — это интимный процесс. Никаких публичных игр, всё остается строго в моей звукоизолированной спальне.", nextId: "q8", scores: { strict: +4 } }, { text: "Публичное унижение — мой конек. Заставлю её встать на колени прямо в безлюдном парке или подъезде.", nextId: "q7_1", scores: { risk: +10, degradation: +10 } } ] },
+                q7_1: { text: "7.1 А если вас случайно кто-то заметит за этим занятием?", options: [ { text: "Это вершина возбуждения (Exhibitionism). Пусть смотрят, как я распоряжаюсь своей собственностью.", nextId: "q8", scores: { risk: +10, degradation: +8 } }, { text: "Я моментально всё прекращу. Я люблю ходить по грани, но проблемы с законом и скандалы мне не нужны.", nextId: "q8", scores: { control: +4 } }, { text: "Я сделаю вид, что всё нормально, а ей прикажу замереть и молчать. Это отличный стресс-тест для её психики.", nextId: "q8", scores: { mind_control: +8, risk: +6 } }, { text: "Буду агрессивно защищать нашу территорию, прогоню зевак матом. Она — моя добыча.", nextId: "q8", scores: { primal: +8, risk: +4 } } ] },
+                q8: { text: "8. Опасные практики (Edgeplay). Насколько близко к смертельной грани ты готов её подвести?", options: [ { text: "Я живу на грани. Жесткая асфиксия (удушье) до потери сознания, ножи (Knifeplay), бладплей. Это чистый адреналин.", nextId: "q9", scores: { edgeplay: +10, primal: +8, sadism: +6 } }, { text: "Игры с дыханием (Breath control) — да, но строго контролируемо, без потери сознания. Кровь и ножи — табу.", nextId: "q9", scores: { edgeplay: +5, control: +4 } }, { text: "Никаких опасных практик. Я несу за неё ответственность. Мой БДСМ — это строгие правила и безопасная порка.", nextId: "q9", scores: { daddy: +6, strict: +5 } }, { text: "Люблю игры с огнем и раскаленным металлом (Fireplay/Branding). Оставить клеймо на её теле — высшая эстетика.", nextId: "q9", scores: { edgeplay: +8, sadism: +8 } } ] },
+                q9: { text: "9. Эксклюзивность тела. Она принадлежит только тебе, или ты готов 'делиться' её телом?", options: [ { text: "Она только моя. Я убью любого, кто просто посмотрит на то, что принадлежит мне. Жуткий собственник.", nextId: "q10", scores: { control: +10, primal: +5 } }, { text: "Куколдизм (Cuckold). Меня безумно заводит режиссировать, как её жестко используют другие мужчины у меня на глазах.", nextId: "q9_1", scores: { cuckold: +10, risk: +6, mind_control: +4 } }, { text: "Я могу сдать её в 'аренду' или использовать как подстилку для своих друзей, чтобы тотально унизить её.", nextId: "q9_1", scores: { degradation: +10, cuckold: +6, objectification: +8 } }, { text: "Мы свингеры/в открытых отношениях, но БДСМ-сессии она проводит исключительно со мной.", nextId: "q10", scores: { } } ] },
+                q9_1: { text: "9.1 В процессе 'использования другими' какова твоя роль?", options: [ { text: "Я сижу в кресле с сигарой и просто наблюдаю, заставляя её смотреть мне в глаза, пока её имеют.", nextId: "q10", scores: { mind_control: +8, cuckold: +6 } }, { text: "Я Порочный Режиссер. Я активно отдаю команды и ей, и приглашенным мужчинам. Я контролирую весь процесс.", nextId: "q10", scores: { control: +8, risk: +5 } }, { text: "Я снимаю всё на камеру, чтобы потом заставить её пересматривать свое падение и деградацию.", nextId: "q10", scores: { degradation: +8, mind_control: +6 } }, { text: "Я присоединяюсь к процессу. Двойное проникновение, жесткое доминирование втроем.", nextId: "q10", scores: { primal: +6, sadism: +4 } } ] },
+                q10: { text: "10. Наказания без применения физической силы (БДСМ без боли). Твой метод?", options: [ { text: "Жесткая физическая нагрузка: стоять в планке или сидеть в 'стульчике', пока не подкосятся ноги и она не заплачет.", nextId: "q11", scores: { strict: +8, control: +4 } }, { text: "Сенсорная депривация. Закрою в темной комнате в наручниках и кляпе на несколько часов. Пусть посидит в тишине.", nextId: "q11", scores: { deprivation: +10, mind_control: +6 } }, { text: "Унизительные бытовые задания: заставлю вычистить туалет зубной щеткой голышом или вылизывать мои ботинки.", nextId: "q11", scores: { degradation: +10, strict: +5 } }, { text: "Игнорирование. Я просто перестану с ней разговаривать. Холодность ломает женщин быстрее любых плетей.", nextId: "q11", scores: { mind_control: +8, strict: +6 } } ] },
+                q11: { text: "11. Провокации (Bratting). Что ты делаешь, когда нижняя начинает дерзить, закатывать глаза и бунтовать?", options: [ { text: "Обожаю это! Это моя любимая игра (Brat Tamer). Я с наслаждением сломаю её сопротивление жесткой поркой.", nextId: "q12", scores: { brat_tamer: +10, sadism: +6 } }, { text: "Не потерплю ни секунды дерзости. Выпишу жесточайший штраф или наказание. Власть не обсуждается.", nextId: "q12", scores: { strict: +10, control: +8 } }, { text: "Психологически загоню в угол. Я не буду бить, я задавлю её интеллектом и тоном так, что она сама приползет извиняться.", nextId: "q12", scores: { mind_control: +8, strict: +4 } }, { text: "Поддержу игру. Начну щекотать, шлепать и превращу конфликт в бурный, страстный, животный секс.", nextId: "q12", scores: { primal: +8, brat_tamer: +4 } } ] },
+                q12: { text: "12. Твой идеальный 'материал'. Какую нижнюю ты ищешь в плане опыта?", options: [ { text: "Чистый лист. Неопытную, наивную девочку, чьи границы я смогу лепить и перепрошивать с нуля (Teacher).", nextId: "q13", scores: { teacher: +10, daddy: +4 } }, { text: "Опытную сабу, которая уже знает протокол, не задает тупых вопросов и готова к хардкору с первой минуты.", nextId: "q13", scores: { strict: +6, sadism: +4 } }, { text: "Сломанную куклу с травмами. Меня привлекает процесс 'починки' и полного переподчинения её психики себе.", nextId: "q13", scores: { mind_control: +10, teacher: +6 } }, { text: "Опыт не имеет значения. Мне важна только химическая реакция, животная страсть и её готовность отдаться.", nextId: "q13", scores: { primal: +8 } } ] },
+                q13: { text: "13. Финансы в BDSM. Кто оплачивает студии, игрушки и логистику?", options: [ { text: "Я мужчина и я Доминант. Я полностью беру на себя все расходы. Моя нижняя не должна ни в чем нуждаться.", nextId: "q14", scores: { daddy: +10, control: +4 } }, { text: "Мы делим расходы на аренду и отели пополам. Удовольствие получают оба, это справедливо.", nextId: "q14", scores: { } }, { text: "Финансовое подчинение (Findom). Она обязана оплачивать мне студии, дарить девайсы и переводить дань за сессии.", nextId: "q14", scores: { mind_control: +6, degradation: +4 } }, { text: "Если она хочет, чтобы я её красиво порол, пусть сама арендует VIP-студию. Мое время и навыки стоят дороже.", nextId: "q14", scores: { strict: +4 } } ] },
+                q14: { text: "14. Безопасность и стоп-слова. Если в разгар жесткой сессии она в панике кричит «Стоп!»?", options: [ { text: "Мгновенно останавливаюсь, отбрасываю плеть, снимаю фиксацию и переключаюсь на мягкую заботу и успокоение.", nextId: "q15", scores: { daddy: +8, teacher: +4 } }, { text: "Снижу темп до минимума и строгим тоном спрошу, что не так. Иногда сабы пугаются своих же фантазий.", nextId: "q15", scores: { strict: +6, teacher: +5 } }, { text: "Практикую CNC (игнорирование стоп-слова). Я заранее предупреждаю: если мы начали, я закончу только тогда, когда решу сам.", nextId: "q15", scores: { edgeplay: +8, mind_control: +8, sadism: +6 } }, { text: "Остановлю сессию, но буду зол. Если она прервала процесс без веской причины, она будет наказана за слабость.", nextId: "q15", scores: { strict: +8, sadism: +4 } } ] },
+                q15: { text: "15. Твои 'Красные флаги'. Что заставит тебя навсегда выгнать нижнюю?", options: [ { text: "Ложь и скрытность. Моя власть строится на 100% доверии. Соврала один раз — прощай навсегда.", nextId: "end", scores: { control: +8, strict: +8 } }, { text: "Попытка манипулировать мной (bottoming from the bottom). Если она начнет указывать, как мне доминировать.", nextId: "end", scores: { strict: +10, primal: +4 } }, { text: "Эмоциональное 'бревно'. Если она не кричит, не извивается и не дает мне энергетической отдачи от боли.", nextId: "end", scores: { sadism: +8, primal: +6 } }, { text: "Отказ выполнять грязные или унизительные приказы. Я не потерплю брезгливости в служении.", nextId: "end", scores: { degradation: +8, mind_control: +5 } } ] }
             }
         };
 
@@ -885,7 +410,6 @@
         let currentScores = {};
         let radarChartInstance = null;
         let finalTitle = ""; 
-        let pregeneratedBlobUrl = null;
 
         function showScreen(screenId) {
             ['screen-welcome', 'screen-quiz', 'screen-result'].forEach(id => {
@@ -894,6 +418,7 @@
             });
             const screen = document.getElementById(screenId);
             screen.classList.remove('hidden');
+            window.scrollTo(0, 0); // Прокрутка вверх при смене экранов
             void screen.offsetWidth;
             screen.classList.add('fade-in');
         }
@@ -999,9 +524,6 @@
             
             showScreen('screen-result');
             drawRadarChart();
-            
-            // Запускаем скрытую генерацию картинки через полсекунды после отрисовки графика
-            setTimeout(pregenerateImage, 500);
         }
 
         function drawRadarChart() {
@@ -1049,47 +571,34 @@
             });
         }
 
-        // --- ГЕНЕРАЦИЯ И ВЫВОД КАРТИНКИ НА ЭКРАН (НАДЕЖНЫЙ МЕТОД) ---
-        async function downloadResult() {
-            const btn = document.getElementById('btn-download');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = 'Генерация... ⏳';
-            btn.disabled = true;
-            
-            const captureArea = document.getElementById('capture-area');
+        // --- ЛОГИКА РЕЖИМА СКРИНШОТА ---
+        function enterScreenshotMode() {
             if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            
+            // Прячем кнопки
+            document.getElementById('result-buttons').classList.add('hidden');
+            // Прячем кнопку доната
+            document.getElementById('donate-btn').classList.add('hidden');
+            // Показываем подсказку сверху
+            document.getElementById('screenshot-hint').classList.remove('hidden');
+            
+            // Прокручиваем наверх, чтобы карточка была видна полностью
+            window.scrollTo(0, 0);
 
-            try {
-                // Создаем скриншот блока
-                const canvas = await html2canvas(captureArea, {
-                    backgroundColor: '#111111', 
-                    scale: 2, // Высокое качество
-                    logging: false,
-                    useCORS: true
-                });
-
-                // Превращаем в картинку JPG
-                const imgData = canvas.toDataURL('image/jpeg', 0.9);
-                
-                // Вставляем картинку в наш скрытый оверлей
-                document.getElementById('final-rendered-image').src = imgData;
-                
-                // Показываем оверлей пользователю
-                document.getElementById('image-overlay').classList.remove('hidden');
-
-                if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            } catch (err) {
-                console.error("Ошибка генерации:", err);
-                alert("Не удалось создать карточку. Сделайте обычный скриншот экрана!");
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
+            // Ждем 100мс, чтобы не зарегистрировать текущий клик, и вешаем слушатель на возврат
+            setTimeout(() => {
+                document.addEventListener('click', exitScreenshotMode, { once: true });
+            }, 100);
         }
 
-        // Функция закрытия оверлея
-        function closeImageOverlay() {
-            document.getElementById('image-overlay').classList.add('hidden');
+        function exitScreenshotMode() {
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            
+            // Возвращаем кнопки
+            document.getElementById('result-buttons').classList.remove('hidden');
+            document.getElementById('donate-btn').classList.remove('hidden');
+            // Прячем подсказку
+            document.getElementById('screenshot-hint').classList.add('hidden');
         }
 
         const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxdJtjTKeIJnlGbs_BF7m19j04iUyoa01cEJkrVlmLVnoF1aNs6s36dHh2EZ4Sz59FYeQ/exec';
@@ -1137,7 +646,6 @@
                 spawnParticles(event, '#ffffff');
             }
             stopLiquidParticles();
-            
             currentRole = null; userAnswers = []; currentScores = {};
             document.body.className = 'min-h-screen flex flex-col items-center justify-start p-4 transition-colors duration-700';
             showScreen('screen-welcome');
