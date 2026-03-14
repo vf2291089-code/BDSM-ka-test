@@ -97,8 +97,9 @@
 
     <div class="ambient-glow"></div>
 
+    <!-- Кнопка Бусти (Скрывается во время квеста) -->
     <button id="donate-btn" onclick="openExternalLink('https://boosty.to/bdsmka')" class="fixed top-4 right-4 z-50 bg-panel border border-accent/50 text-xs px-3 py-1.5 rounded shadow-glow text-accent font-bold hover:text-white transition-all duration-300 hover:shadow-glow-lg flex items-center gap-1">
-        <span class="text-sm">🔥</span> Донат
+        <span class="text-sm">🔥</span> Бусти
     </button>
 
     <div id="app-container" class="w-full max-w-md mt-16 pb-20 relative z-10">
@@ -162,56 +163,52 @@
 
         <!-- ЭКРАН 3: РЕЗУЛЬТАТ -->
         <div id="screen-result" class="hidden flex flex-col items-center text-center fade-in w-full relative">
-            
-            <!-- Подсказка для скриншота (Скрыта по умолчанию) -->
-            <div id="screenshot-hint" class="hidden fixed top-8 left-0 w-full flex justify-center z-50 animate-pulse pointer-events-none">
-                <div class="bg-black/90 border border-accent/80 text-white px-5 py-3 rounded-full text-sm font-bold shadow-glow-lg backdrop-blur-sm">
-                    📸 Сделайте скриншот. Коснитесь экрана для возврата.
-                </div>
-            </div>
 
-            <!-- Блок Карточки (остается на экране всегда) -->
-            <div id="capture-area" class="w-full bg-panel p-6 pb-24 rounded-2xl border border-accent/40 shadow-glow relative overflow-hidden text-left mb-6 transition-all duration-300">
+            <!-- Блок Карточки (Компактный дизайн) -->
+            <div id="capture-area" class="w-full bg-panel p-5 pb-20 rounded-2xl border border-accent/40 shadow-glow relative overflow-hidden text-left mb-4">
                 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent to-transparent opacity-50"></div>
                 
-                <div class="absolute bottom-5 left-0 w-full px-6 flex justify-between items-end z-10 opacity-95">
+                <!-- Логотипы (чуть уменьшены для экономии места) -->
+                <div class="absolute bottom-5 left-0 w-full px-5 flex justify-between items-end z-10 opacity-90">
                     <div class="flex flex-col items-start gap-1">
-                        <span class="text-[11px] text-gray-400 font-mono tracking-widest drop-shadow-md pl-1">@bdsmkaaa</span>
-                        <img src="logo.png" alt="VK" class="w-28 h-auto object-contain" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 40\'><text x=\'50\' y=\'25\' font-family=\'sans-serif\' font-size=\'16\' fill=\'%23555\' text-anchor=\'middle\'>VK</text></svg>'">
+                        <span class="text-[9px] text-gray-400 font-mono tracking-widest drop-shadow-md pl-1">@bdsmkaaa</span>
+                        <img src="logo.png" alt="VK" class="w-24 h-auto object-contain" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 40\'><text x=\'50\' y=\'25\' font-family=\'sans-serif\' font-size=\'16\' fill=\'%23555\' text-anchor=\'middle\'>VK</text></svg>'">
                     </div>
                     <div class="flex flex-col items-end">
-                        <img src="qr_tg.png" alt="QR" class="w-20 h-20 rounded-lg bg-white p-1 border-2 border-accent/50 shadow-glow object-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%23fff\'/><text x=\'50\' y=\'55\' font-family=\'sans-serif\' font-size=\'30\' fill=\'%23333\' text-anchor=\'middle\'>QR</text></svg>'">
+                        <img src="qr_tg.png" alt="QR" class="w-16 h-16 rounded-lg bg-white p-1 border-2 border-accent/50 shadow-glow object-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%23fff\'/><text x=\'50\' y=\'55\' font-family=\'sans-serif\' font-size=\'30\' fill=\'%23333\' text-anchor=\'middle\'>QR</text></svg>'">
                     </div>
                 </div>
 
-                <div class="text-center mb-4">
-                    <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Инициация пройдена</p>
-                    <h1 id="result-title" class="text-2xl font-bold text-accent drop-shadow-glow leading-tight">Звание</h1>
+                <!-- Ненавязчивая надпись снизу -->
+                <div class="absolute bottom-1.5 left-0 w-full text-center text-[9px] text-gray-500 opacity-70 uppercase tracking-widest z-10 font-bold">
+                    Размести у себя на страничке
                 </div>
 
-                <div id="dominant-trait-container" class="text-center w-full mb-4">
-                    <div class="inline-block bg-accent/10 border border-accent/60 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-glow">
+                <div class="text-center mb-3">
+                    <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-1">Инициация пройдена</p>
+                    <h1 id="result-title" class="text-xl font-bold text-accent drop-shadow-glow leading-tight">Звание</h1>
+                </div>
+
+                <div id="dominant-trait-container" class="text-center w-full mb-3">
+                    <div class="inline-block bg-accent/10 border border-accent/60 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest shadow-glow">
                         <span class="text-gray-400 font-normal mr-1">Основа:</span> <span id="dominant-trait-text" class="text-accent">Черта</span>
                     </div>
                 </div>
                 
-                <p id="result-desc" class="text-[13px] text-gray-300 leading-relaxed italic border-l-2 border-accent/50 pl-3 mb-6 relative z-10">
+                <p id="result-desc" class="text-xs text-gray-300 leading-relaxed italic border-l-2 border-accent/50 pl-3 mb-4 relative z-10">
                     Описание
                 </p>
 
-                <div class="relative w-full aspect-square mb-2 z-0">
+                <!-- График (Ограничен по высоте, чтобы точно влезал) -->
+                <div class="relative w-full max-h-[45vh] aspect-square mb-1 z-0 mx-auto">
                     <canvas id="radarChart"></canvas>
                 </div>
             </div>
 
-            <!-- Кнопки действий -->
+            <!-- Единственная кнопка завершения -->
             <div id="result-buttons" class="w-full flex flex-col gap-3">
-                <button onclick="enterScreenshotMode()" class="w-full bg-dark border border-accent text-white font-bold py-3 rounded-xl transition-all shadow-glow hover:shadow-glow-lg hover:bg-accent/10 flex items-center justify-center gap-2">
-                    <span>📸</span> Подготовить для скриншота
-                </button>
-                
-                <button id="finish-btn" onclick="finishQuiz()" class="w-full bg-accent/20 border border-accent hover:bg-accent hover:text-white text-accent font-bold py-4 rounded-xl transition-all">
-                    Отправить данные и Выйти
+                <button id="finish-btn" onclick="finishQuiz()" class="w-full bg-dark border border-accent hover:bg-accent hover:text-white text-accent font-bold py-4 rounded-xl transition-all shadow-glow hover:shadow-glow-lg">
+                    Завершить тест
                 </button>
             </div>
         </div>
@@ -418,9 +415,17 @@
             });
             const screen = document.getElementById(screenId);
             screen.classList.remove('hidden');
-            window.scrollTo(0, 0); // Прокрутка вверх при смене экранов
+            window.scrollTo(0, 0); 
             void screen.offsetWidth;
             screen.classList.add('fade-in');
+
+            // Управляем видимостью кнопки Бусти
+            const boostyBtn = document.getElementById('donate-btn');
+            if (screenId === 'screen-welcome') {
+                boostyBtn.classList.remove('hidden');
+            } else {
+                boostyBtn.classList.add('hidden');
+            }
         }
 
         function startQuiz(role, event) {
@@ -569,36 +574,6 @@
                     maintainAspectRatio: false
                 }
             });
-        }
-
-        // --- ЛОГИКА РЕЖИМА СКРИНШОТА ---
-        function enterScreenshotMode() {
-            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            
-            // Прячем кнопки
-            document.getElementById('result-buttons').classList.add('hidden');
-            // Прячем кнопку доната
-            document.getElementById('donate-btn').classList.add('hidden');
-            // Показываем подсказку сверху
-            document.getElementById('screenshot-hint').classList.remove('hidden');
-            
-            // Прокручиваем наверх, чтобы карточка была видна полностью
-            window.scrollTo(0, 0);
-
-            // Ждем 100мс, чтобы не зарегистрировать текущий клик, и вешаем слушатель на возврат
-            setTimeout(() => {
-                document.addEventListener('click', exitScreenshotMode, { once: true });
-            }, 100);
-        }
-
-        function exitScreenshotMode() {
-            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            
-            // Возвращаем кнопки
-            document.getElementById('result-buttons').classList.remove('hidden');
-            document.getElementById('donate-btn').classList.remove('hidden');
-            // Прячем подсказку
-            document.getElementById('screenshot-hint').classList.add('hidden');
         }
 
         const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxdJtjTKeIJnlGbs_BF7m19j04iUyoa01cEJkrVlmLVnoF1aNs6s36dHh2EZ4Sz59FYeQ/exec';
