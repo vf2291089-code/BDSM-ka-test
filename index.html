@@ -202,7 +202,7 @@
 
             <div class="w-full flex flex-col gap-3">
                 <button id="btn-download" onclick="downloadResult()" class="w-full bg-dark border border-accent text-white font-bold py-3 rounded-xl transition-all shadow-glow hover:shadow-glow-lg hover:bg-accent/10 flex items-center justify-center gap-2">
-                    <span>📸</span> Генерация...
+                    <span>📸</span> Скачать Карточку
                 </button>
                 
                 <button id="finish-btn" onclick="finishQuiz()" class="w-full bg-accent/20 border border-accent hover:bg-accent hover:text-white text-accent font-bold py-4 rounded-xl transition-all">
@@ -211,6 +211,22 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- НОВЫЙ БЛОК: ОВЕРЛЕЙ ДЛЯ СОХРАНЕНИЯ КАРТИНКИ -->
+    <div id="image-overlay" class="hidden fixed inset-0 z-[200] bg-black/95 flex flex-col items-center justify-center p-4 fade-in">
+        <div class="w-full max-w-sm flex flex-col items-center">
+            <div class="bg-accent/20 border border-accent text-accent px-4 py-2 rounded-lg mb-4 text-center animate-pulse">
+                <p class="font-bold text-sm">👇 Зажми картинку пальцем,</p>
+                <p class="text-xs">чтобы «Сохранить» или «Переслать»</p>
+            </div>
+            
+            <img id="final-rendered-image" class="w-full rounded-2xl shadow-glow-lg border-2 border-accent mb-6" />
+            
+            <button onclick="closeImageOverlay()" class="w-full bg-dark border border-gray-700 text-white font-bold py-4 rounded-xl transition-all hover:bg-gray-800">
+                ✕ Закрыть и вернуться
+            </button>
+        </div>
     </div>
 
     <script>
@@ -1015,7 +1031,6 @@
                     }]
                 },
                 options: {
-                    animation: false, // Отключаем анимацию для моментального рендера в картинку
                     scales: {
                         r: {
                             beginAtZero: true, 
@@ -1034,47 +1049,47 @@
             });
         }
 
-        // --- ТЕНЕВАЯ ГЕНЕРАЦИЯ КАРТИНКИ ---
-        async function pregenerateImage() {
+        // --- ГЕНЕРАЦИЯ И ВЫВОД КАРТИНКИ НА ЭКРАН (НАДЕЖНЫЙ МЕТОД) ---
+        async function downloadResult() {
             const btn = document.getElementById('btn-download');
+            const originalText = btn.innerHTML;
             btn.innerHTML = 'Генерация... ⏳';
             btn.disabled = true;
+            
             const captureArea = document.getElementById('capture-area');
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 
             try {
+                // Создаем скриншот блока
                 const canvas = await html2canvas(captureArea, {
-                    backgroundColor: '#111111',
-                    scale: 2,
+                    backgroundColor: '#111111', 
+                    scale: 2, // Высокое качество
                     logging: false,
                     useCORS: true
                 });
 
-                canvas.toBlob((blob) => {
-                    pregeneratedBlobUrl = URL.createObjectURL(blob);
-                    btn.innerHTML = '<span>📸</span> Скачать Карточку';
-                    btn.disabled = false;
-                }, 'image/jpeg', 0.9);
+                // Превращаем в картинку JPG
+                const imgData = canvas.toDataURL('image/jpeg', 0.9);
+                
+                // Вставляем картинку в наш скрытый оверлей
+                document.getElementById('final-rendered-image').src = imgData;
+                
+                // Показываем оверлей пользователю
+                document.getElementById('image-overlay').classList.remove('hidden');
 
+                if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
             } catch (err) {
                 console.error("Ошибка генерации:", err);
-                btn.innerHTML = 'Ошибка. Делайте скриншот';
+                alert("Не удалось создать карточку. Сделайте обычный скриншот экрана!");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         }
 
-        // --- СИНХРОННОЕ СКАЧИВАНИЕ (Обходит блокировки) ---
-        function downloadResult() {
-            if (!pregeneratedBlobUrl) return;
-            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-
-            const link = document.createElement('a');
-            link.style.display = 'none';
-            link.href = pregeneratedBlobUrl;
-            link.download = `Квест_Инициация_${Date.now()}.jpg`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        // Функция закрытия оверлея
+        function closeImageOverlay() {
+            document.getElementById('image-overlay').classList.add('hidden');
         }
 
         const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxdJtjTKeIJnlGbs_BF7m19j04iUyoa01cEJkrVlmLVnoF1aNs6s36dHh2EZ4Sz59FYeQ/exec';
@@ -1122,12 +1137,6 @@
                 spawnParticles(event, '#ffffff');
             }
             stopLiquidParticles();
-            
-            // Очищаем память от сгенерированной картинки
-            if (pregeneratedBlobUrl) {
-                URL.revokeObjectURL(pregeneratedBlobUrl);
-                pregeneratedBlobUrl = null;
-            }
             
             currentRole = null; userAnswers = []; currentScores = {};
             document.body.className = 'min-h-screen flex flex-col items-center justify-start p-4 transition-colors duration-700';
