@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>БДСМ-ка | Квест</title>
     
-    <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -30,9 +27,15 @@
             }
         }
     </script>
-    
-    <!-- Chart.js для Радара -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Chosen Palette: Dark UI with Role-Specific Neon Accents (Deep Cyan for Submissive, Amber-Orange for Dominant) against #050505 background -->
+    <!-- Application Structure Plan: The SPA is structured as a gamified, linear assessment tool (quiz) leading to a highly personalized, shareable dashboard. The flow consists of three main views controlled via JS state: 1. Landing View (Role Selection - Sub/Dom). 2. Interactive Questionnaire View (dynamic progress bar, sequentially loaded questions masking the complex 26-axis scoring matrix). 3. Compact Results Dashboard View (displays synthesized psychological profile, dominant trait badge, radar chart, and a singular action to finish). This linear structure is optimal because it forces user investment and sequential data gathering before revealing the complex analytical result, transforming a dry questionnaire into an engaging narrative journey. -->
+    <!-- Visualization & Content Choices: 
+         - Goal: Psychological Profiling -> Viz: Radar Chart -> Interaction: View results on final screen -> Justification: A radar chart perfectly visualizes a multi-dimensional psychological profile (masochism, control, etc.) allowing the user to instantly see their dominant traits at a glance. -> Library/Method: Chart.js (Canvas). NO SVG.
+         - Goal: Gamified Progression -> Viz: Liquid animated progress bar -> Interaction: Updates automatically upon answering -> Justification: Keeps the user engaged during a long (20+ questions) assessment by providing visual feedback of advancement. -> Library/Method: Pure HTML/CSS with JS width updates. NO SVG.
+         - Goal: Shareability -> Viz: Compact Card Layout -> Interaction: Native OS Screenshot -> Justification: Due to aggressive in-app browser restrictions on downloading files, a compact, single-screen layout encourages native screenshots, maximizing virality without relying on blocked download APIs. -> Library/Method: Tailwind CSS layout. NO SVG. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
     <style>
         :root { --color-accent: 139, 0, 0; }
@@ -68,28 +71,55 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(var(--color-accent), 0.8); border-radius: 4px; }
 
-        /* Анимации жидкости для шкалы прогресса */
         @keyframes slosh {
             0% { background-position: 100% 0; }
             100% { background-position: -100% 0; }
         }
+        
         .liquid-bar {
             height: 12px;
             border-radius: 6px;
             transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
         }
+        
         body.theme-submissive .liquid-bar {
             background: linear-gradient(90deg, #004466, #00bfff, #ffffff, #00bfff, #004466);
             background-size: 200% 100%;
             animation: slosh 2s infinite linear;
             box-shadow: 0 0 10px rgba(0,191,255,0.6);
         }
+        
         body.theme-dominant .liquid-bar {
             background: linear-gradient(90deg, #660000, #ff4500, #ffaa00, #ff4500, #660000);
             background-size: 200% 100%;
             animation: slosh 1s infinite linear;
             box-shadow: 0 0 10px rgba(255,69,0,0.6);
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 380px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh;
+            max-height: 320px;
+        }
+        
+        @media (min-width: 768px) {
+            .chart-container { height: 350px; max-height: 400px; }
+        }
+        
+        .fallback-img {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #222;
+            color: #888;
+            font-weight: bold;
+            border-radius: 8px;
+            text-align: center;
         }
     </style>
 </head>
@@ -97,18 +127,16 @@
 
     <div class="ambient-glow"></div>
 
-    <!-- Кнопка Бусти (Скрывается во время квеста) -->
     <button id="donate-btn" onclick="openExternalLink('https://boosty.to/bdsmka')" class="fixed top-4 right-4 z-50 bg-panel border border-accent/50 text-xs px-3 py-1.5 rounded shadow-glow text-accent font-bold hover:text-white transition-all duration-300 hover:shadow-glow-lg flex items-center gap-1">
         <span class="text-sm">🔥</span> Бусти
     </button>
 
     <div id="app-container" class="w-full max-w-md mt-16 pb-20 relative z-10">
 
-        <!-- ЭКРАН 1: ПРИВЕТСТВИЕ -->
         <div id="screen-welcome" class="fade-in hidden flex flex-col items-center text-center">
             
             <button onclick="openExternalLink('https://vk.com/bdsmkaaa')" class="self-start ml-2 mb-6 transition-transform hover:scale-105 active:scale-95">
-                <img src="logo.png" alt="BDSM-ka" class="w-36 h-auto object-contain" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 150 50\'><text x=\'75\' y=\'32\' font-family=\'sans-serif\' font-size=\'20\' fill=\'%23555\' text-anchor=\'middle\'>VK LOGO</text></svg>'">
+                <img src="logo.png" alt="BDSM-ka" class="w-36 h-auto object-contain" onerror="this.outerHTML='<div class=\'fallback-img w-36 h-12 text-sm\'>BDSM-ka</div>'">
             </button>
 
             <h1 class="text-4xl font-bold text-white mb-2 tracking-widest uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">Инициация</h1>
@@ -143,7 +171,6 @@
             </div>
         </div>
 
-        <!-- ЭКРАН 2: КВЕСТ -->
         <div id="screen-quiz" class="hidden flex flex-col">
             <div class="mb-4 flex justify-between items-center text-xs text-gray-400 uppercase tracking-widest px-2">
                 <span id="role-indicator" class="text-accent font-bold drop-shadow-[0_0_5px_rgba(var(--color-accent),0.5)]">Роль</span>
@@ -161,27 +188,19 @@
             </div>
         </div>
 
-        <!-- ЭКРАН 3: РЕЗУЛЬТАТ -->
         <div id="screen-result" class="hidden flex flex-col items-center text-center fade-in w-full relative">
 
-            <!-- Блок Карточки (Компактный дизайн) -->
-            <div id="capture-area" class="w-full bg-panel p-5 pb-20 rounded-2xl border border-accent/40 shadow-glow relative overflow-hidden text-left mb-4">
+            <div id="capture-area" class="w-full bg-panel p-4 rounded-2xl border border-accent/40 shadow-glow relative overflow-hidden text-left mb-6">
                 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent to-transparent opacity-50"></div>
                 
-                <!-- Логотипы (чуть уменьшены для экономии места) -->
-                <div class="absolute bottom-5 left-0 w-full px-5 flex justify-between items-end z-10 opacity-90">
+                <div class="flex justify-between items-start mb-4 z-10 relative">
                     <div class="flex flex-col items-start gap-1">
                         <span class="text-[9px] text-gray-400 font-mono tracking-widest drop-shadow-md pl-1">@bdsmkaaa</span>
-                        <img src="logo.png" alt="VK" class="w-24 h-auto object-contain" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 40\'><text x=\'50\' y=\'25\' font-family=\'sans-serif\' font-size=\'16\' fill=\'%23555\' text-anchor=\'middle\'>VK</text></svg>'">
+                        <img src="logo.png" alt="VK" class="w-24 h-auto object-contain" onerror="this.outerHTML='<div class=\'fallback-img w-24 h-8 text-[10px]\'>VK</div>'">
                     </div>
                     <div class="flex flex-col items-end">
-                        <img src="qr_tg.png" alt="QR" class="w-16 h-16 rounded-lg bg-white p-1 border-2 border-accent/50 shadow-glow object-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%23fff\'/><text x=\'50\' y=\'55\' font-family=\'sans-serif\' font-size=\'30\' fill=\'%23333\' text-anchor=\'middle\'>QR</text></svg>'">
+                        <img src="qr_tg.png" alt="QR" class="w-14 h-14 rounded-lg bg-white p-1 border-2 border-accent/50 shadow-glow object-cover" onerror="this.outerHTML='<div class=\'fallback-img w-14 h-14 text-[10px]\'>QR</div>'">
                     </div>
-                </div>
-
-                <!-- Ненавязчивая надпись снизу -->
-                <div class="absolute bottom-1.5 left-0 w-full text-center text-[9px] text-gray-500 opacity-70 uppercase tracking-widest z-10 font-bold">
-                    Размести у себя на страничке
                 </div>
 
                 <div class="text-center mb-3">
@@ -199,15 +218,17 @@
                     Описание
                 </p>
 
-                <!-- График (Ограничен по высоте, чтобы точно влезал) -->
-                <div class="relative w-full max-h-[45vh] aspect-square mb-1 z-0 mx-auto">
+                <div class="chart-container z-0 mx-auto">
                     <canvas id="radarChart"></canvas>
+                </div>
+                
+                <div class="text-center text-[10px] text-gray-500 opacity-60 uppercase tracking-widest mt-4 mb-1 font-bold">
+                    РАЗМЕСТИ У СЕБЯ НА СТРАНИЧКЕ
                 </div>
             </div>
 
-            <!-- Единственная кнопка завершения -->
-            <div id="result-buttons" class="w-full flex flex-col gap-3">
-                <button id="finish-btn" onclick="finishQuiz()" class="w-full bg-dark border border-accent hover:bg-accent hover:text-white text-accent font-bold py-4 rounded-xl transition-all shadow-glow hover:shadow-glow-lg">
+            <div id="result-buttons" class="w-full flex flex-col gap-3 mt-2">
+                <button id="finish-btn" onclick="finishQuiz()" class="w-full bg-dark border border-accent hover:bg-accent/20 text-white font-bold py-4 rounded-xl transition-all shadow-glow hover:shadow-glow-lg">
                     Завершить тест
                 </button>
             </div>
@@ -228,7 +249,6 @@
             }
         }
 
-        // --- Эффекты частиц ---
         function spawnParticles(e, forceColorStr = null) {
             const x = e ? e.clientX : window.innerWidth / 2;
             const y = e ? e.clientY : window.innerHeight / 2;
@@ -284,7 +304,6 @@
             if(liquidInterval) clearInterval(liquidInterval);
         }
 
-        // --- БАЗА ЗВАНИЙ ---
         const titlesData = {
             submissive: [
                 { id: "s1", title: "«Безупречный Слуга»", traits: ['service', 'submission', 'strict'], desc: "Мечта для Госпожи, ценящей идеальный порядок. Твоя стихия — круглосуточное, беспрекословное служение и микро-контроль. Готов взять на себя грязную работу, соблюдать дресс-код и просить разрешения даже на глоток воды. Абсолютно надежен и дисциплинирован." },
@@ -317,26 +336,23 @@
             ]
         };
 
-        // --- ЛЕЙБЛЫ КИНКОВ ---
         const traitLabels = {
             submission: 'Покорность', service: 'Служение', findom: 'Финдом', 
             chastity: 'Воздержание', masochism: 'Мазохизм', oral: 'Орал/Фейсситтинг', 
-            brat: 'Строптивость', objectification: 'Объективизация', pegging: 'Инверсия (Пеггинг)', 
+            brat: 'Строптивость', objectification: 'Объективизация', pegging: 'Инверсия', 
             risk: 'Азарт / Риск', mind_control: 'Игры разума', cuckold: 'Куколдизм', 
             praise: 'Жажда похвалы', newbie: 'Неопытность', deprivation: 'Депривация', 
-            online: 'Онлайн-формат', degradation: 'Сломленность', control: 'Тотальный контроль', 
+            online: 'Онлайн', degradation: 'Сломленность', control: 'Контроль', 
             daddy: 'Опека', sadism: 'Садизм', brat_tamer: 'Укрощение', 
-            bondage: 'Бондаж', teacher: 'Наставник', primal: 'Животная агрессия', 
-            strict: 'Строгость', edgeplay: 'Опасные практики'
+            bondage: 'Бондаж', teacher: 'Наставник', primal: 'Инстинкты', 
+            strict: 'Строгость', edgeplay: 'Экстрим'
         };
 
-        // --- ФИКСИРОВАННЫЕ ОСИ ДЛЯ РАДАРА ---
         const radarAxes = {
             submissive: ['submission', 'service', 'masochism', 'degradation', 'bondage', 'risk'],
             dominant: ['control', 'strict', 'sadism', 'mind_control', 'bondage', 'edgeplay']
         };
 
-        // --- ОГРОМНАЯ БАЗА ВОПРОСОВ ---
         const questData = {
             submissive: {
                 q1: { text: "1. Давай узнаем самое главное. Какого уровня погружения ты ищешь? БДСМ для тебя — это образ жизни 24/7 или лишь яркая приправа к сексу?", options: [ { text: "В теме 24/7. Я дышу служением. Мое подчинение Ей не заканчивается за дверями спальни, оно длится всегда.", nextId: "q1_1", scores: { submission: +10, service: +8, control: +5 } }, { text: "Четкий график. Мне нравится служить Ей по выходным или в заранее оговоренное время. В остальном мы на равных.", nextId: "q1_2", scores: { submission: +4, service: +3 } }, { text: "Только секс. Меня заводит тематика, жесткость и фетиши, но в повседневной жизни мне не нужен контроль.", nextId: "q2", scores: { masochism: +5, risk: +3 } }, { text: "Онлайн формат. Я ищу виртуальную Госпожу, чтобы служить Ей дистанционно, не нарушая свою обычную жизнь.", nextId: "q1_3", scores: { online: +10, submission: +4 } } ] },
@@ -419,7 +435,6 @@
             void screen.offsetWidth;
             screen.classList.add('fade-in');
 
-            // Управляем видимостью кнопки Бусти
             const boostyBtn = document.getElementById('donate-btn');
             if (screenId === 'screen-welcome') {
                 boostyBtn.classList.remove('hidden');
@@ -576,7 +591,7 @@
             });
         }
 
-        const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxrRsrVjIeSZltrOu5PS9X5CKjXpVK5KbxUPKecztEBYfCUo24tM6xP3BNzNfACxmCc-A/exec;
+        const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxdJtjTKeIJnlGbs_BF7m19j04iUyoa01cEJkrVlmLVnoF1aNs6s36dHh2EZ4Sz59FYeQ/exec';
 
         async function finishQuiz() {
             const btn = document.getElementById('finish-btn');
