@@ -127,7 +127,7 @@
     <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
         <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-y-2">
             <div class="flex items-center gap-3">
-                <img src="logo.png" alt="Logo" class="h-8 w-auto rounded" onerror="this.outerHTML='<span class=&quot;text-2xl&quot;>🔥</span>'">
+                <img src="logo.png" alt="Logo" class="h-8 w-auto rounded" onerror="this.style.display='none'">
                 <span class="font-bold text-lg tracking-widest uppercase text-stone-800">BDSM-ka Анкеты</span>
             </div>
             <div class="flex gap-4 sm:gap-8 text-sm font-medium overflow-x-auto hide-scroll" id="main-nav-links">
@@ -610,17 +610,18 @@
             mockProfiles = mockProfiles.filter(p => p.id !== CURRENT_USER_ID);
             mockProfiles.unshift(newProfile);
 
+            // Create Tags for the webhook
             const isDomWebhook = newProfile.role === 'dominant';
             const genderTag = newProfile.gender === 'М' ? 'М' : 'Ж';
             const generatedTags = `#${isDomWebhook ? 'Верхний' : 'Нижний'} #${newProfile.city.replace(/\s+/g, '')} #${genderTag}${newProfile.age}`;
 
-            // 3. Отправляем в Google Script
-            // Замени на свою ссылку /exec !!!
-            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxbGDgJg9y76MVPOfERwEJO6iQxbqreSyJNgtauIJBMbEiSk0LodREOXBN_lEqW5t9gAA/exec'; 
-            
+            // Send to Google Script using POST with plain text body (safest for CORS)
+            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxdJtjTKeIJnlGbs_BF7m19j04iUyoa01cEJkrVlmLVnoF1aNs6s36dHh2EZ4Sz59FYeQ/exec'; 
             try {
                 await fetch(WEBHOOK_URL, {
                     method: 'POST',
+                    mode: 'no-cors', // <-- ВОТ ЭТА СТРОЧКА СНИМАЕТ БЛОКИРОВКУ БРАУЗЕРА
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // <-- И ЭТА ТОЖЕ
                     body: JSON.stringify({
                         tgId: newProfile.id,
                         tgUsername: newProfile.username,
@@ -684,7 +685,8 @@
             const footerBrandingHTML = `
                 <div class="mt-4 pt-4 border-t border-black/10 flex justify-between items-center opacity-80">
                     <div class="flex items-center gap-2">
-                        <img src="logo.png" alt="BDSM-ka" class="h-6 w-auto" onerror="this.outerHTML='<span class=&quot;text-xs font-bold opacity-60 uppercase tracking-widest&quot;>BDSM-ka Анкеты</span>'">
+                        <img src="logo.png" alt="BDSM-ka" class="h-6 w-auto" onerror="this.style.display='none'">
+                        <span class="text-xs font-bold opacity-60 uppercase tracking-widest">BDSM-ka Анкеты</span>
                     </div>
                     <img src="qr_tg.png" alt="QR" class="w-10 h-10 rounded bg-white p-0.5 shadow-sm border border-black/10" onerror="this.style.display='none'">
                 </div>
