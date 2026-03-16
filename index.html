@@ -8,15 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-    <!-- Chosen Palette: Warm Sand & Stone (Light Theme) with vivid Emerald/Rose for Tag Toggles -->
-    <!-- Application Structure Plan: The SPA is a Dating Hub focused on profile creation and discovery.
-         1. 'Лента Анкет' (Feed): Dashboard for exploring fully expanded profiles (charts visible by default) with visual tags for preferences/limits and permanent branding (Logo/QR).
-         2. 'Создать Анкету' (Profile Setup): Users set up their profile. Features a dynamic Premium Gate: selecting a non-base tier reveals a Boosty promo code requirement. Preference selection uses a clear, highly visible toggle system. -->
-    <!-- Visualization & Content Choices: 
-         - Goal: Preference Selection -> Viz: Toggleable Pill Buttons -> Interaction: Click to add to Likes (Green) or Limits (Red). Opposite state grays out -> Justification: Highly tactile and visually unambiguous UX compared to standard checkboxes. NO SVG.
-         - Goal: Profile Presentation -> Viz: Fully Expanded Card with Inline Radar Chart -> Interaction: Scroll -> Justification: Reduces friction (no clicks needed to see the chart), creating a complete "poster" for each user that is easy to screenshot natively. NO SVG. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    
+    <!-- Добавлена библиотека для генерации картинки из HTML -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -104,7 +98,6 @@
         .card-tier-leather .text-muted { color: #fdba74; }
         .card-tier-leather .border-muted { border-color: #78350f; }
         
-        /* Avatars */
         .avatar-sub { background: linear-gradient(135deg, #e0f2fe, #0284c7); color: white;}
         .avatar-dom { background: linear-gradient(135deg, #ffedd5, #ea580c); color: white;}
         
@@ -118,26 +111,15 @@
             color: #64748b; 
         }
         .tag-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
-        
         .tag-pref-active { 
-            background-color: #10b981 !important; 
-            border-color: #059669 !important; 
-            color: white !important; 
+            background-color: #10b981 !important; border-color: #059669 !important; color: white !important; 
             box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
         }
-        
         .tag-limit-active { 
-            background-color: #ef4444 !important; 
-            border-color: #dc2626 !important; 
-            color: white !important; 
+            background-color: #ef4444 !important; border-color: #dc2626 !important; color: white !important; 
             box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
         }
-        
-        .tag-disabled { 
-            opacity: 0.25; 
-            pointer-events: none; 
-            filter: grayscale(100%); 
-        }
+        .tag-disabled { opacity: 0.25; pointer-events: none; filter: grayscale(100%); }
     </style>
 </head>
 <body class="flex flex-col min-h-screen transition-colors duration-700">
@@ -156,7 +138,6 @@
     </nav>
 
     <main class="flex-grow w-full max-w-6xl mx-auto px-4 py-8">
-
         <!-- VIEW: DATING FEED -->
         <div id="view-feed" class="tab-content fade-in block">
             <div class="mb-8">
@@ -171,22 +152,20 @@
                 </div>
             </div>
 
-            <!-- Profiles Grid -->
             <div id="profiles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
                 <!-- Profiles injected via JS -->
             </div>
         </div>
 
-        <!-- VIEW: PROFILE SETUP (Form with Premium Gate & Interactive Tags) -->
+        <!-- VIEW: PROFILE SETUP -->
         <div id="view-setup" class="tab-content hidden fade-in max-w-3xl mx-auto">
             <div class="bg-white p-6 md:p-8 rounded-2xl shadow-card border border-stone-100">
                 <h1 class="text-3xl font-bold text-stone-800 mb-3">Создать Анкету</h1>
                 <p class="text-stone-600 mb-8 pb-6 border-b border-stone-100">
-                    Заполните данные и выберите ваши предпочтения. Алгоритм автоматически определит ваше Звание и построит график психотипа для Ленты.
+                    Заполните данные и выберите предпочтения. Алгоритм определит ваше Звание и построит график психотипа для Ленты.
                 </p>
 
                 <form id="profile-form" onsubmit="publishProfile(event)" class="space-y-8">
-                    
                     <!-- 1. Basic Info -->
                     <div class="space-y-5">
                         <h3 class="text-lg font-bold text-stone-800 flex items-center gap-2"><span class="bg-stone-200 text-stone-700 w-6 h-6 flex items-center justify-center rounded-full text-xs">1</span> Базовые данные</h3>
@@ -255,10 +234,9 @@
                             <option value="latex">Латексная фактура (Глянец)</option>
                         </select>
 
-                        <!-- Hidden Premium Promo Gate -->
                         <div id="premium-gate" class="hidden mt-4 p-5 bg-amber-50 border border-amber-200 rounded-xl shadow-inner">
                             <p class="text-base text-amber-900 font-bold mb-1 flex items-center gap-2">💎 Премиальный дизайн</p>
-                            <p class="text-xs text-amber-700 mb-4">Для публикации уникальной фактурной карточки требуется действующий промокод.</p>
+                            <p class="text-xs text-amber-700 mb-4">Для уникальной фактурной карточки требуется промокод.</p>
                             
                             <div class="flex flex-col sm:flex-row gap-3">
                                 <input type="text" id="form-promo" placeholder="Введите промокод..." class="flex-1 px-4 py-3 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none bg-white text-stone-900 font-mono font-bold uppercase placeholder-stone-300">
@@ -267,37 +245,31 @@
                         </div>
                     </div>
 
-                    <!-- 3. Preferences Section (Likes) -->
+                    <!-- 3 & 4. Preferences -->
                     <div class="space-y-4 pt-6 border-t border-stone-100">
                         <div class="flex justify-between items-end mb-4">
                             <div>
                                 <h3 class="text-lg font-bold text-emerald-700 flex items-center gap-2"><span class="bg-emerald-100 text-emerald-800 w-6 h-6 flex items-center justify-center rounded-full text-xs">3</span> Предпочтения (Нравится)</h3>
-                                <p class="text-xs text-stone-500 mt-1">Отметьте практики, которые вас заводят. Это сформирует ваш график.</p>
+                                <p class="text-xs text-stone-500 mt-1">Отметьте практики, которые вас заводят.</p>
                             </div>
                         </div>
-                        <div id="preferences-container" class="flex flex-wrap gap-2">
-                            <!-- Populated via JS -->
-                        </div>
+                        <div id="preferences-container" class="flex flex-wrap gap-2"></div>
                     </div>
 
-                    <!-- 4. Limits Section (Taboos) -->
                     <div class="space-y-4 pt-6 border-t border-stone-100">
                         <div>
                             <h3 class="text-lg font-bold text-red-700 flex items-center gap-2"><span class="bg-red-100 text-red-800 w-6 h-6 flex items-center justify-center rounded-full text-xs">4</span> Табу и Неприязнь (Лимиты)</h3>
                             <p class="text-xs text-stone-500 mt-1">Отметьте то, что для вас категорически неприемлемо.</p>
                         </div>
-                        <div id="limits-container" class="flex flex-wrap gap-2">
-                            <!-- Populated via JS -->
-                        </div>
+                        <div id="limits-container" class="flex flex-wrap gap-2"></div>
                     </div>
 
-                    <button type="submit" class="w-full bg-stone-900 text-white font-bold py-5 rounded-xl hover:bg-stone-800 transition-all shadow-card mt-8 text-lg flex items-center justify-center gap-2">
+                    <button type="submit" id="submit-btn" class="w-full bg-stone-900 text-white font-bold py-5 rounded-xl hover:bg-stone-800 transition-all shadow-card mt-8 text-lg flex items-center justify-center gap-2">
                         Опубликовать в Клубе <span class="text-xl">→</span>
                     </button>
                 </form>
             </div>
         </div>
-
     </main>
 
     <!-- Modals -->
@@ -319,7 +291,6 @@
     </button>
 
     <script>
-        // --- Telegram Init ---
         const tg = window.Telegram ? window.Telegram.WebApp : null;
         if (tg) { tg.expand(); tg.ready(); }
 
@@ -327,7 +298,6 @@
             if (tg && tg.openLink) { tg.openLink(url); } else { window.open(url, '_blank'); }
         }
 
-        // --- Premium Gate Logic ---
         document.getElementById('form-tier').addEventListener('change', function(e) {
             const gate = document.getElementById('premium-gate');
             const promoInput = document.getElementById('form-promo');
@@ -341,7 +311,6 @@
             }
         });
 
-        // --- Data: 30+ Kinks Database & Mapping to Axes ---
         const kinksDatabase = [
             { id: 'k1', name: 'Сисси', mappedAxisSub: 'degradation', mappedAxisDom: 'mind_control' },
             { id: 'k2', name: 'Финдом', mappedAxisSub: 'service', mappedAxisDom: 'control' },
@@ -382,7 +351,7 @@
             'masochism': 'Мазохизм', 'oral': 'Орал/Фейсситтинг', 'brat': 'Строптивость', 'objectification': 'Объективизация',
             'pegging': 'Пеггинг', 'risk': 'Экстрим/Риск', 'mind_control': 'Игры разума', 'cuckold': 'Куколдизм',
             'praise': 'Жажда похвалы', 'newbie': 'Неопытность', 'deprivation': 'Депривация', 'online': 'Онлайн',
-            'degradation': 'Сломленность', 'control': 'Тотальный контроль', 'daddy': 'Опека', 'sadism': 'Садизм',
+            'degradation': 'Сломленность', 'control': 'Контроль', 'daddy': 'Опека', 'sadism': 'Садизм',
             'brat_tamer': 'Укрощение', 'bondage': 'Бондаж', 'teacher': 'Наставник', 'primal': 'Животная агрессия',
             'strict': 'Строгость', 'edgeplay': 'Опасные практики'
         };
@@ -411,7 +380,6 @@
             ]
         };
 
-        // --- Mock Database ---
         let mockProfiles = [
             {
                 id: 1, role: 'dominant', tier: 'leather', username: 'mr_dom_88',
@@ -426,13 +394,6 @@
                 title: '«Дерзкая Игрушка»', desc: 'Обожаю проверять нервы на прочность. Дерзю, чтобы быть наказанной.',
                 dominantTrait: 'brat', scores: [5, 2, 8, 4, 3, 7],
                 prefs: ['Порка (Флоггинг)', 'Публичность', 'Афтеркеа (Aftercare)'], limits: ['Унижение', 'Золотой дождь'], avatarUrl: null
-            },
-            {
-                id: 3, role: 'dominant', tier: 'gold', username: 'mistress_v',
-                name: 'Виктория', age: 29, city: 'Казань', gender: 'Ж',
-                title: '«Искусный Кукловод»', desc: 'Ломаю не тело, а виртуозно подчиняю сознание. Обожаю газлайтинг и разрушение эго.',
-                dominantTrait: 'mind_control', scores: [5, 4, 3, 10, 2, 2],
-                prefs: ['Газлайтинг', 'Унижение', 'Сенсорная депривация'], limits: ['Кровь', 'Медицинские игры'], avatarUrl: null
             }
         ];
 
@@ -441,11 +402,9 @@
         let currentUploadedPhotoBase64 = null;
         let charts = {};
         
-        // Form State
         let selectedPrefs = new Set();
         let selectedLimits = new Set();
 
-        // --- Init Tags ---
         function initTagsUI() {
             const prefsContainer = document.getElementById('preferences-container');
             const limitsContainer = document.getElementById('limits-container');
@@ -453,13 +412,11 @@
             limitsContainer.innerHTML = '';
 
             kinksDatabase.forEach(kink => {
-                // Pref Button
                 const btnP = document.createElement('button');
                 btnP.type = 'button';
                 btnP.className = 'tag-btn px-4 py-2 rounded-full text-xs font-bold shadow-sm';
                 btnP.textContent = kink.name;
                 
-                // Limit Button
                 const btnL = document.createElement('button');
                 btnL.type = 'button';
                 btnL.className = 'tag-btn px-4 py-2 rounded-full text-xs font-bold shadow-sm';
@@ -475,7 +432,7 @@
 
         function toggleTag(type, itemName, clickedBtn, oppositeBtn) {
             if (type === 'pref') {
-                if (selectedLimits.has(itemName)) return; // Can't be both
+                if (selectedLimits.has(itemName)) return; 
                 if (selectedPrefs.has(itemName)) {
                     selectedPrefs.delete(itemName);
                     clickedBtn.classList.remove('tag-pref-active');
@@ -486,7 +443,7 @@
                     oppositeBtn.classList.add('tag-disabled');
                 }
             } else {
-                if (selectedPrefs.has(itemName)) return; // Can't be both
+                if (selectedPrefs.has(itemName)) return; 
                 if (selectedLimits.has(itemName)) {
                     selectedLimits.delete(itemName);
                     clickedBtn.classList.remove('tag-limit-active');
@@ -499,7 +456,6 @@
             }
         }
 
-        // --- Navigation ---
         function showScreen(screenId) {
             document.querySelectorAll('.tab-content').forEach(el => {
                 el.classList.add('hidden');
@@ -529,7 +485,6 @@
             if(tabId === 'feed') renderProfiles(mockProfiles);
         }
 
-        // --- Photo Upload ---
         function previewPhoto(event) {
             const file = event.target.files[0];
             const previewContainer = document.getElementById('photo-preview-container');
@@ -551,9 +506,12 @@
             }
         }
 
-        // --- Profile Generation & Publishing ---
-        function publishProfile(e) {
+        // --- Core Image Generation & Publishing ---
+        async function publishProfile(e) {
             e.preventDefault();
+            
+            const submitBtn = document.getElementById('submit-btn');
+            const originalBtnText = submitBtn.innerHTML;
             
             const role = document.getElementById('form-role').value;
             const tier = document.getElementById('form-tier').value || 'base';
@@ -571,7 +529,9 @@
                 return;
             }
 
-            // Calculate Scores based on selected preferences
+            submitBtn.innerHTML = 'Создание карточки... ⏳';
+            submitBtn.disabled = true;
+
             let rawScores = { 'submission': 2, 'service': 2, 'masochism': 2, 'degradation': 2, 'bondage': 2, 'risk': 2, 
                               'control': 2, 'strict': 2, 'sadism': 2, 'mind_control': 2, 'edgeplay': 2 };
             
@@ -583,18 +543,15 @@
                 }
             });
 
-            // Convert to Radar format
             const axes = radarAxes[role];
             let finalScoresArray = axes.map(axis => Math.min(10, rawScores[axis])); 
 
-            // Find Dominant Axis
             let maxAxis = axes[0];
             let maxScore = -1;
             axes.forEach(axis => {
                 if(rawScores[axis] > maxScore) { maxScore = rawScores[axis]; maxAxis = axis; }
             });
 
-            // Assign Title based on Dominant Axis
             const possibleTitles = titlesData[role];
             let assignedTitle = possibleTitles.find(t => t.trait === maxAxis);
             if(!assignedTitle) assignedTitle = possibleTitles[0];
@@ -617,19 +574,52 @@
                 limits: Array.from(selectedLimits)
             };
 
-            // Update Mock Database
+            // 1. Создаем скрытый контейнер для генерации картинки (html2canvas)
+            const offscreen = document.createElement('div');
+            offscreen.style.position = 'absolute';
+            offscreen.style.left = '-9999px';
+            offscreen.style.top = '0';
+            offscreen.style.width = '380px'; // Ширина как у телефона
+            offscreen.style.background = '#fdfbf7';
+            offscreen.style.padding = '10px';
+            document.body.appendChild(offscreen);
+
+            // Создаем HTML карточки, но БЕЗ кнопок связи (специальный флаг true)
+            const tempId = 'capture_' + newProfile.id;
+            const tempProfile = { ...newProfile, id: tempId };
+            offscreen.innerHTML = createCardHTML(tempProfile, true); 
+            
+            // Рендерим график без анимации (true)
+            renderChart(tempId, tempProfile.role, tempProfile.scores, tempProfile.tier, true);
+
+            // Ждем долю секунды, чтобы график точно нарисовался
+            await new Promise(r => setTimeout(r, 600));
+
+            let base64Image = null;
+            try {
+                const canvas = await html2canvas(offscreen, { scale: 2, useCORS: true, backgroundColor: '#fdfbf7' });
+                // Получаем чистый base64 без префикса
+                base64Image = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+            } catch(err) {
+                console.error("Ошибка html2canvas:", err);
+            }
+            
+            document.body.removeChild(offscreen);
+
+            // 2. Обновляем локальную базу (чтобы карточка появилась в ленте Web App)
             mockProfiles = mockProfiles.filter(p => p.id !== CURRENT_USER_ID);
             mockProfiles.unshift(newProfile);
 
-            // Create Tags for the webhook
             const isDomWebhook = newProfile.role === 'dominant';
             const genderTag = newProfile.gender === 'М' ? 'М' : 'Ж';
             const generatedTags = `#${isDomWebhook ? 'Верхний' : 'Нижний'} #${newProfile.city.replace(/\s+/g, '')} #${genderTag}${newProfile.age}`;
 
-            // Send to Google Script using POST with plain text body (safest for CORS)
-            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwafOl-YdT2GxXrwQmSdgHEgNL2FJPgnOaAV0FoO7ddwTltHehWbQjVIFwbA7KV_OuPAg/exec'; 
+            // 3. Отправляем в Google Script
+            // Замени на свою ссылку /exec !!!
+            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxdJtjTKeIJnlGbs_BF7m19j04iUyoa01cEJkrVlmLVnoF1aNs6s36dHh2EZ4Sz59FYeQ/exec'; 
+            
             try {
-                fetch(WEBHOOK_URL, {
+                await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     body: JSON.stringify({
                         tgId: newProfile.id,
@@ -640,19 +630,23 @@
                         limits: newProfile.limits.join(', '),
                         tags: generatedTags,
                         name: newProfile.name,
-                        city: newProfile.city
+                        city: newProfile.city,
+                        imageBase64: base64Image // <-- Передаем картинку!
                     })
                 });
             } catch(err) { console.log('Webhook triggered.'); }
 
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+
             if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
             
-            alert(`Анкета опубликована!\nВаше звание: ${newProfile.title}`);
+            alert(`Анкета успешно сгенерирована!\nВаше звание: ${newProfile.title}`);
             switchTab('feed');
         }
 
-        // --- Rendering Logic ---
-        function createCardHTML(profile) {
+        // --- Rendering ---
+        function createCardHTML(profile, isCapture = false) {
             const isDom = profile.role === 'dominant';
             const colorClass = isDom ? 'text-orange-600' : 'text-sky-600';
             const avatarClass = isDom ? 'avatar-dom' : 'avatar-sub';
@@ -673,13 +667,11 @@
                     </div>
                 </div>`;
 
-            // Tags HTML (Green for Prefs, Red for Limits)
             let tagsHtml = '';
             const pTags = (profile.prefs || []).map(p => `<span class="inline-block px-2 py-1 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-bold mr-1 mb-1">✓ ${p}</span>`).join('');
             const lTags = (profile.limits || []).map(l => `<span class="inline-block px-2 py-1 rounded bg-red-100 text-red-800 border border-red-200 text-[10px] font-bold mr-1 mb-1">✕ ${l}</span>`).join('');
             tagsHtml = `<div class="mb-4 flex flex-wrap">${pTags}${lTags}</div>`;
             
-            // Fully expanded chart
             const chartHtml = `
                 <div class="border-t border-black/10 pt-4 mb-4 relative z-0">
                     <div class="text-center text-xs font-bold uppercase tracking-widest opacity-40 mb-2">Психотип</div>
@@ -689,7 +681,6 @@
                 </div>
             `;
 
-            // Permanent Branding at the bottom
             const footerBrandingHTML = `
                 <div class="mt-4 pt-4 border-t border-black/10 flex justify-between items-center opacity-80">
                     <div class="flex items-center gap-2">
@@ -699,7 +690,8 @@
                 </div>
             `;
 
-            const actionBtnHTML = `
+            // Прячем кнопку "Написать" если это скриншот
+            const actionBtnHTML = isCapture ? '' : `
                 <button onclick="openContactModal('${profile.username}')" class="w-full mt-4 py-3.5 rounded-xl ${isDom ? 'bg-orange-600 hover:bg-orange-700' : 'bg-sky-600 hover:bg-sky-700'} text-white text-sm font-bold transition-colors shadow-md flex justify-center items-center gap-2 relative z-10">
                     💬 Написать Владельцу
                 </button>`;
@@ -728,10 +720,6 @@
         function renderProfiles(profilesToRender) {
             const grid = document.getElementById('profiles-grid');
             if (!grid) return;
-            if(profilesToRender.length === 0) {
-                grid.innerHTML = '<div class="col-span-full text-center py-10 text-stone-500">Анкет не найдено.</div>';
-                return;
-            }
             grid.innerHTML = profilesToRender.map(p => createCardHTML(p)).join('');
             
             profilesToRender.forEach(p => {
@@ -747,7 +735,8 @@
             renderProfiles(filtered);
         }
 
-        function renderChart(id, role, scoresData, tier) {
+        // --- Добавлен флаг disableAnimation для скриншота ---
+        function renderChart(id, role, scoresData, tier, disableAnimation = false) {
             if (charts[id]) { charts[id].destroy(); }
             const canvas = document.getElementById(`canvas-${id}`);
             if (!canvas) return; 
@@ -780,6 +769,7 @@
                 },
                 options: {
                     maintainAspectRatio: false,
+                    animation: disableAnimation ? false : undefined, // Убираем анимацию при создании скриншота
                     scales: {
                         r: {
                             beginAtZero: true,
@@ -795,7 +785,6 @@
             });
         }
 
-        // --- Contact Logic ---
         function openContactModal(username) {
             pendingContactUsername = username;
             document.getElementById('contact-modal-text').innerHTML = `Перейти в Telegram для начала диалога с <b>@${username}</b>?`;
@@ -818,7 +807,6 @@
             closeModal('contact-modal');
         }
 
-        // --- Init ---
         window.onload = () => { 
             initTagsUI();
             switchTab('feed'); 
