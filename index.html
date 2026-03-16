@@ -300,7 +300,7 @@
 
     </main>
 
-    <!-- Contact Modal -->
+    <!-- Modals -->
     <div id="contact-modal" class="hidden fixed inset-0 z-[100] bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
         <div class="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center border border-stone-200">
             <div class="text-5xl mb-4">💬</div>
@@ -372,7 +372,7 @@
             { id: 'k27', name: 'Оргазмический контроль', mappedAxisSub: 'submission', mappedAxisDom: 'strict' },
             { id: 'k28', name: 'Плей-пирсинг (Иглы)', mappedAxisSub: 'masochism', mappedAxisDom: 'edgeplay' },
             { id: 'k29', name: 'Дисциплина / Правила', mappedAxisSub: 'submission', mappedAxisDom: 'strict' },
-            { id: 'k30', name: 'Абсолютный CNC (Без стоп-слова)', mappedAxisSub: 'risk', mappedAxisDom: 'edgeplay' },
+            { id: 'k30', name: 'Абсолютный CNC', mappedAxisSub: 'risk', mappedAxisDom: 'edgeplay' },
             { id: 'k31', name: 'Афтеркеа (Aftercare)', mappedAxisSub: 'praise', mappedAxisDom: 'daddy' },
             { id: 'k32', name: 'Служение по дому', mappedAxisSub: 'service', mappedAxisDom: 'control' }
         ];
@@ -626,13 +626,11 @@
             const genderTag = newProfile.gender === 'М' ? 'М' : 'Ж';
             const generatedTags = `#${isDomWebhook ? 'Верхний' : 'Нижний'} #${newProfile.city.replace(/\s+/g, '')} #${genderTag}${newProfile.age}`;
 
-            // Webhook payload including tags
-            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxFo7sRXUOJ_Prme_3htjsEVmC3CWw3TaHUImMoB95t2ZEct1K-KSqVZ7k0b4KQv3y1vQ/exec';
+            // Send to Google Script using POST with plain text body (safest for CORS)
+            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwJQiB98HKNpj7g82FasAE3OSv9-3iZez7AVnPmPgGM31957cWsEAjcLkJOOIoJTUUs2Q/exec'; 
             try {
                 fetch(WEBHOOK_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({
                         tgId: newProfile.id,
                         tgUsername: newProfile.username,
@@ -645,7 +643,7 @@
                         city: newProfile.city
                     })
                 });
-            } catch(err) { console.log('Webhook logic running.'); }
+            } catch(err) { console.log('Webhook triggered.'); }
 
             if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
             
@@ -691,12 +689,13 @@
                 </div>
             `;
 
+            // Permanent Branding at the bottom
             const footerBrandingHTML = `
-                <div class="mt-4 pt-4 border-t border-black/10 border-muted flex justify-between items-center opacity-80">
+                <div class="mt-4 pt-4 border-t border-black/10 flex justify-between items-center opacity-80">
                     <div class="flex items-center gap-2">
-                        <img src="logo.png" alt="BDSM-ka" class="h-6 w-auto" onerror="this.outerHTML='<span class=&quot;text-xs font-bold opacity-60 uppercase tracking-widest&quot;>Клуб Знакомств</span>'">
+                        <img src="logo.png" alt="BDSM-ka" class="h-6 w-auto" onerror="this.outerHTML='<span class=&quot;text-xs font-bold opacity-60 uppercase tracking-widest&quot;>BDSM-ka Анкеты</span>'">
                     </div>
-                    <img src="qr_tg.png" alt="QR" class="w-10 h-10 rounded bg-white p-0.5 shadow-sm" onerror="this.style.display='none'">
+                    <img src="qr_tg.png" alt="QR" class="w-10 h-10 rounded bg-white p-0.5 shadow-sm border border-black/10" onerror="this.style.display='none'">
                 </div>
             `;
 
