@@ -3,349 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>БДСМ-ка | Квест</title>
+    <title>BDSM-ka Dating Hub</title>
     
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Chosen Palette: Warm Sand & Stone (Light Theme) -->
+    <!-- Application Structure Plan: The SPA is designed as a direct Dating Hub without the quiz element.
+         1. 'Лента Анкет' (Feed): A dashboard for exploring generated profiles. 
+         2. 'Энциклопедия' (Encyclopedia): Exploratory view of traits and titles.
+         3. 'Создать Анкету' (Profile Setup): Users directly set up their profile, including manually selecting their Archetype/Title. The system automatically generates the corresponding Radar Chart based on the selected title's predefined traits. -->
+    <!-- Visualization & Content Choices: 
+         - Goal: Profile Visualization -> Viz: Radar Charts (Chart.js) -> Interaction: 'View Psychotype' toggle -> Justification: Radar charts perfectly map the 6 dominant axes of a BDSM profile. NO SVG/Mermaid used.
+         - Goal: Data Exploration -> Viz: Filterable Card Grid -> Interaction: Category tags -> Justification: Allows users to sort through the community based on their specific relationship needs. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        dark: '#050505',
-                        panel: '#111111',
-                        accent: 'rgba(var(--color-accent), 1)',
+                        sand: '#fdfbf7',
+                        stonebg: '#f5f5f4',
+                        sub: '#0284c7', 
+                        dom: '#ea580c', 
                     },
                     boxShadow: {
-                        'glow': '0 0 15px rgba(var(--color-accent), 0.3)',
-                        'glow-lg': '0 0 30px rgba(var(--color-accent), 0.5)'
-                    },
-                    animation: {
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02)',
                     }
                 }
             }
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- Chosen Palette: Dark UI with Role-Specific Neon Accents (Deep Cyan for Submissive, Amber-Orange for Dominant) against #050505 background -->
-    <!-- Application Structure Plan: The SPA is structured as a gamified, linear assessment tool (quiz) leading to a highly personalized, shareable dashboard. The flow consists of three main views controlled via JS state: 1. Landing View (Role Selection - Sub/Dom). 2. Interactive Questionnaire View (dynamic progress bar, sequentially loaded questions masking the complex 26-axis scoring matrix). 3. Compact Results Dashboard View (displays synthesized psychological profile, dominant trait badge, radar chart, and a singular action to finish). This linear structure is optimal because it forces user investment and sequential data gathering before revealing the complex analytical result, transforming a dry questionnaire into an engaging narrative journey. -->
-    <!-- Visualization & Content Choices: 
-         - Goal: Psychological Profiling -> Viz: Radar Chart -> Interaction: View results on final screen -> Justification: A radar chart perfectly visualizes a multi-dimensional psychological profile (masochism, control, etc.) allowing the user to instantly see their dominant traits at a glance. -> Library/Method: Chart.js (Canvas). NO SVG.
-         - Goal: Gamified Progression -> Viz: Liquid animated progress bar -> Interaction: Updates automatically upon answering -> Justification: Keeps the user engaged during a long (20+ questions) assessment by providing visual feedback of advancement. -> Library/Method: Pure HTML/CSS with JS width updates. NO SVG.
-         - Goal: Shareability -> Viz: Compact Card Layout -> Interaction: Native OS Screenshot -> Justification: Due to aggressive in-app browser restrictions on downloading files, a compact, single-screen layout encourages native screenshots, maximizing virality without relying on blocked download APIs. -> Library/Method: Tailwind CSS layout. NO SVG. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
-
     <style>
-        :root { --color-accent: 139, 0, 0; }
-        body.theme-submissive { --color-accent: 0, 191, 255; }
-        body.theme-dominant { --color-accent: 255, 120, 0; }
-
-        body {
-            background-color: #050505;
-            color: #e5e5e5;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-            transition: background-color 0.5s ease;
-            overflow-x: hidden;
-        }
-
-        .ambient-glow {
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100vw; height: 100vw;
-            background: radial-gradient(circle, rgba(var(--color-accent), 0.08) 0%, transparent 60%);
-            z-index: -1;
-            pointer-events: none;
-            transition: background 0.8s ease;
-        }
-
-        .fade-in { animation: fadeIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: rgba(var(--color-accent), 0.8); border-radius: 4px; }
-
-        @keyframes slosh {
-            0% { background-position: 100% 0; }
-            100% { background-position: -100% 0; }
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #fdfbf7; color: #292524; overflow-x: hidden; }
         
-        .liquid-bar {
-            height: 12px;
-            border-radius: 6px;
-            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-        }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
         
-        body.theme-submissive .liquid-bar {
-            background: linear-gradient(90deg, #004466, #00bfff, #ffffff, #00bfff, #004466);
-            background-size: 200% 100%;
-            animation: slosh 2s infinite linear;
-            box-shadow: 0 0 10px rgba(0,191,255,0.6);
-        }
-        
-        body.theme-dominant .liquid-bar {
-            background: linear-gradient(90deg, #660000, #ff4500, #ffaa00, #ff4500, #660000);
-            background-size: 200% 100%;
-            animation: slosh 1s infinite linear;
-            box-shadow: 0 0 10px rgba(255,69,0,0.6);
-        }
-
         .chart-container {
             position: relative;
             width: 100%;
-            max-width: 380px;
+            max-width: 340px;
             margin-left: auto;
             margin-right: auto;
-            height: 40vh;
-            max-height: 320px;
+            height: 240px;
+            max-height: 280px;
+            overflow: hidden;
         }
+
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-tier-base { background: #ffffff; border: 1px solid #e7e5e4; }
+        .card-tier-gold { background: linear-gradient(135deg, #fefce8 0%, #fef08a 50%, #fde047 100%); border: 1px solid #eab308; }
+        .card-tier-latex { background: #1c1917; border: 1px solid #000; color: #f5f5f4; }
+        .card-tier-leather { background: #271204; border: 2px dashed #78350f; color: #ffedd5; }
+        .card-tier-metal { background: repeating-linear-gradient(45deg, #cbd5e1, #cbd5e1 10px, #94a3b8 10px, #94a3b8 20px); border: 2px solid #475569; }
+        .card-tier-metal .inner-panel { background-color: rgba(255,255,255,0.9); padding: 1rem; border-radius: 0.5rem; height: 100%; }
+        .card-tier-silver { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%); border: 1px solid #94a3b8; color: #1e293b; }
         
-        @media (min-width: 768px) {
-            .chart-container { height: 350px; max-height: 400px; }
-        }
+        .avatar-sub { background: linear-gradient(135deg, #e0f2fe, #0284c7); color: white;}
+        .avatar-dom { background: linear-gradient(135deg, #ffedd5, #ea580c); color: white;}
         
-        .fallback-img {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #222;
-            color: #888;
-            font-weight: bold;
-            border-radius: 8px;
-            text-align: center;
-        }
+        input[type="file"]::file-selector-button { display: none; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-start p-4 transition-colors duration-700">
+<body class="flex flex-col min-h-screen transition-colors duration-700">
 
-    <div class="ambient-glow"></div>
+    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-y-2">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">🔥</span>
+                <span class="font-bold text-lg tracking-widest uppercase text-stone-800">Клуб Знакомств</span>
+            </div>
+            <div class="flex gap-4 sm:gap-8 text-sm font-medium overflow-x-auto hide-scroll" id="main-nav-links">
+                <button onclick="switchTab('feed')" class="nav-btn text-stone-900 border-b-2 border-stone-900 pb-1 whitespace-nowrap" id="nav-feed">Лента Анкет</button>
+                <button onclick="switchTab('encyclopedia')" class="nav-btn text-stone-500 hover:text-stone-900 border-b-2 border-transparent pb-1 whitespace-nowrap" id="nav-encyclopedia">Энциклопедия</button>
+                <button onclick="switchTab('setup')" class="nav-btn text-stone-500 hover:text-stone-900 border-b-2 border-transparent pb-1 whitespace-nowrap" id="nav-setup">Создать Анкету</button>
+            </div>
+        </div>
+    </nav>
 
-    <button id="donate-btn" onclick="openExternalLink('https://boosty.to/bdsmka')" class="fixed top-4 right-4 z-50 bg-panel border border-accent/50 text-xs px-3 py-1.5 rounded shadow-glow text-accent font-bold hover:text-white transition-all duration-300 hover:shadow-glow-lg flex items-center gap-1">
+    <main class="flex-grow w-full max-w-6xl mx-auto px-4 py-8">
+
+        <!-- VIEW: DATING FEED -->
+        <div id="view-feed" class="tab-content fade-in block">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-stone-800 mb-3">Сообщество</h1>
+                <p class="text-base text-stone-600 max-w-3xl mb-6">
+                    Исследуйте анкеты участников. Нажмите «Психотип», чтобы развернуть радар-чарт и оценить совместимость ваших кинков.
+                </p>
+                <div class="flex gap-2 overflow-x-auto w-full pb-2 hide-scroll items-center">
+                    <button onclick="filterProfiles('all')" class="px-5 py-2 rounded-full bg-stone-800 text-xs font-bold text-white hover:bg-stone-700 transition-colors shrink-0">Все</button>
+                    <button onclick="filterProfiles('dominant')" class="px-5 py-2 rounded-full bg-orange-100 text-xs font-bold text-orange-800 hover:bg-orange-200 transition-colors shrink-0">Верхние</button>
+                    <button onclick="filterProfiles('submissive')" class="px-5 py-2 rounded-full bg-sky-100 text-xs font-bold text-sky-800 hover:bg-sky-200 transition-colors shrink-0">Нижние</button>
+                </div>
+            </div>
+
+            <div id="profiles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Profiles injected via JS -->
+            </div>
+        </div>
+
+        <!-- VIEW: ENCYCLOPEDIA -->
+        <div id="view-encyclopedia" class="tab-content hidden fade-in max-w-5xl mx-auto">
+            <div class="mb-10 text-center">
+                <h1 class="text-3xl font-bold text-stone-800 mb-4">Архитектура Психотипов</h1>
+                <p class="text-stone-600 max-w-2xl mx-auto">База знаний платформы. Ознакомьтесь с осями оценки и классификацией званий.</p>
+            </div>
+
+            <h2 class="text-xl font-bold text-stone-800 mb-4 border-b border-stone-200 pb-2">26 Осей Оценки (Кинки)</h2>
+            <div id="traits-container" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
+                <!-- Traits injected via JS -->
+            </div>
+
+            <h2 class="text-xl font-bold text-stone-800 mb-4 border-b border-stone-200 pb-2">Архив Званий</h2>
+            <div class="flex gap-4 mb-6">
+                <button onclick="renderEncyclopediaTitles('submissive')" class="flex-1 py-3 rounded-lg bg-sky-100 text-sky-800 font-bold hover:bg-sky-200 transition-colors">🧎 Звания Нижних</button>
+                <button onclick="renderEncyclopediaTitles('dominant')" class="flex-1 py-3 rounded-lg bg-orange-100 text-orange-800 font-bold hover:bg-orange-200 transition-colors">👑 Звания Верхних</button>
+            </div>
+            <div id="encyclopedia-titles-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Titles injected via JS -->
+            </div>
+        </div>
+
+        <!-- VIEW: PROFILE SETUP (Direct Form) -->
+        <div id="view-setup" class="tab-content hidden fade-in max-w-2xl mx-auto">
+            <div class="bg-white p-8 rounded-2xl shadow-card border border-stone-100">
+                <h1 class="text-3xl font-bold text-stone-800 mb-3">Создать Анкету</h1>
+                <p class="text-stone-600 mb-8 pb-6 border-b border-stone-100">
+                    Заполните данные вашей карточки. Выберите свою Роль и подходящее Звание — алгоритм автоматически построит ваш психологический график (Радар) для отображения в Ленте.
+                </p>
+
+                <form id="profile-form" onsubmit="publishProfile(event)" class="space-y-6">
+                    <div class="bg-stonebg p-5 rounded-xl border border-stone-200 flex items-center gap-6">
+                        <div id="photo-preview-container" class="w-24 h-24 rounded-full bg-white border-2 border-dashed border-stone-300 flex items-center justify-center text-stone-400 overflow-hidden shrink-0 shadow-inner">
+                            <span class="text-3xl">📸</span>
+                        </div>
+                        <div class="flex-1">
+                            <label class="inline-block px-5 py-2.5 bg-white border border-stone-300 rounded-lg text-sm font-medium text-stone-700 hover:bg-stone-50 cursor-pointer shadow-sm transition-all">
+                                Загрузить фото
+                                <input type="file" id="form-photo" accept="image/jpeg, image/png" class="hidden" onchange="previewPhoto(event)">
+                            </label>
+                            <p class="text-xs text-stone-500 mt-2">Рекомендуется портретное фото.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Имя / Никнейм</label>
+                            <input type="text" id="form-name" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all" placeholder="Алекс">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Ваш @Username (Телеграм)</label>
+                            <input type="text" id="form-username" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all" placeholder="@telegram_id">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Возраст</label>
+                            <input type="number" id="form-age" required min="18" max="99" class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all" placeholder="25">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Город</label>
+                            <input type="text" id="form-city" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all" placeholder="Москва">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Пол</label>
+                            <select id="form-gender" class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white outline-none">
+                                <option value="М">Мужской</option>
+                                <option value="Ж">Женский</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Оформление карточки</label>
+                            <select id="form-tier" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all text-stone-800">
+                                <option value="base">Стандартная (Белая)</option>
+                                <option value="silver">Серебро (VIP)</option>
+                                <option value="gold">Золото (VIP)</option>
+                                <option value="metal">Металл (Эксклюзив)</option>
+                                <option value="leather">Кожа (Эксклюзив)</option>
+                                <option value="latex">Латекс (Эксклюзив)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Role & Title Selection -->
+                    <div class="p-5 bg-stone-50 border border-stone-200 rounded-xl space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-2">Выберите вашу Роль</label>
+                            <select id="form-role" onchange="updateTitleDropdown()" class="w-full px-4 py-3 border border-stone-300 rounded-lg bg-white outline-none font-bold text-stone-800">
+                                <option value="dominant">👑 Верхний (Доминант)</option>
+                                <option value="submissive">🧎 Нижний (Сабмиссив)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-2">Выберите ваш Архетип (Звание)</label>
+                            <select id="form-title" required class="w-full px-4 py-3 border border-stone-300 rounded-lg bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all text-stone-800">
+                                <!-- Options populated by JS -->
+                            </select>
+                            <p class="text-[10px] text-stone-500 mt-2">Выбор звания автоматически настроит ваш психологический профиль (Радар).</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Цитата о себе (Отобразится в анкете)</label>
+                        <textarea id="form-desc" rows="2" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all resize-none" placeholder="Ищу партнера для..."></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-stone-900 text-white font-bold py-4 rounded-xl hover:bg-stone-800 transition-all shadow-md mt-6 text-lg">
+                        Опубликовать Анкету
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Contact Modal -->
+    <div id="contact-modal" class="hidden fixed inset-0 z-[100] bg-stone-900/40 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center">
+            <div class="text-5xl mb-4">💬</div>
+            <h3 class="text-xl font-bold text-stone-800 mb-2">Открыть диалог</h3>
+            <p class="text-sm text-stone-500 mb-8" id="contact-modal-text">Вы перейдете в Telegram.</p>
+            <div class="flex gap-3">
+                <button onclick="closeModal('contact-modal')" class="flex-1 py-3 bg-stone-100 text-stone-700 rounded-xl font-bold hover:bg-stone-200 transition-colors">Отмена</button>
+                <button onclick="confirmContact()" class="flex-1 py-3 bg-stone-900 text-white rounded-xl font-bold hover:bg-stone-800 transition-colors shadow-md">Перейти</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Donate Button -->
+    <button id="donate-btn" onclick="openExternalLink('https://boosty.to/bdsmka')" class="fixed bottom-4 right-4 z-50 bg-white border border-stone-300 text-xs px-3 py-2 rounded-full shadow-lg text-stone-700 font-bold hover:text-stone-900 transition-all flex items-center gap-1">
         <span class="text-sm">🔥</span> Бусти
     </button>
 
-    <div id="app-container" class="w-full max-w-md mt-16 pb-20 relative z-10">
-
-        <div id="screen-welcome" class="fade-in hidden flex flex-col items-center text-center">
-            
-            <button onclick="openExternalLink('https://vk.com/bdsmkaaa')" class="self-start ml-2 mb-6 transition-transform hover:scale-105 active:scale-95">
-                <img src="logo.png" alt="BDSM-ka" class="w-36 h-auto object-contain" onerror="this.outerHTML='<div class=\'fallback-img w-36 h-12 text-sm\'>BDSM-ka</div>'">
-            </button>
-
-            <h1 class="text-4xl font-bold text-white mb-2 tracking-widest uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">Инициация</h1>
-            <p class="text-gray-400 mb-10 text-sm px-4">Погрузись в свое сознание. Отвечай честно. Узнай свое истинное предназначение.</p>
-            
-            <div class="w-full flex flex-col gap-4 px-2">
-                <button onclick="startQuiz('submissive', event)" class="relative w-full bg-[#001a22] border-2 border-[#00bfff]/50 hover:border-[#00bfff] p-4 rounded-xl text-left flex justify-between items-center group transition-all duration-300 shadow-[0_0_20px_rgba(0,191,255,0.15)] hover:shadow-[0_0_30px_rgba(0,191,255,0.4)] animate-pulse-slow overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-r from-[#00bfff]/0 to-[#00bfff]/10 group-hover:to-[#00bfff]/20 transition-all"></div>
-                    <div class="flex flex-col relative z-10">
-                        <span class="text-lg font-bold text-[#00bfff] tracking-wide">ПУТЬ НИЖНЕГО</span>
-                        <span class="text-xs text-gray-400 mt-1">Отдать контроль и служить</span>
-                    </div>
-                    <span class="text-[#00bfff] text-2xl relative z-10 transition-transform group-hover:translate-x-2">→</span>
-                </button>
-
-                <button onclick="startQuiz('dominant', event)" class="relative w-full bg-[#220d00] border-2 border-[#ff7800]/50 hover:border-[#ff7800] p-4 rounded-xl text-left flex justify-between items-center group transition-all duration-300 shadow-[0_0_20px_rgba(255,120,0,0.15)] hover:shadow-[0_0_30px_rgba(255,120,0,0.4)] animate-pulse-slow overflow-hidden" style="animation-delay: 1.5s;">
-                    <div class="absolute inset-0 bg-gradient-to-r from-[#ff7800]/0 to-[#ff7800]/10 group-hover:to-[#ff7800]/20 transition-all"></div>
-                    <div class="flex flex-col relative z-10">
-                        <span class="text-lg font-bold text-[#ff7800] tracking-wide">ПУТЬ ВЕРХНЕГО</span>
-                        <span class="text-xs text-gray-400 mt-1">Взять контроль и властвовать</span>
-                    </div>
-                    <span class="text-[#ff7800] text-2xl relative z-10 transition-transform group-hover:translate-x-2">→</span>
-                </button>
-
-                <button class="relative w-full bg-[#0a0a0a] border-2 border-gray-800 p-4 rounded-xl text-left flex justify-between items-center opacity-60 cursor-not-allowed grayscale">
-                    <div class="flex flex-col relative z-10">
-                        <span class="text-lg font-bold text-gray-400 tracking-wide">ПУТЬ ГОСПОЖИ</span>
-                        <span class="text-xs text-gray-500 mt-1">В разработке...</span>
-                    </div>
-                    <span class="text-gray-500 text-xl relative z-10">🔒</span>
-                </button>
-            </div>
-        </div>
-
-        <div id="screen-quiz" class="hidden flex flex-col">
-            <div class="mb-4 flex justify-between items-center text-xs text-gray-400 uppercase tracking-widest px-2">
-                <span id="role-indicator" class="text-accent font-bold drop-shadow-[0_0_5px_rgba(var(--color-accent),0.5)]">Роль</span>
-                <button onclick="resetApp(event)" class="hover:text-white transition-colors">Прервать ✕</button>
-            </div>
-            
-            <div class="w-full bg-dark rounded-full h-3 mb-6 border border-gray-800 relative overflow-hidden">
-                <div id="progress-bar-fill" class="liquid-bar w-0"></div>
-            </div>
-            
-            <div class="bg-panel/90 backdrop-blur-md p-6 rounded-2xl border border-accent/30 shadow-glow fade-in relative overflow-hidden" id="question-container">
-                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent to-transparent opacity-50"></div>
-                <h2 id="question-text" class="text-lg font-medium text-white mb-8 leading-relaxed"></h2>
-                <div id="options-container" class="flex flex-col gap-3 relative z-10"></div>
-            </div>
-        </div>
-
-        <div id="screen-result" class="hidden flex flex-col items-center text-center fade-in w-full relative">
-
-            <div id="capture-area" class="w-full bg-panel p-4 rounded-2xl border border-accent/40 shadow-glow relative overflow-hidden text-left mb-6">
-                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent to-transparent opacity-50"></div>
-                
-                <div class="flex justify-between items-start mb-4 z-10 relative">
-                    <div class="flex flex-col items-start gap-1">
-                        <span class="text-[9px] text-gray-400 font-mono tracking-widest drop-shadow-md pl-1">@bdsmkaaa</span>
-                        <img src="logo.png" alt="VK" class="w-24 h-auto object-contain" onerror="this.outerHTML='<div class=\'fallback-img w-24 h-8 text-[10px]\'>VK</div>'">
-                    </div>
-                    <div class="flex flex-col items-end">
-                        <img src="qr_tg.png" alt="QR" class="w-14 h-14 rounded-lg bg-white p-1 border-2 border-accent/50 shadow-glow object-cover" onerror="this.outerHTML='<div class=\'fallback-img w-14 h-14 text-[10px]\'>QR</div>'">
-                    </div>
-                </div>
-
-                <div class="text-center mb-3">
-                    <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-1">Инициация пройдена</p>
-                    <h1 id="result-title" class="text-xl font-bold text-accent drop-shadow-glow leading-tight">Звание</h1>
-                </div>
-
-                <div id="dominant-trait-container" class="text-center w-full mb-3">
-                    <div class="inline-block bg-accent/10 border border-accent/60 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest shadow-glow">
-                        <span class="text-gray-400 font-normal mr-1">Основа:</span> <span id="dominant-trait-text" class="text-accent">Черта</span>
-                    </div>
-                </div>
-                
-                <p id="result-desc" class="text-xs text-gray-300 leading-relaxed italic border-l-2 border-accent/50 pl-3 mb-4 relative z-10">
-                    Описание
-                </p>
-
-                <div class="chart-container z-0 mx-auto">
-                    <canvas id="radarChart"></canvas>
-                </div>
-                
-                <div class="text-center text-[10px] text-gray-500 opacity-60 uppercase tracking-widest mt-4 mb-1 font-bold">
-                    РАЗМЕСТИ У СЕБЯ НА СТРАНИЧКЕ
-                </div>
-            </div>
-
-            <div id="result-buttons" class="w-full flex flex-col gap-3 mt-2">
-                <button id="finish-btn" onclick="finishQuiz()" class="w-full bg-dark border border-accent hover:bg-accent/20 text-white font-bold py-4 rounded-xl transition-all shadow-glow hover:shadow-glow-lg">
-                    Завершить тест
-                </button>
-            </div>
-        </div>
-
-    </div>
-
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
+        // --- Telegram Init ---
+        const tg = window.Telegram ? window.Telegram.WebApp : null;
+        if (tg) { tg.expand(); tg.ready(); }
 
         function openExternalLink(url) {
-            if (tg && tg.openLink) {
-                tg.openLink(url);
-            } else {
-                window.open(url, '_blank');
-            }
+            if (tg && tg.openLink) { tg.openLink(url); } else { window.open(url, '_blank'); }
         }
 
-        function spawnParticles(e, forceColorStr = null) {
-            const x = e ? e.clientX : window.innerWidth / 2;
-            const y = e ? e.clientY : window.innerHeight / 2;
-            for (let i = 0; i < 20; i++) {
-                const p = document.createElement('div');
-                document.body.appendChild(p);
-                const size = Math.random() * 4 + 2;
-                const colorStr = forceColorStr || `rgb(${getComputedStyle(document.body).getPropertyValue('--color-accent')})`;
-                p.style.cssText = `position: fixed; pointer-events: none; border-radius: 50%; z-index: 9999; width: ${size}px; height: ${size}px; background: ${colorStr}; box-shadow: 0 0 ${size*2}px ${colorStr}; left: ${x}px; top: ${y}px;`;
-                const angle = Math.random() * Math.PI * 2;
-                const velocity = Math.random() * 80 + 30;
-                p.animate([
-                    { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
-                    { transform: `translate(calc(-50% + ${Math.cos(angle) * velocity}px), calc(-50% + ${Math.sin(angle) * velocity}px)) scale(0)`, opacity: 0 }
-                ], { duration: Math.random() * 500 + 400, easing: 'cubic-bezier(0.25, 1, 0.5, 1)' }).onfinish = () => p.remove();
-            }
-        }
-
-        let liquidInterval;
-        function startLiquidParticles() {
-            if(liquidInterval) clearInterval(liquidInterval);
-            liquidInterval = setInterval(() => {
-                if(document.getElementById('screen-quiz').classList.contains('hidden')) return;
-                
-                const bar = document.getElementById('progress-bar-fill');
-                const rect = bar.getBoundingClientRect();
-                if(rect.width < 10) return; 
-
-                const p = document.createElement('div');
-                document.body.appendChild(p);
-                
-                const isSub = currentRole === 'submissive';
-                const size = Math.random() * 3 + 2;
-                const x = rect.right - (Math.random() * 10);
-                const y = rect.top + (rect.height / 2);
-                
-                const colorStr = isSub ? 'rgba(255,255,255,0.8)' : 'rgba(255,165,0,0.9)';
-                const shadowStr = isSub ? '0 0 5px #00bfff' : '0 0 5px #ff4500';
-                
-                p.style.cssText = `position: fixed; pointer-events: none; border-radius: 50%; z-index: 9999; width: ${size}px; height: ${size}px; background: ${colorStr}; box-shadow: ${shadowStr}; left: ${x}px; top: ${y}px;`;
-                
-                const tx = (Math.random() - 0.5) * 20;
-                const ty = isSub ? (Math.random() * 30 + 10) : -(Math.random() * 30 + 10); 
-                
-                p.animate([
-                    { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
-                    { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`, opacity: 0 }
-                ], { duration: Math.random() * 400 + 400, easing: 'ease-out' }).onfinish = () => p.remove();
-
-            }, 100); 
-        }
-        function stopLiquidParticles() {
-            if(liquidInterval) clearInterval(liquidInterval);
-        }
-
-        const titlesData = {
-            submissive: [
-                { id: "s1", title: "«Безупречный Слуга»", traits: ['service', 'submission', 'strict'], desc: "Мечта для Госпожи, ценящей идеальный порядок. Твоя стихия — круглосуточное, беспрекословное служение и микро-контроль. Готов взять на себя грязную работу, соблюдать дресс-код и просить разрешения даже на глоток воды. Абсолютно надежен и дисциплинирован." },
-                { id: "s2", title: "«Финансовый Донор»", traits: ['findom'], desc: "Слова ничего не стоят без ресурсов. Ты находишь извращенное наслаждение в том, чтобы оплачивать капризы Госпожи. Будь то аренда студии или дань за право написать Ей сообщение — готов опустошать кошелек по первому щелчку пальцев. Твои деньги — инструмент Её власти." },
-                { id: "s3", title: "«Узник Похоти»", traits: ['chastity', 'submission'], desc: "Твоя похоть больше тебе не принадлежит. Готов запереть себя в пояс верности и отдать ключ. Обожаешь жить в состоянии перманентного возбуждения, умоляя о разрядке. Идеальный кандидат для долгих издевательств и жестокого тизинга." },
-                { id: "s4", title: "«Неутомимая Груша»", traits: ['masochism', 'edgeplay'], desc: "У тебя невероятно высокий болевой порог. Ты — живой холст для плетей. Тебе не нужны мягкие игры; ты жаждешь крови, рубцов и жестких практик. Выдержишь самые тяжелые удары, превращая физическую боль в чистый экстаз поклонения." },
-                { id: "s5", title: "«Одержимый Жрец»", traits: ['oral', 'service'], desc: "Тело Госпожи — храм, а твой язык — безотказный инструмент. Обожаешь фейсситтинг и готов часами вылизывать Её до изнеможения. Тебе не важно собственное удовольствие: будешь задыхаться под Её весом, находя в этом тотальном служении предназначение." },
-                { id: "s6", title: "«Дерзкая Игрушка»", traits: ['brat', 'masochism'], desc: "Обожаешь проверять нервы на прочность. Дерзишь и нарушаешь правила не потому, что не хочешь служить, а потому, что отчаянно жаждешь быть жестоко сломанным. Тот самый строптивый зверь, которого невероятно сладко ставить на колени жесткой поркой." },
-                { id: "s7", title: "«Живая Мебель»", traits: ['objectification', 'degradation'], desc: "Добровольно отказываешься от права называться человеком. Жаждешь тотальной объективизации: быть пепельницей, ковриком или подставкой. Возбуждает полная сломленность эго. Готов часами молча стоять в углу, ожидая, пока Хозяйка соизволит тебя использовать." },
-                { id: "s8", title: "«Покорная Сучка»", traits: ['pegging', 'degradation'], desc: "Готов отдать Госпоже самое дорогое — свою мужскую гордость. Мечтаешь о тотальной инверсии ролей и страпоне (пеггинге). Развинув ноги, позволяешь использовать себя. Безотказная игрушка для Госпожи, которая любит жестко брать то, что Ей принадлежит." },
-                { id: "s9", title: "«Адреналиновый Наркоман»", traits: ['risk', 'edgeplay'], desc: "Для тебя риск публичного разоблачения или опасных практик слаще любой порки. С восторгом наденешь анальную пробку под костюм или будешь балансировать на грани асфиксии. Страх и опасность — топливо для твоего тотального подчинения." },
-                { id: "s10", title: "«Сломанная Воля»", traits: ['mind_control', 'degradation'], desc: "Тебе не нужны цепи. Жаждешь жесткого психологического доминирования, газлайтинга и словесного унижения. Хочешь, чтобы Госпожа била по комплексам и внушала тебе свою реальность. Идеальный материал для изощренного подчинения разума." },
-                { id: "s11", title: "«Покорный Зритель»", traits: ['cuckold', 'submission'], desc: "Твоя величайшая фантазия — осознавать свою ничтожность на фоне других мужчин твоей Госпожи. С упоением будешь прислуживать Ей на свиданиях с другими: подносить напитки или молча смотреть из угла в поясе верности, пока Она наслаждается сексом." },
-                { id: "s12", title: "«Хороший Мальчик»", traits: ['praise', 'daddy'], desc: "За твоим фасадом скрывается отчаянная потребность в строгой опеке. Тебе нужны четкие правила и ласковые поглаживания по голове за послушание. Ты расцветаешь от похвалы Госпожи и готов свернуть горы ради Её слова 'Умничка'." },
-                { id: "s13", title: "«Чистый Холст»", traits: ['newbie', 'submission'], desc: "У тебя мало практического опыта, но горит безумное желание принадлежать. Ты — не испорченный чужими привычками материал. Идеальный проект для Наставницы, которая хочет вылепить раба строго под свои протоколы и нужды." },
-                { id: "s14", title: "«Узник Темноты»", traits: ['bondage', 'deprivation'], desc: "Твое доверие безгранично. Жаждешь абсолютной сенсорной и физической беспомощности. Жесткое шибари, мумификация, вакуумные кровати и кляпы. Готов превратиться в безмолвный комок покорности, лишенный права даже на движение." },
-                { id: "s15", title: "«Виртуальный Раб»", traits: ['online', 'service'], desc: "Идеальный актив для Госпожи, ценящей личное пространство. Не требуешь постоянного физического контакта. Будешь преданно служить на расстоянии: выполнять унизительные задания по видео, скидывать отчеты и переводить финансовые подношения." }
-            ],
-            dominant: [
-                { id: "d1", title: "«Абсолютный Владелец»", traits: ['control', 'strict'], desc: "Живешь властью 24/7. Для тебя нижняя — личная собственность. Готов обеспечивать свою вещь, но взамен требуешь беспрекословного подчинения, микро-контроля расписания и ритуалов. Ревнив, даришь чувство абсолютной защищенности в обмен на свободу воли." },
-                { id: "d2", title: "«Властный Покровитель»", traits: ['daddy', 'praise'], desc: "Строгий Папочка, чья власть строится на опеке и уважении. Щедр на ласку, но за проступок накажешь ледяным тоном или лишением внимания. За твоей спиной можно быть слабой девочкой, зная, что ты укроешь от мира, но и строго спросишь за оплошность." },
-                { id: "d3", title: "«Изощрённый Эстет»", traits: ['sadism', 'bondage'], desc: "Садист-художник, для которого тело — холст для боли. Обожаешь оставлять метки и эстетично связывать. В арсенале всегда плети, воск и лед. Ты не мясник, ты филигранно проводишь сабу по краю между невыносимой болью и звенящим экстазом." },
-                { id: "d4", title: "«Искусный Кукловод»", traits: ['mind_control', 'degradation'], desc: "Ломаешь не тело, а виртуозно подчиняешь сознание. Обожаешь газлайтинг, словесное унижение и разрушение эго. Заставляешь нижнюю сомневаться в собственной реальности и полностью зависеть от твоего одобрения. В твоих руках она теряет связь с миром." },
-                { id: "d5", title: "«Азартный Укротитель»", traits: ['brat_tamer', 'sadism'], desc: "Хищник, охотящийся на строптивых. Идеально покорная кукла наводит скуку. Обожаешь процесс укрощения, когда девочка дерзит. Хорошая порка и жесткое давление быстро возвращают правильные настройки и заставляют приползти с извинениями." },
-                { id: "d6", title: "«Порочный Режиссёр»", traits: ['risk', 'cuckold'], desc: "Азарт риска и публичности заводит больше всего. Выведешь нижнюю в ресторан с виброяйцом или заставишь прислуживать другим (куколдизм). Любишь снимать игры на видео. Превращаешь каждый выход из дома в опасную, будоражащую кровь игру." },
-                { id: "d7", title: "«Хранитель Оков»", traits: ['bondage', 'deprivation'], desc: "Мастер тотальной фиксации. Шибари, колодки, мумификация — забираешь девушку в безраздельное пользование, лишая возможности шевелиться. Лишив её зрения и слуха, даришь пугающее, но невероятно сладкое чувство полного освобождения от контроля." },
-                { id: "d8", title: "«Тёмный Скульптор»", traits: ['teacher', 'strict'], desc: "Терпеливый, но строгий Наставник. Ищешь 'чистый лист' — неопытную девочку, которую готов учить. Шаг за шагом будешь перепрошивать её границы, жестко наказывая за ошибки, пока она не станет идеальным отражением твоих протоколов и фантазий." },
-                { id: "d9", title: "«Первобытный Хищник»", traits: ['primal', 'edgeplay'], desc: "Чистая животная агрессия и первобытная власть. Не признаешь девайсы; используешь руки, укусы и жесткое удушье до потемнения в глазах. Рядом с тобой просыпается древнее животное желание сдаться на милость хищнику, который может зайти за грань." },
-                { id: "d10", title: "«Ледяной Диктатор»", traits: ['strict', 'control'], desc: "Бескомпромиссный надзиратель с абсурдным уровнем требований к дисциплине. Требуешь покорности с первой секунды. Недовольство выражаешь ледяным тоном. Твое признание нужно заслужить идеальным и безошибочным выполнением сотен мелких правил." }
-            ]
-        };
-
+        // --- Data ---
         const traitLabels = {
-            submission: 'Покорность', service: 'Служение', findom: 'Финдом', 
-            chastity: 'Воздержание', masochism: 'Мазохизм', oral: 'Орал/Фейсситтинг', 
-            brat: 'Строптивость', objectification: 'Объективизация', pegging: 'Инверсия', 
-            risk: 'Азарт / Риск', mind_control: 'Игры разума', cuckold: 'Куколдизм', 
-            praise: 'Жажда похвалы', newbie: 'Неопытность', deprivation: 'Депривация', 
-            online: 'Онлайн', degradation: 'Сломленность', control: 'Контроль', 
-            daddy: 'Опека', sadism: 'Садизм', brat_tamer: 'Укрощение', 
-            bondage: 'Бондаж', teacher: 'Наставник', primal: 'Инстинкты', 
-            strict: 'Строгость', edgeplay: 'Экстрим'
+            'submission': 'Покорность', 'service': 'Служение', 'findom': 'Финдом', 'chastity': 'Воздержание',
+            'masochism': 'Мазохизм', 'oral': 'Орал/Фейсситтинг', 'brat': 'Строптивость', 'objectification': 'Объективизация',
+            'pegging': 'Пеггинг', 'risk': 'Экстрим/Риск', 'mind_control': 'Игры разума', 'cuckold': 'Куколдизм',
+            'praise': 'Жажда похвалы', 'newbie': 'Неопытность', 'deprivation': 'Депривация', 'online': 'Онлайн',
+            'degradation': 'Сломленность', 'control': 'Тотальный контроль', 'daddy': 'Опека', 'sadism': 'Садизм',
+            'brat_tamer': 'Укрощение', 'bondage': 'Бондаж', 'teacher': 'Наставник', 'primal': 'Животная агрессия',
+            'strict': 'Строгость', 'edgeplay': 'Опасные практики'
         };
 
         const radarAxes = {
@@ -353,300 +267,385 @@
             dominant: ['control', 'strict', 'sadism', 'mind_control', 'bondage', 'edgeplay']
         };
 
-        const questData = {
-            submissive: {
-                q1: { text: "1. Давай узнаем самое главное. Какого уровня погружения ты ищешь? БДСМ для тебя — это образ жизни 24/7 или лишь яркая приправа к сексу?", options: [ { text: "В теме 24/7. Я дышу служением. Мое подчинение Ей не заканчивается за дверями спальни, оно длится всегда.", nextId: "q1_1", scores: { submission: +10, service: +8, control: +5 } }, { text: "Четкий график. Мне нравится служить Ей по выходным или в заранее оговоренное время. В остальном мы на равных.", nextId: "q1_2", scores: { submission: +4, service: +3 } }, { text: "Только секс. Меня заводит тематика, жесткость и фетиши, но в повседневной жизни мне не нужен контроль.", nextId: "q2", scores: { masochism: +5, risk: +3 } }, { text: "Онлайн формат. Я ищу виртуальную Госпожу, чтобы служить Ей дистанционно, не нарушая свою обычную жизнь.", nextId: "q1_3", scores: { online: +10, submission: +4 } } ] },
-                q1_1: { text: "1.1 Если мы в формате 24/7, как именно ты хочешь, чтобы Она контролировала твою повседневную жизнь?", options: [ { text: "Тотальный микро-контроль: Она диктует мне дресс-код, меню, требует фото-отчеты и контролирует мои переписки.", nextId: "q2", scores: { service: +10, degradation: +5, submission: +8 } }, { text: "Духовное лидерство: я признаю Её безусловный авторитет, Её слово — закон, но без удушающей ежедневной бюрократии.", nextId: "q2", scores: { submission: +6, praise: +4 } }, { text: "Финансовый контроль: Она должна забрать мою зарплату и выдавать мне ровно столько, сколько посчитает нужным.", nextId: "q2", scores: { findom: +12, submission: +5, degradation: +3 } }, { text: "Абсурдные правила: хочу просить у Неё разрешения на поход в туалет или глоток воды. Я ничто без Её команды.", nextId: "q2", scores: { degradation: +8, submission: +10, mind_control: +6 } } ] },
-                q1_2: { text: "1.2 А после жесткой сессии? Как твоя психика возвращается в реальный мир?", options: [ { text: "Мне жизненно необходим долгий афтеркеа (aftercare): чтобы Госпожа обняла, погладила по голове и успокоила.", nextId: "q2", scores: { praise: +8, daddy: +5 } }, { text: "Легко переключаюсь. Снимаем 'ошейник', идем пить кофе и обсуждать бытовые дела.", nextId: "q2", scores: { } }, { text: "Я хочу, чтобы сессия заканчивалась резко и холодно. Оставьте меня одного приходить в себя в углу.", nextId: "q2", scores: { degradation: +6, masochism: +3 } }, { text: "Меня заводит, когда после сессии Она сразу использует меня как прислугу: заставляет убрать игрушки и вымыть полы.", nextId: "q2", scores: { service: +10, degradation: +4 } } ] },
-                q1_3: { text: "1.3 Онлайн подчинение... В чем оно будет выражаться ярче всего?", options: [ { text: "Финансовые подношения. Моя карточка принадлежит Ей, я перевожу деньги по первому требованию (Findom).", nextId: "q2", scores: { findom: +10, service: +4 } }, { text: "Унизительные задания по видео. Я буду стоять на коленях перед камерой и выполнять всё, что Она скажет.", nextId: "q2", scores: { degradation: +8, online: +8, exhibitionism: +4 } }, { text: "Оргазмический контроль. Я надену пояс верности и буду умолять Её разблокировать замок через приложение.", nextId: "q2", scores: { chastity: +10, online: +6 } }, { text: "Интеллектуальное служение. Я буду помогать Ей с работой, делать таблицы, писать тексты — быть Её личным секретарем.", nextId: "q2", scores: { service: +8, submission: +4 } } ] },
-                q2: { text: "2. Кем ты видишь себя рядом с Ней? Ты хочешь принадлежать Ей как личная собственность или тебе важно оставаться личностью?", options: [ { text: "Я хочу быть безвольной вещью, живым инструментом для Её удовлетворения. У меня нет своих желаний.", nextId: "q2_1", scores: { degradation: +10, submission: +10, objectification: +10 } }, { text: "Я преданный раб, но считаю, что заслуживаю заботу, ласку и уважение в ответ на мое безупречное служение.", nextId: "q2_2", scores: { praise: +6, service: +4 } }, { text: "Я её игрушка для битья. Моя личность не важна, главное — сколько боли я смогу вытерпеть ради Неё.", nextId: "q3", scores: { masochism: +10, degradation: +4 } }, { text: "Я строптивый питомец (Brat). Я личность, которая обожает бросать Ей вызов, чтобы быть жестко поставленным на место.", nextId: "q3", scores: { brat: +10, risk: +4 } } ] },
-                q2_1: { text: "2.1 Если ты Её вещь, как Она должна распоряжаться тобой при чужих людях?", options: [ { text: "Она может сдавать меня в «аренду» своим подругам. Мое тело принадлежит Ей, Она решает, кто меня использует.", nextId: "q3", scores: { cuckold: +8, degradation: +10, risk: +5 } }, { text: "Она должна хвастаться мной: водить на поводке на вечеринки, показывать всем, насколько я дрессирован.", nextId: "q3", scores: { risk: +8, service: +5, objectification: +6 } }, { text: "Никак. Я Её личный, тайный секрет. Мое служение должно оставаться за закрытыми дверями.", nextId: "q3", scores: { submission: +4 } }, { text: "Я должен прислуживать Ей и Её гостям: подносить напитки на коленях, молча убирать за ними, не поднимая глаз.", nextId: "q3", scores: { service: +10, degradation: +6 } } ] },
-                q2_2: { text: "2.2 Какой формат заботы от Верхней тебя привлекает?", options: [ { text: "Формат «Властная Мамочка / Mommy»: Она всё решает за меня, балует, но и строго порет ремнем за двойки.", nextId: "q3", scores: { praise: +10, daddy: +8, strict: +4 } }, { text: "Формат Наставницы: Она холодна, но справедлива. Она лепит из меня идеального саба через строгие уроки.", nextId: "q3", scores: { teacher: +8, strict: +6, submission: +4 } }, { text: "Дружеский. В жизни мы смеемся и общаемся на равных, а в спальне Она превращается в Демона.", nextId: "q3", scores: { risk: +2 } }, { text: "Мне не нужна забота. Мне нужен ледяной диктатор, чье малейшее одобрение я буду вымаливать годами.", nextId: "q3", scores: { mind_control: +8, submission: +6 } } ] },
-                q3: { text: "3. Психологическое давление (Mindfuck). Как ты отнесешься к тому, если Госпожа начнет обзывать, унижать тебя и ломать твое эго?", options: [ { text: "Это мой абсолютный идеал. Пусть бьет по моим реальным комплексам, газлайтит и внушает свою реальность.", nextId: "q3_1", scores: { mind_control: +10, degradation: +8, submission: +5 } }, { text: "Предпочитаю только классический грязный мат (dirty talk) строго в процессе секса. Без перехода на реальные личности.", nextId: "q4", scores: { mind_control: +2, risk: +1 } }, { text: "Я ненавижу словесные унижения. Я «хороший мальчик», меня заводит Её похвала и ласковый, но властный тон.", nextId: "q3_2", scores: { praise: +10, strict: +2 } }, { text: "Мне нравится, когда Она унижает не меня, а мою мужественность (sissification). Заставляет носить женское белье.", nextId: "q4", scores: { degradation: +10, pegging: +5 } } ] },
-                q3_1: { text: "3.1 Насколько глубоко Она может залезть в твой разум?", options: [ { text: "Она может читать все мои переписки, удалить моих друзей и стать единственным центром моей вселенной.", nextId: "q4", scores: { mind_control: +10, submission: +8, isolation: +5 } }, { text: "Она может использовать шантаж: держать у себя мой компромат, чтобы я жил в вечном страхе разоблачения.", nextId: "q4", scores: { risk: +10, mind_control: +8, edgeplay: +4 } }, { text: "Только вербальное унижение во время сессий. Вне игры моя психика должна быть в безопасности.", nextId: "q4", scores: { degradation: +4 } }, { text: "Пусть заставляет меня повторять унизительные мантры («Я ничтожество, я просто вещь») сотни раз перед зеркалом.", nextId: "q4", scores: { degradation: +8, mind_control: +6 } } ] },
-                q3_2: { text: "3.2 А если ты серьезно провинишься, как Она должна тебя отчитать?", options: [ { text: "Ледяным, спокойным тоном, от которого мурашки по коже. Я должен сам сгореть от стыда под Её взглядом.", nextId: "q4", scores: { strict: +8, submission: +5 } }, { text: "Игнорированием. Хуже всего, если Она лишит меня своего внимания, пока я не заслужу прощение на коленях.", nextId: "q4", scores: { praise: +8, mind_control: +4 } }, { text: "Заставить меня писать объяснительные записки и стоять голым в углу с поднятыми руками.", nextId: "q4", scores: { service: +6, strict: +6, degradation: +3 } }, { text: "Взять в руки тяжелый ремень. Никаких слов, только физическое наказание, пока я не усвою урок.", nextId: "q4", scores: { masochism: +8 } } ] },
-                q4: { text: "4. Ограничение свободы. Насколько тебе нравится быть физически обездвиженным в Её руках (Бондаж)?", options: [ { text: "Обожаю. Чем сложнее и жестче фиксация, тем лучше. Чувство полной беспомощности перед Ней сводит меня с ума.", nextId: "q4_1", scores: { bondage: +10, submission: +4 } }, { text: "Меня пугает потеря свободы. Я хочу иметь возможность двигаться, трогать Её и активно прислуживать.", nextId: "q4_2", scores: { service: +8, risk: -2 } }, { text: "Легкий бондаж — да. Наручники на спинку кровати, чтобы я просто не мешал Ей брать то, что Она хочет.", nextId: "q5", scores: { bondage: +4 } }, { text: "Только психологический бондаж. Она скажет «Замри» — и я не посмею даже моргнуть без веревок.", nextId: "q5", scores: { mind_control: +8, strict: +6, submission: +5 } } ] },
-                q4_1: { text: "4.1 Какой уровень фиксации ты предпочитаешь и что при этом чувствуешь?", options: [ { text: "Сложное японское шибари. Мне важна эстетика веревок, давление на узлы и искусство связывания.", nextId: "q5", scores: { bondage: +8, masochism: +3 } }, { text: "Колодки или стальные цепи. Хочу чувствовать холод металла и абсолютную невозможность вырваться.", nextId: "q5", scores: { bondage: +9, degradation: +4 } }, { text: "Мумификация или вакуумная кровать. Быть полностью запечатанным в латекс, как безмолвная кукла.", nextId: "q5", scores: { bondage: +10, deprivation: +8, degradation: +5 } }, { text: "Подвешивание (Suspension). Я хочу болтаться в воздухе, полностью отдав свой вес и жизнь в Её руки.", nextId: "q5", scores: { bondage: +10, edgeplay: +6, risk: +5 } } ] },
-                q4_2: { text: "4.2 Если ты не любишь бондаж, то как Госпоже удерживать твой контроль во время сессии?", options: [ { text: "Через боль. Каждый раз, когда я дернусь без разрешения, Она должна наносить жесткий удар плетью.", nextId: "q5", scores: { masochism: +8, strict: +4 } }, { text: "Через приказы. Я буду преданно держать позу, даже если у меня сводит мышцы. Это моя обязанность.", nextId: "q5", scores: { service: +8, submission: +6 } }, { text: "Через оргазмический контроль. Если я ослушаюсь, Она лишит меня разрядки на неделю.", nextId: "q5", scores: { chastity: +6, mind_control: +4 } }, { text: "Я вообще не люблю жесткий контроль. Я хочу дикой, страстной борьбы, где Она побеждает меня своей энергией.", nextId: "q5", scores: { risk: +6, brat: +4 } } ] },
-                q5: { text: "5. Оргазмический контроль (Chastity). Твое отношение к запрету на разрядку?", options: [ { text: "Мой оргазм принадлежит Ей. Мечтаю запереть член в клетку (пояс верности) и навсегда отдать Ей ключ.", nextId: "q5_1", scores: { chastity: +10, submission: +6, degradation: +3 } }, { text: "Люблю тизинг (tease and denial) в рамках одной сессии: Она доводит меня до грани часами, а потом запрещает кончать.", nextId: "q5_2", scores: { chastity: +6, mind_control: +4 } }, { text: "Оргазм для меня — важная и обязательная часть. Я не хочу его лишаться, иначе теряю мотивацию.", nextId: "q6", scores: { } }, { text: "Я готов терпеть запреты, только если в конце Она жестоко «выдоит» меня, заставив кончать снова и снова.", nextId: "q5_2", scores: { masochism: +6, edgeplay: +4 } } ] },
-                q5_1: { text: "5.1 Готов ли ты носить пояс верности 24/7 в обычной жизни (на работе, в зале)?", options: [ { text: "Да. Идеальная пытка. Хочу сходить с ума от стояка в офисе, зная, что клетка врезается в плоть.", nextId: "q6", scores: { chastity: +10, risk: +6, masochism: +5 } }, { text: "Готов носить постоянно, но прошу Госпожу не провоцировать меня фото и видео в рабочее время — я сойду с ума.", nextId: "q6", scores: { chastity: +8 } }, { text: "Буду носить его только дома или на выходных в качестве наказания за проступки.", nextId: "q6", scores: { chastity: +4, strict: +3 } }, { text: "Я надену его, но буду постоянно ныть и умолять снять его. Обожаю быть жалким попрошайкой.", nextId: "q6", scores: { chastity: +6, brat: +4, degradation: +5 } } ] },
-                q5_2: { text: "5.2 Полное лишение оргазма (Ruined Orgasm) или гиперстимуляция?", options: [ { text: "Ruined Orgasm. За секунду до разрядки Она бьет меня или резко бросает. Оргазм смазывается, оставляя пустоту.", nextId: "q6", scores: { mind_control: +8, degradation: +6 } }, { text: "Гиперстимуляция. Заставить меня кончать с помощью вибратора 3-4 раза подряд, когда мне уже больно.", nextId: "q6", scores: { masochism: +8, edgeplay: +5 } }, { text: "Финансовый шантаж. Я должен платить крупную сумму за каждую секунду прикосновения к моему члену.", nextId: "q6", scores: { findom: +10, chastity: +4 } }, { text: "Просто классический долгий тизинг. Без жести, просто сладкая пытка ожиданием.", nextId: "q6", scores: { praise: +3 } } ] },
-                q6: { text: "6. Боль и Порка. Каков твой болевой порог и отношение к физическому воздействию?", options: [ { text: "Я хардкорный мазохист. Мне нужна кровь, синяки, глубокие рубцы от плетей. Боль — это мой экстаз.", nextId: "q6_1", scores: { masochism: +10, edgeplay: +6 } }, { text: "Я люблю эстетичную боль: обжигающий воск, лед, укусы, царапины, звонкие пощечиины. Без расчлененки.", nextId: "q6_2", scores: { masochism: +6, objectification: +3 } }, { text: "Я вообще не люблю боль. Меня заводит исключительно психологическое давление, унижение и служение.", nextId: "q7", scores: { mind_control: +8, degradation: +4 } }, { text: "Я люблю, когда бьют не меня, а по моей гордости. Удары по лицу или плевки — это унижение, а не боль.", nextId: "q7", scores: { degradation: +10, masochism: +2 } } ] },
-                q6_1: { text: "6.1 Маркировка тела. Ты хочешь носить Её метки?", options: [ { text: "Да! Я хочу, чтобы Она вырезала скальпелем свои инициалы на моей груди или сделала мне клеймо.", nextId: "q7", scores: { edgeplay: +10, masochism: +8, risk: +5 } }, { text: "Обожаю синяки и засосы на видимых местах (шея, ключицы), чтобы все на работе видели, что у меня есть Владелица.", nextId: "q7", scores: { risk: +8, masochism: +5, exhibitionism: +4 } }, { text: "Предпочитаю, чтобы следы от порки оставались только на спине и бедрах, скрытые под одеждой.", nextId: "q7", scores: { masochism: +6 } }, { text: "Согласен на постоянные метки в виде тематических татуировок (штрихкод, Её имя).", nextId: "q7", scores: { submission: +8, objectification: +6 } } ] },
-                q6_2: { text: "6.2 Если боль эстетичная, то какой инструмент в Её руках пугает и заводит больше всего?", options: [ { text: "Медицинские иглы (Play-piercing). Хочу, чтобы Она протыкала мою кожу сотнями иголок.", nextId: "q7", scores: { edgeplay: +8, masochism: +6 } }, { text: "Огонь и раскаленный воск. Контраст температур сводит меня с ума.", nextId: "q7", scores: { masochism: +5, risk: +2 } }, { text: "Электростимуляция (Violet Wand). Удары током, пронизывающие всё тело.", nextId: "q7", scores: { masochism: +6, bondage: +2 } }, { text: "Её острые длинные ногти и тяжелые пощечины. Мне нужен прямой телесный контакт хищницы.", nextId: "q7", scores: { primal: +8, degradation: +3 } } ] },
-                q7: { text: "7. Риск и Публичность (Public play). Насколько ты готов рисковать своим статусом ради Неё?", options: [ { text: "Безумно готов. Хочу гулять с анальной пробкой, выполнять грязные команды в ТЦ и целовать Её туфли при всех.", nextId: "q7_1", scores: { risk: +10, degradation: +8 } }, { text: "Люблю легкий экстрим: когда Она незаметно отдает приказы взглядом на званом ужине, и я дрожу от страха.", nextId: "q8", scores: { risk: +5, mind_control: +4 } }, { text: "Только приватность. Я серьезный человек в жизни, мое подчинение остается строго за закрытыми дверями.", nextId: "q8", scores: { strict: +2 } }, { text: "Хочу, чтобы Она выкладывала мои унизительные фото или видео на свой Boosty или в закрытые каналы.", nextId: "q7_2", scores: { risk: +8, degradation: +10, online: +6 } } ] },
-                q7_1: { text: "7.1 А если вас кто-то заметит в ресторане?", options: [ { text: "В этом весь смысл! Публичное унижение, стыд и осуждение прохожих — это мой главный фетиш.", nextId: "q8", scores: { risk: +10, degradation: +10 } }, { text: "Я сгорю со стыда и буду умолять Её прекратить, но именно это Её и позабавит.", nextId: "q8", scores: { brat: +4, degradation: +6, risk: +6 } }, { text: "Всё должно быть на грани фола, но так виртуозно, чтобы никто не смог предъявить нам претензии.", nextId: "q8", scores: { mind_control: +5, risk: +4 } }, { text: "Если нас заметят, я буду защищать Её репутацию любой ценой, возьму весь удар на себя.", nextId: "q8", scores: { service: +8, submission: +5 } } ] },
-                q7_2: { text: "7.2 Если Она снимет тебя на видео, как Она должна его использовать?", options: [ { text: "Для жесткого шантажа. «Сделай это, или я разошлю это видео твоим коллегам».", nextId: "q8", scores: { mind_control: +10, risk: +10 } }, { text: "Продавать его другим сабам, чтобы они видели, какая у меня властная Госпожа (Findom + Cuckold).", nextId: "q8", scores: { findom: +6, cuckold: +6, degradation: +5 } }, { text: "Оставить строго для личного архива, чтобы пересматривать долгими вечерами.", nextId: "q8", scores: { submission: +4 } }, { text: "Заставить меня пересматривать это видео каждый день, чтобы я помнил, насколько я жалок.", nextId: "q8", scores: { degradation: +8, mind_control: +5 } } ] },
-                q8: { text: "8. Опасные игры (Edgeplay) и Дыхание. Готов ли ты заглянуть в глаза настоящему страху?", options: [ { text: "Да, я обожаю жесткое придушивание (асфиксию) до потемнения в глазах. Моя жизнь буквально в Её руках.", nextId: "q8_1", scores: { edgeplay: +10, risk: +6, masochism: +4 } }, { text: "Боюсь удушья, но люблю сенсорную депривацию: плотные кляпы и глухие маски. Неизвестность пугает до дрожи.", nextId: "q9", scores: { deprivation: +10, bondage: +5 } }, { text: "Я люблю игры с ножами (Knifeplay). Когда холодное лезвие скользит по горлу, я чувствую абсолютную власть.", nextId: "q9", scores: { edgeplay: +10, risk: +8 } }, { text: "Нет, я никогда не играю со своим здоровьем и жизнью. Только безопасный БДСМ без экстрима.", nextId: "q9", scores: { strict: +4 } } ] },
-                q8_1: { text: "8.1 Как именно ты хочешь, чтобы Она перекрывала тебе кислород?", options: [ { text: "Только Её руками. Хочу чувствовать тепло Её кожи и видеть в Её глазах животную власть (Primal).", nextId: "q9", scores: { primal: +8, edgeplay: +6 } }, { text: "Её ногами. Хочу, чтобы Она наступила мне каблуком на горло или душила бедрами (Facesitting).", nextId: "q9", scores: { oral: +6, objectification: +5, edgeplay: +5 } }, { text: "Кожаными ошейниками, веревками или цепями. Меня заводит визуальная жесткость девайсов.", nextId: "q9", scores: { bondage: +6, masochism: +4 } }, { text: "Противогазами или пластиковыми пакетами (Breath control). Тотальная изоляция.", nextId: "q9", scores: { deprivation: +8, edgeplay: +8 } } ] },
-                q9: { text: "9. Эксклюзивность. Ты принадлежишь только Ей, или тебя заводит идея «делиться»?", options: [ { text: "Я принадлежу только Ей. Я полностью моногамен в подчинении, мысли о других людях вызывают отторжение.", nextId: "q9_1", scores: { submission: +8 } }, { text: "Куколдизм (Cuckold). Хочу сидеть в клетке и смотреть, как Она занимается сексом с настоящими альфа-самцами.", nextId: "q9_2", scores: { cuckold: +10, degradation: +8, risk: +4 } }, { text: "Аренда. Я Её вещь, и Она может сдать меня в использование своим подругам-Госпожам на вечер.", nextId: "q9_2", scores: { objectification: +10, degradation: +6, service: +5 } }, { text: "Групповые унижения. Хочу, чтобы Она позвала гостей, и они все вместе смеялись надо мной и плевали в меня.", nextId: "q9_2", scores: { degradation: +10, risk: +8 } } ] },
-                q9_1: { text: "9.1 Насколько глубоко Её чувство собственничества должно проникать в твою жизнь?", options: [ { text: "Она решает, с кем я дружу, куда хожу и что ем. Моя жизнь полностью спроектирована Ей.", nextId: "q10", scores: { control: +10, strict: +8, submission: +6 } }, { text: "Я верен Ей сексуально и тематически, но в работе и дружбе я принимаю решения сам.", nextId: "q10", scores: { } }, { text: "Она должна поставить мне гео-трекер на телефон и следить за каждым моим шагом круглосуточно.", nextId: "q10", scores: { mind_control: +8, service: +4 } }, { text: "Её контроль выражается в том, что я обязан постоянно присылать видео-отчеты о том, чем я занят.", nextId: "q10", scores: { online: +6, service: +5 } } ] },
-                q9_2: { text: "9.2 Если Она использует тебя в играх с другими (Куколд/Аренда), какова твоя роль?", options: [ { text: "Я молчаливая мебель. Стою на четвереньках в качестве столика, пока они пьют вино.", nextId: "q10", scores: { objectification: +10, degradation: +8 } }, { text: "Я жалкий уборщик (Cleanup). После того, как чужие мужчины закончат, я вылизываю Её дочиста.", nextId: "q10", scores: { cuckold: +10, degradation: +10, oral: +6 } }, { text: "Я био-вибратор. Она использует мой рот, пока другой мужчина имеет Её сзади.", nextId: "q10", scores: { oral: +8, cuckold: +6, service: +5 } }, { text: "Я финансовый спонсор. Я оплачиваю Её свидания с другими мужчинами, отели и их подарки.", nextId: "q10", scores: { findom: +10, cuckold: +8, degradation: +4 } } ] },
-                q10: { text: "10. Инверсия ролей и Пеггинг. Готов ли ты отдать контроль над своей задницей?", options: [ { text: "Да, это моя мечта. Раздвинуть ноги, принять Её страпон и быть использованным как покорная сучка.", nextId: "q10_1", scores: { pegging: +10, degradation: +6, submission: +5 } }, { text: "Меня это заводит, но у меня мало опыта. Если Госпожа будет нежна и терпелива на первых этапах — я Ваш.", nextId: "q11", scores: { pegging: +4, praise: +4 } }, { text: "Нет, жесткое табу. Моя простата и мужественность неприкосновенны.", nextId: "q11", scores: { } }, { text: "Только жесткий фистинг (Fisting) или огромные игрушки. Я хочу, чтобы Она растянула меня до предела.", nextId: "q10_1", scores: { masochism: +8, edgeplay: +6, pegging: +5 } } ] },
-                q10_1: { text: "10.1 Какого отношения в процессе пеггинга ты ждешь?", options: [ { text: "Жесткое доминирование. Пусть берет меня грубо, тянет за волосы, называет шлюхой и вбивается без жалости.", nextId: "q11", scores: { degradation: +8, masochism: +6 } }, { text: "Физиологическое служение. Хочу, чтобы Она методично стимулировала простату до 'hands-free' оргазма (доение).", nextId: "q11", scores: { pegging: +8, service: +4 } }, { text: "Ролевая игра (Sissification). Я должен быть накрашен, в женском белье и парике, чтобы полностью потерять мужское эго.", nextId: "q11", scores: { degradation: +10, mind_control: +5 } }, { text: "Тотальный бондаж. Связать меня в позу 'лягушки', чтобы я даже не мог дернуться, когда Она входит.", nextId: "q11", scores: { bondage: +8, deprivation: +4 } } ] },
-                q11: { text: "11. Территория твоего служения и финансы. Где и как проходят встречи?", options: [ { text: "У меня дома. Я вымою полы, подготовлю еду и сделаю всё, чтобы Госпоже было комфортно меня использовать.", nextId: "q12", scores: { service: +8 } }, { text: "В дорогих БДСМ-отелях. Я сам найду, забронирую и оплачу лучшую VIP-студию для Неё.", nextId: "q12", scores: { findom: +8, service: +6 } }, { text: "Я готов делить расходы на аренду 50/50, ведь мы оба получаем от сессии удовольствие.", nextId: "q12", scores: { } }, { text: "Я приеду к Ней домой, если Она позволит, и буду выполнять обязанности по дому (уборка, готовка).", nextId: "q12", scores: { service: +10, submission: +5 } } ] },
-                q12: { text: "12. Расстояния. Что, если идеальная Владелица живет в другом городе?", options: [ { text: "Расстояние не преграда. Я буду летать к Ней по выходным или полностью перееду, бросив всё.", nextId: "q13", scores: { submission: +8, risk: +4 } }, { text: "Идеально! Я ищу виртуальное подчинение (Online). Буду служить по видеосвязи и слать деньги.", nextId: "q13", scores: { online: +10, findom: +6 } }, { text: "Только мой город. Виртуальные романы и перелеты — это трата времени.", nextId: "q13", scores: { } }, { text: "Я буду оплачивать Ей билеты бизнес-класса, чтобы Она прилетала ко мне, когда захочет.", nextId: "q13", scores: { findom: +8, service: +4 } } ] },
-                q13: { text: "13. Бытовое служение. Если Госпожа прикажет вымыть полы в Её доме зубной щеткой?", options: [ { text: "Я сделаю это с радостью и рвением. Тяжелое, бессмысленное бытовое служение очищает мой разум.", nextId: "q14", scores: { service: +10, degradation: +4 } }, { text: "Я пришел в БДСМ за сексом, наручниками и страстью, а не для того, чтобы работать бесплатным уборщиком.", nextId: "q14", scores: { risk: +2, brat: +2 } }, { text: "Сделаю, но буду тихо ныть и жаловаться, ожидая, пока Она не шлепнет меня по губам за дерзость.", nextId: "q14", scores: { brat: +8, masochism: +3 } }, { text: "Я лучше найму Ей профессиональную клининговую компанию за свой счет. Мое время стоит дороже.", nextId: "q14", scores: { findom: +6 } } ] },
-                q14: { text: "14. Животные отыгрыши (Petplay). Если Она наденет на тебя собачий ошейник, миску на пол и прикажет лаять?", options: [ { text: "Я стану Её верным, преданным Псом (Puppy play). Буду спать в ногах кровати и радостно вилять хвостом.", nextId: "q15", scores: { objectification: +8, degradation: +6, submission: +5 } }, { text: "Я скорее Кот. Своенравный, ласковый, трусь о колени, но могу и выпустить когти, если Она не обращает внимания.", nextId: "q15", scores: { brat: +6, praise: +5 } }, { text: "Я Свинья (Pigplay). Обожаю ползать в грязи, жрать с пола и хрюкать, пока Она смеется надо мной.", nextId: "q15", scores: { degradation: +10, objectification: +8 } }, { text: "Нет, зоо-ролевые игры и имитация животных меня абсолютно не привлекают.", nextId: "q15", scores: { } } ] },
-                q15: { text: "15. Твой «пробег». Какой у тебя реальный опыт подчинения женщине?", options: [ { text: "Я опытный нижний. Знаю протокол, умею служить, понимаю свои лимиты и не задаю лишних вопросов.", nextId: "q16", scores: { service: +4 } }, { text: "Я «чистый лист». Опыта нет совсем, но у меня огромное желание учиться. Ищу мудрую Наставницу.", nextId: "q16", scores: { newbie: +10, submission: +4 } }, { text: "Я теоретик. Пересмотрел гигабайты порно, прочитал все паблики, но в реальности боюсь сделать первый шаг.", nextId: "q16", scores: { newbie: +8, online: +4 } }, { text: "У меня огромный опыт, но я «сломанный» саб с травмами из прошлых отношений. Мне нужна жесткая перезагрузка.", nextId: "q16", scores: { mind_control: +6, degradation: +4 } } ] },
-                q16: { text: "16. Безопасность и Стоп-слово. Как ты относишься к своим собственным границам?", options: [ { text: "Я знаю свои лимиты. Если я произнесу стоп-слово («Красный»), Госпожа должна немедленно всё остановить.", nextId: "q17", scores: { strict: +2 } }, { text: "CNC (Игнорирование стопа). Я даю согласие на насилие. Даже если я плачу и умоляю, Она сама решает, когда хватит.", nextId: "q17", scores: { mind_control: +10, risk: +8, edgeplay: +6 } }, { text: "Я вообще не использую стоп-слова. Моя жизнь, мое здоровье и мое тело полностью в Её распоряжении.", nextId: "q17", scores: { submission: +10, risk: +6, degradation: +4 } }, { text: "Мой стоп-кран — это мои деньги. Я плачу за сессию: если мне не нравится, я просто ухожу.", nextId: "q17", scores: { brat: +4 } } ] },
-                q17: { text: "17. Ритуалы преданности. Что ты должен делать, когда Госпожа входит в комнату?", options: [ { text: "Мгновенно упасть на колени, опустить глаза в пол и ждать Её первого приказа, не смея заговорить первым.", nextId: "q18", scores: { submission: +8, service: +6, strict: +4 } }, { text: "Подойти и нежно поцеловать Её туфли или сапоги, выражая свою любовь и поклонение.", nextId: "q18", scores: { service: +5, praise: +3 } }, { text: "Я не люблю излишнюю театральщину. Я просто поздороваюсь с уважением.", nextId: "q18", scores: { } }, { text: "Радостно подбежать, как щенок, обнять Её за ноги и умолять погладить меня.", nextId: "q18", scores: { objectification: +4, praise: +6 } } ] },
-                q18: { text: "18. Оральное служение. Насколько глубоко ты готов уйти в поклонение Её телу?", options: [ { text: "Фейсситтинг (Facesitting). Она садится мне на лицо всем весом. Я задыхаюсь без кислорода, но продолжаю лизать.", nextId: "q19", scores: { oral: +10, edgeplay: +6, deprivation: +5 } }, { text: "Долгий куннилингус. Я готов работать языком часами, пока у меня не сведет челюсть. Это моя главная обязанность.", nextId: "q19", scores: { oral: +8, service: +6 } }, { text: "Деградация. Если Она кончит, я должен слизать Её соки с Её туфель или прямо с грязного пола.", nextId: "q19", scores: { oral: +6, degradation: +10 } }, { text: "Оральные ласки — это взаимный, чувственный процесс, а не слепое служение. Без фанатизма.", nextId: "q19", scores: { } } ] },
-                q19: { text: "19. Твои «Красные флаги». Что заставит тебя навсегда уйти от Госпожи?", options: [ { text: "Если Она покажет свою слабость, начнет плакать, жаловаться на жизнь или попросит меня принять мужское решение.", nextId: "q20", scores: { submission: +6 } }, { text: "Неуважение к моим жестким лимитам (например, если Она попытается пустить мне кровь, а я предупреждал, что боюсь).", nextId: "q20", scores: { } }, { text: "Холодность и отсутствие афтеркеа. Если Она будет относиться ко мне как к пустому месту после сессии, я выгорю.", nextId: "q20", scores: { praise: +8 } }, { text: "Если Она откажется от моей финансовой помощи. Для меня невозможно служить той, кто не берет мои деньги.", nextId: "q20", scores: { findom: +8 } } ] },
-                q20: { text: "20. Финал близок. Какую эмоцию ты хочешь испытывать после встречи с Ней чаще всего?", options: [ { text: "Тотальное опустошение и катарсис от пережитой невыносимой боли.", nextId: "end", scores: { masochism: +8, edgeplay: +4 } }, { text: "Глубокий стыд, ощущение собственной ничтожности и использованности.", nextId: "end", scores: { degradation: +10, mind_control: +6 } }, { text: "Тепло, умиротворение и чувство, что я 'хороший мальчик', заслуживший Её любовь.", nextId: "end", scores: { praise: +10, daddy: +4 } }, { text: "Адреналин, дрожь в коленях и страх от того, что мы творили на глазах у всех.", nextId: "end", scores: { risk: +10 } } ] }
-            },
-            dominant: {
-                q1: { text: "1. Давай узнаем самое главное. Какого формата власти ты ищешь? Твое доминирование — это круглосуточная работа или ролевая игра?", options: [ { text: "Власть 24/7. Я не снимаю корону. Она моя собственность, и я контролирую её жизнь даже когда мы не рядом.", nextId: "q1_1", scores: { control: +10, strict: +8 } }, { text: "Тематические сессии. В спальне я тиран и бог, но за дверью мы партнеры, друзья и на равных.", nextId: "q2", scores: { sadism: +4 } }, { text: "Онлайн-Империя. Я ищу дистанционных рабынь, которые будут слать мне видео-отчеты и переводить деньги.", nextId: "q1_2", scores: { control: +6, mind_control: +4 } }, { text: "Спонтанный контроль (Primal). Я беру власть только тогда, когда во мне просыпается первобытный инстинкт.", nextId: "q2", scores: { primal: +8, edgeplay: +4 } } ] },
-                q1_1: { text: "1.1 В формате 24/7, как именно выражается твой микро-контроль в повседневной жизни?", options: [ { text: "Диктатура: Она обязана носить ошейник под одеждой, соблюдать диету, ложиться спать по команде и писать ежедневные отчеты.", nextId: "q2", scores: { control: +10, strict: +10 } }, { text: "Финансовый контроль: Она отдает мне свою зарплату, а я решаю, сколько ей оставить на проезд и кофе.", nextId: "q2", scores: { control: +6, mind_control: +5 } }, { text: "Духовное руководство: Я не требую бумажек и отчетов. Мой авторитет давит так, что она сама боится сделать шаг без спроса.", nextId: "q2", scores: { mind_control: +8, daddy: +4 } }, { text: "Изоляция: Я контролирую её круг общения, читаю переписки и постепенно отрезаю её от внешнего мира.", nextId: "q2", scores: { mind_control: +10, control: +8, risk: +5 } } ] },
-                q1_2: { text: "1.2 Если формат Онлайн, то как ты заставляешь её чувствовать свою власть через экран?", options: [ { text: "Заставляю выполнять унизительные задания (писать мое имя на теле, портить свою одежду) по видеосвязи.", nextId: "q2", scores: { degradation: +8, mind_control: +6 } }, { text: "Шантаж. Она скидывает мне самый жесткий компромат, и теперь её жизнь висит на волоске от моего настроения.", nextId: "q2", scores: { risk: +10, mind_control: +8, edgeplay: +5 } }, { text: "Оргазмический контроль. Я управляю замком её пояса верности через Bluetooth. Она кончит, только когда я нажму кнопку.", nextId: "q2", scores: { control: +8, bondage: +4 } }, { text: "Словесное унижение и газлайтинг. Я ломаю её психику текстом и голосовыми, заставляя рыдать над телефоном.", nextId: "q2", scores: { mind_control: +10, sadism: +4 } } ] },
-                q2: { text: "2. Отношение к нижней. Она для тебя — живой человек, требующий заботы, или просто кусок мяса для утех?", options: [ { text: "Она моя любимая вещь. Я содержу её, балую, слежу за её здоровьем, но требую идеального послушания (Daddy).", nextId: "q3", scores: { daddy: +10, control: +6, praise: +5 } }, { text: "Она — расходный материал. Если она сломается или не выдержит моих требований, я просто найду новую.", nextId: "q3", scores: { sadism: +8, degradation: +6, strict: +6 } }, { text: "Она — пластилин. Я наставник (Teacher), который терпеливо и методично вылепит из неё идеальную рабыню.", nextId: "q3", scores: { teacher: +10, strict: +4 } }, { text: "Она — моя добыча. Меня заводит её сопротивление, я хочу ломать её и укрощать каждый день (Brat Tamer).", nextId: "q3", scores: { brat_tamer: +10, primal: +6, sadism: +4 } } ] },
-                q3: { text: "3. Психология боли. Твоя истинная цель, когда ты берешь в руки плеть?", options: [ { text: "Эстетика и искусство. Я рисую синяками и рубцами. Я хочу провести её по грани эндорфинового транса.", nextId: "q4", scores: { sadism: +8, teacher: +4 } }, { text: "Разрушение воли. Я бью, чтобы увидеть её слезы, услышать мольбы о пощаде и почувствовать свою абсолютную власть.", nextId: "q4", scores: { sadism: +10, mind_control: +8 } }, { text: "Наказание. Плеть — это не игра. Это инструмент дисциплины, который применяется только за нарушение правил.", nextId: "q4", scores: { strict: +10, control: +6 } }, { text: "Животная агрессия. Мне не нужны плети. Я бью руками, кусаю до крови и душу. Это первобытный инстинкт.", nextId: "q4", scores: { primal: +10, edgeplay: +8 } } ] },
-                q4: { text: "4. Игры разума (Mindfuck). Любишь ли ты манипулировать сознанием нижней?", options: [ { text: "Да, это мое любимое. Газлайтинг, словесное унижение, внушение ложных воспоминаний. Я сломаю её эго.", nextId: "q5", scores: { mind_control: +10, degradation: +6 } }, { text: "Использую только жесткий грязный мат (dirty talk) в постели, чтобы завести нас обоих. Без травм для психики.", nextId: "q5", scores: { sadism: +2 } }, { text: "Нет, я строг, но адекватен. Моя власть строится на уважении и четких правилах, а не на токсичных манипуляциях.", nextId: "q5", scores: { strict: +6, daddy: +4 } }, { text: "Я играю на её страхах. Люблю пугать её неизвестностью, внезапными наказаниями и паранойей.", nextId: "q5", scores: { mind_control: +8, risk: +5 } } ] },
-                q5: { text: "5. Бондаж и фиксация. Каков твой подход к ограничению её свободы?", options: [ { text: "Мастер Шибари. Веревки — это философия. Я связываю её так красиво и сложно, что это похоже на искусство.", nextId: "q6", scores: { bondage: +10, teacher: +3 } }, { text: "Тотальная депривация. Колодки, смирительные рубашки, глухие шлемы. Она не должна ни видеть, ни двигаться.", nextId: "q6", scores: { bondage: +8, deprivation: +10, mind_control: +5 } }, { text: "Минимализм. Наручники к батарее — этого достаточно, чтобы она не мешала мне брать её жестко.", nextId: "q6", scores: { bondage: +3, primal: +2 } }, { text: "Психологический бондаж. Я не использую веревки. Я говорю «Сидеть» — и она сидит в неудобной позе часами.", nextId: "q6", scores: { strict: +8, mind_control: +6, control: +5 } } ] },
-                q6: { text: "6. Оргазмический контроль. Как ты распоряжаешься её разрядкой?", options: [ { text: "Полный запрет (Chastity/Denial). Она может неделями жить с разрушенными оргазмами. Разрядка — это редкая привилегия.", nextId: "q7", scores: { mind_control: +8, strict: +5 } }, { text: "Пытка удовольствием (Overstimulation). Я заставлю её кончать 5, 10 раз подряд, пока она не начнет плакать от гиперчувствительности.", nextId: "q7", scores: { sadism: +8, edgeplay: +4 } }, { text: "Я щедрый Папочка. Я доведу её до сумасшествия, но в конце всегда подарю мощный, заслуженный оргазм.", nextId: "q7", scores: { daddy: +8 } }, { text: "Я использую её оргазм как инструмент дрессировки. Хорошо служишь — кончаешь. Ошиблась — лишаешься на месяц.", nextId: "q7", scores: { strict: +8, control: +6 } } ] },
-                q7: { text: "7. Публичные игры и Экстрим. Рискнешь ли ты вывести её 'в свет'?", options: [ { text: "Обязательно. Надену на неё виброяйцо с пультом, ошейник под шарф и выведу в дорогой ресторан. Риск заводит.", nextId: "q7_1", scores: { risk: +10, degradation: +5 } }, { text: "Только скрытый контроль. Буду отдавать ей тайные команды взглядом или шепотом, чтобы никто из гостей не понял.", nextId: "q8", scores: { mind_control: +6, risk: +3 } }, { text: "БДСМ — это интимный процесс. Никаких публичных игр, всё остается строго в моей звукоизолированной спальне.", nextId: "q8", scores: { strict: +4 } }, { text: "Публичное унижение — мой конек. Заставлю её встать на колени прямо в безлюдном парке или подъезде.", nextId: "q7_1", scores: { risk: +10, degradation: +10 } } ] },
-                q7_1: { text: "7.1 А если вас случайно кто-то заметит за этим занятием?", options: [ { text: "Это вершина возбуждения (Exhibitionism). Пусть смотрят, как я распоряжаюсь своей собственностью.", nextId: "q8", scores: { risk: +10, degradation: +8 } }, { text: "Я моментально всё прекращу. Я люблю ходить по грани, но проблемы с законом и скандалы мне не нужны.", nextId: "q8", scores: { control: +4 } }, { text: "Я сделаю вид, что всё нормально, а ей прикажу замереть и молчать. Это отличный стресс-тест для её психики.", nextId: "q8", scores: { mind_control: +8, risk: +6 } }, { text: "Буду агрессивно защищать нашу территорию, прогоню зевак матом. Она — моя добыча.", nextId: "q8", scores: { primal: +8, risk: +4 } } ] },
-                q8: { text: "8. Опасные практики (Edgeplay). Насколько близко к смертельной грани ты готов её подвести?", options: [ { text: "Я живу на грани. Жесткая асфиксия (удушье) до потери сознания, ножи (Knifeplay), бладплей. Это чистый адреналин.", nextId: "q9", scores: { edgeplay: +10, primal: +8, sadism: +6 } }, { text: "Игры с дыханием (Breath control) — да, но строго контролируемо, без потери сознания. Кровь и ножи — табу.", nextId: "q9", scores: { edgeplay: +5, control: +4 } }, { text: "Никаких опасных практик. Я несу за неё ответственность. Мой БДСМ — это строгие правила и безопасная порка.", nextId: "q9", scores: { daddy: +6, strict: +5 } }, { text: "Люблю игры с огнем и раскаленным металлом (Fireplay/Branding). Оставить клеймо на её теле — высшая эстетика.", nextId: "q9", scores: { edgeplay: +8, sadism: +8 } } ] },
-                q9: { text: "9. Эксклюзивность тела. Она принадлежит только тебе, или ты готов 'делиться' её телом?", options: [ { text: "Она только моя. Я убью любого, кто просто посмотрит на то, что принадлежит мне. Жуткий собственник.", nextId: "q10", scores: { control: +10, primal: +5 } }, { text: "Куколдизм (Cuckold). Меня безумно заводит режиссировать, как её жестко используют другие мужчины у меня на глазах.", nextId: "q9_1", scores: { cuckold: +10, risk: +6, mind_control: +4 } }, { text: "Я могу сдать её в 'аренду' или использовать как подстилку для своих друзей, чтобы тотально унизить её.", nextId: "q9_1", scores: { degradation: +10, cuckold: +6, objectification: +8 } }, { text: "Мы свингеры/в открытых отношениях, но БДСМ-сессии она проводит исключительно со мной.", nextId: "q10", scores: { } } ] },
-                q9_1: { text: "9.1 В процессе 'использования другими' какова твоя роль?", options: [ { text: "Я сижу в кресле с сигарой и просто наблюдаю, заставляя её смотреть мне в глаза, пока её имеют.", nextId: "q10", scores: { mind_control: +8, cuckold: +6 } }, { text: "Я Порочный Режиссер. Я активно отдаю команды и ей, и приглашенным мужчинам. Я контролирую весь процесс.", nextId: "q10", scores: { control: +8, risk: +5 } }, { text: "Я снимаю всё на камеру, чтобы потом заставить её пересматривать свое падение и деградацию.", nextId: "q10", scores: { degradation: +8, mind_control: +6 } }, { text: "Я присоединяюсь к процессу. Двойное проникновение, жесткое доминирование втроем.", nextId: "q10", scores: { primal: +6, sadism: +4 } } ] },
-                q10: { text: "10. Наказания без применения физической силы (БДСМ без боли). Твой метод?", options: [ { text: "Жесткая физическая нагрузка: стоять в планке или сидеть в 'стульчике', пока не подкосятся ноги и она не заплачет.", nextId: "q11", scores: { strict: +8, control: +4 } }, { text: "Сенсорная депривация. Закрою в темной комнате в наручниках и кляпе на несколько часов. Пусть посидит в тишине.", nextId: "q11", scores: { deprivation: +10, mind_control: +6 } }, { text: "Унизительные бытовые задания: заставлю вычистить туалет зубной щеткой голышом или вылизывать мои ботинки.", nextId: "q11", scores: { degradation: +10, strict: +5 } }, { text: "Игнорирование. Я просто перестану с ней разговаривать. Холодность ломает женщин быстрее любых плетей.", nextId: "q11", scores: { mind_control: +8, strict: +6 } } ] },
-                q11: { text: "11. Провокации (Bratting). Что ты делаешь, когда нижняя начинает дерзить, закатывать глаза и бунтовать?", options: [ { text: "Обожаю это! Это моя любимая игра (Brat Tamer). Я с наслаждением сломаю её сопротивление жесткой поркой.", nextId: "q12", scores: { brat_tamer: +10, sadism: +6 } }, { text: "Не потерплю ни секунды дерзости. Выпишу жесточайший штраф или наказание. Власть не обсуждается.", nextId: "q12", scores: { strict: +10, control: +8 } }, { text: "Психологически загоню в угол. Я не буду бить, я задавлю её интеллектом и тоном так, что она сама приползет извиняться.", nextId: "q12", scores: { mind_control: +8, strict: +4 } }, { text: "Поддержу игру. Начну щекотать, шлепать и превращу конфликт в бурный, страстный, животный секс.", nextId: "q12", scores: { primal: +8, brat_tamer: +4 } } ] },
-                q12: { text: "12. Твой идеальный 'материал'. Какую нижнюю ты ищешь в плане опыта?", options: [ { text: "Чистый лист. Неопытную, наивную девочку, чьи границы я смогу лепить и перепрошивать с нуля (Teacher).", nextId: "q13", scores: { teacher: +10, daddy: +4 } }, { text: "Опытную сабу, которая уже знает протокол, не задает тупых вопросов и готова к хардкору с первой минуты.", nextId: "q13", scores: { strict: +6, sadism: +4 } }, { text: "Сломанную куклу с травмами. Меня привлекает процесс 'починки' и полного переподчинения её психики себе.", nextId: "q13", scores: { mind_control: +10, teacher: +6 } }, { text: "Опыт не имеет значения. Мне важна только химическая реакция, животная страсть и её готовность отдаться.", nextId: "q13", scores: { primal: +8 } } ] },
-                q13: { text: "13. Финансы в BDSM. Кто оплачивает студии, игрушки и логистику?", options: [ { text: "Я мужчина и я Доминант. Я полностью беру на себя все расходы. Моя нижняя не должна ни в чем нуждаться.", nextId: "q14", scores: { daddy: +10, control: +4 } }, { text: "Мы делим расходы на аренду и отели пополам. Удовольствие получают оба, это справедливо.", nextId: "q14", scores: { } }, { text: "Финансовое подчинение (Findom). Она обязана оплачивать мне студии, дарить девайсы и переводить дань за сессии.", nextId: "q14", scores: { mind_control: +6, degradation: +4 } }, { text: "Если она хочет, чтобы я её красиво порол, пусть сама арендует VIP-студию. Мое время и навыки стоят дороже.", nextId: "q14", scores: { strict: +4 } } ] },
-                q14: { text: "14. Безопасность и стоп-слова. Если в разгар жесткой сессии она в панике кричит «Стоп!»?", options: [ { text: "Мгновенно останавливаюсь, отбрасываю плеть, снимаю фиксацию и переключаюсь на мягкую заботу и успокоение.", nextId: "q15", scores: { daddy: +8, teacher: +4 } }, { text: "Снижу темп до минимума и строгим тоном спрошу, что не так. Иногда сабы пугаются своих же фантазий.", nextId: "q15", scores: { strict: +6, teacher: +5 } }, { text: "Практикую CNC (игнорирование стоп-слова). Я заранее предупреждаю: если мы начали, я закончу только тогда, когда решу сам.", nextId: "q15", scores: { edgeplay: +8, mind_control: +8, sadism: +6 } }, { text: "Остановлю сессию, но буду зол. Если она прервала процесс без веской причины, она будет наказана за слабость.", nextId: "q15", scores: { strict: +8, sadism: +4 } } ] },
-                q15: { text: "15. Твои 'Красные флаги'. Что заставит тебя навсегда выгнать нижнюю?", options: [ { text: "Ложь и скрытность. Моя власть строится на 100% доверии. Соврала один раз — прощай навсегда.", nextId: "end", scores: { control: +8, strict: +8 } }, { text: "Попытка манипулировать мной (bottoming from the bottom). Если она начнет указывать, как мне доминировать.", nextId: "end", scores: { strict: +10, primal: +4 } }, { text: "Эмоциональное 'бревно'. Если она не кричит, не извивается и не дает мне энергетической отдачи от боли.", nextId: "end", scores: { sadism: +8, primal: +6 } }, { text: "Отказ выполнять грязные или унизительные приказы. Я не потерплю брезгливости в служении.", nextId: "end", scores: { degradation: +8, mind_control: +5 } } ] }
-            }
+        const titlesData = {
+            submissive: [
+                { id: "s1", title: "«Безупречный Слуга»", traits: ['service', 'submission', 'strict'], desc: "Мечта для Госпожи, ценящей идеальный порядок. Круглосуточное, беспрекословное служение." },
+                { id: "s2", title: "«Финансовый Донор»", traits: ['findom'], desc: "Слова ничего не стоят без ресурсов. Наслаждение в оплате капризов." },
+                { id: "s3", title: "«Узник Похоти»", traits: ['chastity', 'submission'], desc: "Похоть больше не принадлежит тебе. Готов запереть себя в пояс верности." },
+                { id: "s4", title: "«Неутомимая Груша»", traits: ['masochism', 'edgeplay'], desc: "Высокий болевой порог. Живой холст для плетей, жажда жестких практик." },
+                { id: "s5", title: "«Одержимый Жрец»", traits: ['oral', 'service'], desc: "Её тело — храм. Готов часами вылизывать Её до изнеможения." },
+                { id: "s6", title: "«Дерзкая Игрушка»", traits: ['brat', 'masochism'], desc: "Дерзит не потому, что не хочет служить, а потому, что отчаянно жаждет порки." },
+                { id: "s7", title: "«Живая Мебель»", traits: ['objectification', 'degradation'], desc: "Отказ от права называться человеком. Объективизация и сломленность." },
+                { id: "s8", title: "«Покорная Сучка»", traits: ['pegging', 'degradation'], desc: "Мечтает о тотальной инверсии ролей и страпоне." },
+                { id: "s9", title: "«Адреналиновый Наркоман»", traits: ['risk', 'edgeplay'], desc: "Риск публичного разоблачения или асфиксия слаще любой порки." },
+                { id: "s10", title: "«Сломанная Воля»", traits: ['mind_control', 'degradation'], desc: "Жажда жесткого психологического доминирования и газлайтинга." },
+                { id: "s11", title: "«Покорный Зритель»", traits: ['cuckold', 'submission'], desc: "Осознание своей ничтожности на фоне других мужчин Госпожи." },
+                { id: "s12", title: "«Хороший Мальчик»", traits: ['praise', 'daddy'], desc: "Потребность в строгой опеке и поглаживаниях по голове за послушание." },
+                { id: "s13", title: "«Чистый Холст»", traits: ['newbie', 'submission'], desc: "Мало опыта, но горит безумное желание принадлежать. Идеальный проект." },
+                { id: "s14", title: "«Узник Темноты»", traits: ['bondage', 'deprivation'], desc: "Жажда абсолютной сенсорной и физической беспомощности. Шибари." },
+                { id: "s15", title: "«Виртуальный Раб»", traits: ['online', 'service'], desc: "Преданное служение на расстоянии по видеосвязи." }
+            ],
+            dominant: [
+                { id: "d1", title: "«Абсолютный Владелец»", traits: ['control', 'strict'], desc: "Власть 24/7. Микро-контроль расписания и ритуалов." },
+                { id: "d2", title: "«Властный Покровитель»", traits: ['daddy', 'praise'], desc: "Власть строится на опеке и уважении. Щедр на ласку, но строг." },
+                { id: "d3", title: "«Изощрённый Эстет»", traits: ['sadism', 'bondage'], desc: "Тело — холст для боли. Обожает оставлять метки и связывать." },
+                { id: "d4", title: "«Искусный Кукловод»", traits: ['mind_control', 'degradation'], desc: "Ломает сознание. Обожает газлайтинг, словесное унижение и разрушение эго." },
+                { id: "d5", title: "«Азартный Укротитель»", traits: ['brat_tamer', 'sadism'], desc: "Охота на строптивых. Порка быстро возвращает правильные настройки." },
+                { id: "d6", title: "«Порочный Режиссёр»", traits: ['risk', 'cuckold'], desc: "Азарт риска и публичности. Превращает выход из дома в опасную игру." },
+                { id: "d7", title: "«Хранитель Оков»", traits: ['bondage', 'deprivation'], desc: "Мастер тотальной фиксации. Лишает возможности шевелиться." },
+                { id: "d8", title: "«Тёмный Скульптор»", traits: ['teacher', 'strict'], desc: "Терпеливый Наставник. Перепрошивает границы шаг за шагом." },
+                { id: "d9", title: "«Первобытный Хищник»", traits: ['primal', 'edgeplay'], desc: "Чистая животная агрессия. Использует руки, укусы и жесткое удушье." },
+                { id: "d10", title: "«Ледяной Диктатор»", traits: ['strict', 'control'], desc: "Бескомпромиссный надзиратель с абсурдным уровнем требований." }
+            ]
         };
 
-        let currentRole = null;
-        let userAnswers = [];
-        let currentScores = {};
-        let radarChartInstance = null;
-        let finalTitle = ""; 
+        // --- Mock Database ---
+        let mockProfiles = [
+            {
+                id: 1, role: 'dominant', tier: 'leather', username: 'mr_dom_88',
+                name: 'Александр', age: 34, city: 'Москва', gender: 'М',
+                title: '«Абсолютный Владелец»',
+                desc: 'Живу властью 24/7. Для меня нижняя — личная собственность.',
+                dominantTrait: 'control',
+                scores: [10, 10, 4, 6, 2, 3], // Base scores for demo
+                avatarUrl: null
+            },
+            {
+                id: 2, role: 'submissive', tier: 'latex', username: 'cute_brat_spb',
+                name: 'Елена', age: 22, city: 'Санкт-Петербург', gender: 'Ж',
+                title: '«Дерзкая Игрушка»',
+                desc: 'Обожаю проверять нервы на прочность. Дерзю, чтобы быть наказанной.',
+                dominantTrait: 'brat',
+                scores: [3, 2, 10, 4, 3, 7],
+                avatarUrl: null
+            },
+            {
+                id: 3, role: 'dominant', tier: 'gold', username: 'mistress_v',
+                name: 'Виктория', age: 29, city: 'Казань', gender: 'Ж',
+                title: '«Искусный Кукловод»',
+                desc: 'Ломаю не тело, а виртуозно подчиняю сознание.',
+                dominantTrait: 'mind_control',
+                scores: [5, 4, 3, 10, 2, 2],
+                avatarUrl: null
+            }
+        ];
 
+        const CURRENT_USER_ID = 999;
+        let pendingContactUsername = '';
+        let currentUploadedPhotoBase64 = null;
+        let charts = {};
+
+        // --- Navigation ---
         function showScreen(screenId) {
-            ['screen-welcome', 'screen-quiz', 'screen-result'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-                document.getElementById(id).classList.remove('fade-in');
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('fade-in');
             });
             const screen = document.getElementById(screenId);
-            screen.classList.remove('hidden');
-            window.scrollTo(0, 0); 
-            void screen.offsetWidth;
-            screen.classList.add('fade-in');
-
-            const boostyBtn = document.getElementById('donate-btn');
-            if (screenId === 'screen-welcome') {
-                boostyBtn.classList.remove('hidden');
-            } else {
-                boostyBtn.classList.add('hidden');
+            if (screen) {
+                screen.classList.remove('hidden');
+                window.scrollTo(0, 0); 
+                void screen.offsetWidth;
+                screen.classList.add('fade-in');
             }
         }
 
-        function startQuiz(role, event) {
-            if(event) spawnParticles(event, role === 'submissive' ? '#00bfff' : '#ff7800');
-            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-
-            currentRole = role;
-            userAnswers = [];
-            currentScores = {};
-            document.body.className = `min-h-screen flex flex-col items-center justify-start p-4 transition-colors duration-700 theme-${role}`;
-            document.getElementById('role-indicator').textContent = role === 'submissive' ? 'Путь Нижнего' : 'Путь Верхнего';
+        function switchTab(tabId) {
+            showScreen(`view-${tabId}`);
             
-            document.getElementById('progress-bar-fill').style.width = '0%';
-            
-            setTimeout(() => { 
-                showScreen('screen-quiz'); 
-                renderQuestion('q1'); 
-                startLiquidParticles();
-            }, 300);
-        }
-
-        function updateProgress(qId) {
-            const maxQ = currentRole === 'submissive' ? 20 : 15; 
-            const match = qId.match(/\d+/);
-            if(match) {
-                const currentQ = parseInt(match[0]);
-                const pct = Math.min(100, (currentQ / maxQ) * 100);
-                document.getElementById('progress-bar-fill').style.width = pct + '%';
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-stone-900', 'border-stone-900');
+                btn.classList.add('text-stone-500', 'border-transparent');
+            });
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if(activeBtn) {
+                activeBtn.classList.remove('text-stone-500', 'border-transparent');
+                activeBtn.classList.add('text-stone-900', 'border-stone-900');
             }
+            
+            if(tabId === 'feed') renderProfiles(mockProfiles);
+            if(tabId === 'encyclopedia') renderEncyclopedia();
         }
 
-        function renderQuestion(questionId) {
-            if (questionId === 'end') { calculateAndShowResult(); return; }
-
-            const qData = questData[currentRole][questionId];
-            if (!qData) { calculateAndShowResult(); return; }
-
-            updateProgress(questionId);
-
-            const container = document.getElementById('question-container');
-            container.classList.remove('fade-in'); void container.offsetWidth; container.classList.add('fade-in');
-
-            document.getElementById('question-text').textContent = qData.text;
-            const optionsContainer = document.getElementById('options-container');
-            optionsContainer.innerHTML = '';
-
-            qData.options.forEach((opt) => {
-                const btn = document.createElement('button');
-                btn.className = 'w-full bg-dark/50 border border-gray-800 hover:border-accent hover:bg-accent/10 transition-all duration-300 p-4 rounded-xl text-left text-sm text-gray-300 hover:text-white leading-snug hover:shadow-glow relative overflow-hidden';
-                btn.textContent = opt.text;
-                btn.onclick = (e) => handleAnswer(questionId, opt, e);
-                optionsContainer.appendChild(btn);
+        // --- Form Logic ---
+        function updateTitleDropdown() {
+            const role = document.getElementById('form-role').value;
+            const titleSelect = document.getElementById('form-title');
+            titleSelect.innerHTML = '';
+            
+            titlesData[role].forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.id;
+                opt.textContent = t.title;
+                titleSelect.appendChild(opt);
             });
         }
 
-        function handleAnswer(questionId, opt, event) {
-            userAnswers.push({ qId: questionId, answer: opt.text });
+        function previewPhoto(event) {
+            const file = event.target.files[0];
+            const previewContainer = document.getElementById('photo-preview-container');
             
-            if (opt.scores) {
-                for (const [trait, value] of Object.entries(opt.scores)) {
-                    currentScores[trait] = (currentScores[trait] || 0) + value;
+            if (file) {
+                if (file.size > 2097152) {
+                    alert("Файл слишком большой! Максимальный размер 2 МБ.");
+                    event.target.value = "";
+                    return;
                 }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentUploadedPhotoBase64 = e.target.result;
+                    previewContainer.innerHTML = `<img src="${currentUploadedPhotoBase64}" class="w-full h-full object-cover" />`;
+                }
+                reader.readAsDataURL(file);
             }
-
-            if(event) spawnParticles(event);
-            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            setTimeout(() => { renderQuestion(opt.nextId); }, 250);
         }
 
-        function calculateAndShowResult() {
-            stopLiquidParticles();
-            let bestTitle = titlesData[currentRole][0];
-            let maxTitleScore = -1;
+        function publishProfile(e) {
+            e.preventDefault();
+            
+            const role = document.getElementById('form-role').value;
+            const titleId = document.getElementById('form-title').value;
+            const titleObj = titlesData[role].find(t => t.id === titleId);
+            
+            // Auto-generate scores based on the selected title's traits
+            const axes = radarAxes[role];
+            const generatedScores = axes.map(axis => titleObj.traits.includes(axis) ? 10 : 3); // 10 for primary, 3 for baseline
 
-            titlesData[currentRole].forEach(titleObj => {
-                let currentTitleScore = 0;
-                titleObj.traits.forEach(trait => {
-                    currentTitleScore += (currentScores[trait] || 0);
+            const newProfile = {
+                id: CURRENT_USER_ID,
+                role: role,
+                tier: document.getElementById('form-tier').value || 'base',
+                username: document.getElementById('form-username').value.replace('@', ''),
+                name: document.getElementById('form-name').value,
+                age: document.getElementById('form-age').value,
+                city: document.getElementById('form-city').value,
+                gender: document.getElementById('form-gender').value,
+                desc: document.getElementById('form-desc').value,
+                avatarUrl: currentUploadedPhotoBase64,
+                title: titleObj.title,
+                dominantTrait: titleObj.traits[0] || axes[0],
+                scores: generatedScores
+            };
+
+            // Update Mock Database
+            mockProfiles = mockProfiles.filter(p => p.id !== CURRENT_USER_ID);
+            mockProfiles.unshift(newProfile);
+
+            // Background Webhook (Optional, silent fail if errors)
+            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxdJtjTKeIJnlGbs_BF7m19j04iUyoa01cEJkrVlmLVnoF1aNs6s36dHh2EZ4Sz59FYeQ/exec';
+            try {
+                fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        tgId: newProfile.id,
+                        tgUsername: newProfile.username,
+                        role: newProfile.role,
+                        title: newProfile.title,
+                        answers: "Ручной выбор (Тест пропущен)"
+                    })
                 });
-                if (currentTitleScore > maxTitleScore) {
-                    maxTitleScore = currentTitleScore;
-                    bestTitle = titleObj;
-                }
-            });
+            } catch(e) { console.log('Webhook sync skipped.'); }
 
-            finalTitle = bestTitle.title; 
-            document.getElementById('result-title').textContent = bestTitle.title;
-            document.getElementById('result-desc').textContent = bestTitle.desc;
-
-            const axes = radarAxes[currentRole];
-            let maxAxis = axes[0];
-            let maxAxisScore = -1;
-            axes.forEach(axis => {
-                const score = currentScores[axis] || 0;
-                if (score > maxAxisScore) {
-                    maxAxisScore = score;
-                    maxAxis = axis;
-                }
-            });
-            document.getElementById('dominant-trait-text').textContent = traitLabels[maxAxis];
+            if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
             
-            showScreen('screen-result');
-            drawRadarChart();
+            // Reset form for future use if needed, but not strictly required
+            e.target.reset();
+            document.getElementById('photo-preview-container').innerHTML = '<span class="text-3xl">📸</span>';
+            currentUploadedPhotoBase64 = null;
+            updateTitleDropdown();
+
+            alert(`Анкета успешно опубликована!\nЗвание: ${newProfile.title}`);
+            switchTab('feed');
         }
 
-        function drawRadarChart() {
-            const axes = radarAxes[currentRole];
-            const labels = axes.map(t => traitLabels[t] || t);
-            const data = axes.map(t => (currentScores[t] || 0) + 1);
 
-            const ctx = document.getElementById('radarChart').getContext('2d');
-            if(radarChartInstance) radarChartInstance.destroy();
+        // --- Rendering Logic ---
+        function createCardHTML(profile, isEncyclopedia = false) {
+            const isDom = profile.role === 'dominant';
+            const colorClass = isDom ? 'text-orange-600' : 'text-sky-600';
+            const avatarClass = isDom ? 'avatar-dom' : 'avatar-sub';
+            const tierClass = isEncyclopedia ? 'card-tier-base' : `card-tier-${profile.tier || 'base'}`;
+
+            let avatarContent = profile.avatarUrl 
+                ? `<img src="${profile.avatarUrl}" class="w-full h-full object-cover">` 
+                : (profile.gender === 'М' ? '🧔' : '👩');
+
+            const headerHTML = isEncyclopedia ? '' : `
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-14 h-14 rounded-full ${avatarClass} flex items-center justify-center text-xl shadow-md border border-black/10 shrink-0 overflow-hidden">
+                        ${avatarContent}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <h3 class="font-bold text-lg leading-tight truncate">${profile.name}, ${profile.age}</h3>
+                        <p class="text-xs opacity-70 flex items-center gap-1 truncate"><span>📍</span> ${profile.city}</p>
+                    </div>
+                </div>`;
+
+            const footerHTML = isEncyclopedia ? '' : `
+                <div class="flex gap-2 mt-auto pt-4 border-t border-black/10">
+                    <button onclick="toggleChart('${profile.id}', '${profile.role}')" class="flex-1 py-2.5 rounded-lg bg-black/5 hover:bg-black/10 text-xs font-bold transition-colors border border-black/10 text-inherit flex justify-center items-center">
+                        📊 Психотип
+                    </button>
+                    <button onclick="openContactModal('${profile.username}')" class="flex-1 py-2.5 rounded-lg ${isDom ? 'bg-orange-600 hover:bg-orange-700' : 'bg-sky-600 hover:bg-sky-700'} text-white text-xs font-bold transition-colors shadow-md flex justify-center items-center">
+                        💬 Написать
+                    </button>
+                </div>`;
+
+            return `
+                <div class="${tierClass} rounded-2xl p-5 h-full flex flex-col transition-transform hover:-translate-y-1 hover:shadow-card shadow-soft" data-role="${profile.role}">
+                    <div class="inner-panel flex flex-col h-full relative z-10">
+                        ${headerHTML}
+                        <div class="mb-3">
+                            <span class="text-[9px] uppercase tracking-widest opacity-60">Звание</span>
+                            <h4 class="font-bold ${colorClass} text-md leading-tight">${profile.title}</h4>
+                        </div>
+                        ${profile.dominantTrait ? `
+                        <div class="mb-4">
+                            <span class="inline-block px-2 py-1 rounded bg-black/10 text-[10px] font-mono border border-black/10 opacity-80">
+                                Основа: ${traitLabels[profile.dominantTrait] || profile.dominantTrait}
+                            </span>
+                        </div>` : ''}
+                        <p class="text-xs italic leading-relaxed border-l-2 pl-2 mb-4 flex-grow opacity-90 border-black/20">
+                            "${profile.desc}"
+                        </p>
+                        ${footerHTML}
+                        <div id="chart-wrap-${profile.id}" class="${isEncyclopedia ? 'block' : 'hidden'} mt-4 pt-4 border-t border-black/10">
+                            <div class="chart-container">
+                                <canvas id="canvas-${profile.id}"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProfiles(profilesToRender) {
+            const grid = document.getElementById('profiles-grid');
+            if (!grid) return;
+            if(profilesToRender.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center py-10 text-stone-500">Анкет не найдено.</div>';
+                return;
+            }
+            grid.innerHTML = profilesToRender.map(p => createCardHTML(p)).join('');
+        }
+
+        function filterProfiles(type) {
+            let filtered = mockProfiles;
+            if (type === 'dominant' || type === 'submissive') {
+                filtered = mockProfiles.filter(p => p.role === type);
+            }
+            renderProfiles(filtered);
+        }
+
+        function toggleChart(id, role) {
+            const wrap = document.getElementById(`chart-wrap-${id}`);
+            if (!wrap) return;
+            if (wrap.classList.contains('hidden')) {
+                wrap.classList.remove('hidden');
+                const profile = mockProfiles.find(p => p.id == id);
+                if (profile) {
+                    renderChart(id, role, profile.scores);
+                }
+            } else {
+                wrap.classList.add('hidden');
+            }
+        }
+
+        function renderChart(id, role, scoresData) {
+            if (charts[id]) { charts[id].destroy(); }
+            const ctx = document.getElementById(`canvas-${id}`).getContext('2d');
             
-            const rgbColor = getComputedStyle(document.body).getPropertyValue('--color-accent').trim();
+            const axes = radarAxes[role];
+            const labels = axes.map(t => traitLabels[t] || t);
+            const rgbLine = role === 'dominant' ? '234, 88, 12' : '2, 132, 199'; 
 
-            radarChartInstance = new Chart(ctx, {
+            charts[id] = new Chart(ctx, {
                 type: 'radar',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Интенсивность',
-                        data: data,
-                        backgroundColor: `rgba(${rgbColor}, 0.3)`,
-                        borderColor: `rgba(${rgbColor}, 1)`,
-                        pointBackgroundColor: `rgba(${rgbColor}, 1)`,
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: `rgba(${rgbColor}, 1)`,
-                        borderWidth: 2,
+                        data: scoresData,
+                        backgroundColor: `rgba(${rgbLine}, 0.15)`,
+                        borderColor: `rgba(${rgbLine}, 0.8)`,
+                        pointBackgroundColor: `rgba(${rgbLine}, 1)`,
+                        borderWidth: 1.5,
+                        pointRadius: 2
                     }]
                 },
                 options: {
+                    maintainAspectRatio: false,
                     scales: {
                         r: {
-                            beginAtZero: true, 
-                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                            pointLabels: { 
-                                color: 'rgba(255, 255, 255, 0.9)', 
-                                font: { size: 10, family: "sans-serif", weight: 'bold' } 
-                            },
-                            ticks: { display: false } 
+                            beginAtZero: true,
+                            suggestedMax: 10,
+                            angleLines: { color: 'rgba(0,0,0,0.1)' },
+                            grid: { color: 'rgba(0,0,0,0.1)' },
+                            pointLabels: { color: 'rgba(0,0,0,0.7)', font: { size: 9, family: "sans-serif", weight: 'bold' } },
+                            ticks: { display: false }
                         }
                     },
-                    plugins: { legend: { display: false } },
-                    maintainAspectRatio: false
+                    plugins: { legend: { display: false } }
                 }
             });
         }
 
-        const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxdJtjTKeIJnlGbs_BF7m19j04iUyoa01cEJkrVlmLVnoF1aNs6s36dHh2EZ4Sz59FYeQ/exec';
-
-        async function finishQuiz() {
-            const btn = document.getElementById('finish-btn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = 'Отправка данных... ⏳';
-            btn.disabled = true;
-
-            const tgUser = tg.initDataUnsafe?.user || {};
-
-            const payload = {
-                tgId: tgUser.id || 'Аноним',
-                tgUsername: tgUser.username ? '@' + tgUser.username : (tgUser.first_name || 'Без имени'),
-                role: currentRole === 'submissive' ? 'Нижний' : 'Верхний',
-                title: finalTitle,
-                answers: JSON.stringify(userAnswers)
-            };
-
-            try {
-                await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'text/plain;charset=utf-8',
-                    },
-                    body: JSON.stringify(payload)
-                });
-                alert("Анкета успешно отправлена Госпоже!");
-            } catch(e) {
-                console.error('Ошибка отправки:', e);
-                alert("Анкета сохранена!"); 
+        function renderEncyclopedia() {
+            const tCont = document.getElementById('traits-container');
+            let tHtml = '';
+            for(const [key, val] of Object.entries(traitLabels)) {
+                tHtml += `<div class="bg-white border border-stone-200 p-2 rounded text-center shadow-sm"><div class="text-[10px] text-stone-400 font-mono">${key}</div><div class="text-sm font-bold text-stone-700">${val}</div></div>`;
             }
-
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-
-            resetApp();
+            tCont.innerHTML = tHtml;
+            renderEncyclopediaTitles('submissive');
         }
 
-        function resetApp(event) {
-            if(event) {
-                if(!confirm('Точно прервать инициацию?')) return;
-                spawnParticles(event, '#ffffff');
+        function renderEncyclopediaTitles(role) {
+            const container = document.getElementById('encyclopedia-titles-grid');
+            const data = titlesData[role];
+            
+            let html = '';
+            data.forEach((t, idx) => {
+                const mockProfile = { id: `enc_${role}_${idx}`, role: role, title: t.title, desc: t.desc, dominantTrait: t.traits[0] };
+                html += createCardHTML(mockProfile, true);
+            });
+            container.innerHTML = html;
+
+            data.forEach((t, idx) => {
+                const scores = radarAxes[role].map(axis => t.traits.includes(axis) ? 10 : 2);
+                renderChart(`enc_${role}_${idx}`, role, scores);
+            });
+        }
+
+        // --- Contact Logic ---
+        function openContactModal(username) {
+            pendingContactUsername = username;
+            document.getElementById('contact-modal-text').innerHTML = `Перейти в Telegram для начала диалога с <b>@${username}</b>?`;
+            document.getElementById('contact-modal').classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function confirmContact() {
+            if(pendingContactUsername) {
+                const link = `https://t.me/${pendingContactUsername}`;
+                if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTelegramLink) {
+                    window.Telegram.WebApp.openTelegramLink(link);
+                } else {
+                    window.open(link, '_blank');
+                }
             }
-            stopLiquidParticles();
-            currentRole = null; userAnswers = []; currentScores = {};
-            document.body.className = 'min-h-screen flex flex-col items-center justify-start p-4 transition-colors duration-700';
-            showScreen('screen-welcome');
+            closeModal('contact-modal');
         }
 
-        function initApp() {
-            document.body.className = 'min-h-screen flex flex-col items-center justify-start p-4 transition-colors duration-700';
-            showScreen('screen-welcome');
-        }
-
-        window.onload = initApp;
+        // --- Init ---
+        window.onload = () => { 
+            updateTitleDropdown(); // Initialize dropdown based on default role
+            switchTab('feed'); 
+        };
     </script>
 </body>
 </html>
