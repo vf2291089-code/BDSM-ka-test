@@ -9,14 +9,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <!-- Chosen Palette: Warm Sand & Stone (Light Theme) -->
-    <!-- Application Structure Plan: The SPA is designed as a direct Dating Hub without the quiz element.
-         1. 'Лента Анкет' (Feed): A dashboard for exploring generated profiles. 
-         2. 'Энциклопедия' (Encyclopedia): Exploratory view of traits and titles.
-         3. 'Создать Анкету' (Profile Setup): Users directly set up their profile, including manually selecting their Archetype/Title. The system automatically generates the corresponding Radar Chart based on the selected title's predefined traits. -->
+    <!-- Chosen Palette: Warm Sand & Stone (Light Theme) with vivid Emerald/Rose for Tag Toggles -->
+    <!-- Application Structure Plan: The SPA is a Dating Hub focused on profile creation and discovery.
+         1. 'Лента Анкет' (Feed): Dashboard for exploring fully expanded profiles (charts visible by default) with visual tags for preferences/limits and permanent branding (Logo/QR).
+         2. 'Создать Анкету' (Profile Setup): Users set up their profile. Features a dynamic Premium Gate: selecting a non-base tier reveals a Boosty promo code requirement. Preference selection uses a clear, highly visible toggle system. -->
     <!-- Visualization & Content Choices: 
-         - Goal: Profile Visualization -> Viz: Radar Charts (Chart.js) -> Interaction: 'View Psychotype' toggle -> Justification: Radar charts perfectly map the 6 dominant axes of a BDSM profile. NO SVG/Mermaid used.
-         - Goal: Data Exploration -> Viz: Filterable Card Grid -> Interaction: Category tags -> Justification: Allows users to sort through the community based on their specific relationship needs. -->
+         - Goal: Preference Selection -> Viz: Toggleable Pill Buttons -> Interaction: Click to add to Likes (Green) or Limits (Red). Opposite state grays out -> Justification: Highly tactile and visually unambiguous UX compared to standard checkboxes. NO SVG.
+         - Goal: Profile Presentation -> Viz: Fully Expanded Card with Inline Radar Chart -> Interaction: Scroll -> Justification: Reduces friction (no clicks needed to see the chart), creating a complete "poster" for each user that is easy to screenshot natively. NO SVG. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
     <script>
@@ -31,7 +30,8 @@
                     },
                     boxShadow: {
                         'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-                        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02)',
+                        'card': '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                        'gold-glow': '0 0 20px rgba(234, 179, 8, 0.4)',
                     }
                 }
             }
@@ -49,7 +49,7 @@
             max-width: 340px;
             margin-left: auto;
             margin-right: auto;
-            height: 240px;
+            height: 250px;
             max-height: 280px;
             overflow: hidden;
         }
@@ -60,31 +60,96 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* PREMIUM TIER STYLES */
         .card-tier-base { background: #ffffff; border: 1px solid #e7e5e4; }
-        .card-tier-gold { background: linear-gradient(135deg, #fefce8 0%, #fef08a 50%, #fde047 100%); border: 1px solid #eab308; }
-        .card-tier-latex { background: #1c1917; border: 1px solid #000; color: #f5f5f4; }
-        .card-tier-leather { background: #271204; border: 2px dashed #78350f; color: #ffedd5; }
-        .card-tier-metal { background: repeating-linear-gradient(45deg, #cbd5e1, #cbd5e1 10px, #94a3b8 10px, #94a3b8 20px); border: 2px solid #475569; }
-        .card-tier-metal .inner-panel { background-color: rgba(255,255,255,0.9); padding: 1rem; border-radius: 0.5rem; height: 100%; }
-        .card-tier-silver { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%); border: 1px solid #94a3b8; color: #1e293b; }
         
+        .card-tier-gold { 
+            background: linear-gradient(135deg, #fffbeb 0%, #fef08a 30%, #eab308 50%, #fef08a 70%, #fffbeb 100%); 
+            border: 2px solid #ca8a04; 
+            box-shadow: 0 10px 25px rgba(234, 179, 8, 0.3);
+        }
+        .card-tier-gold .inner-panel { background: rgba(255, 255, 255, 0.85); border-radius: 0.75rem; padding: 1rem; }
+        
+        .card-tier-silver { 
+            background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 50%, #94a3b8 100%); 
+            border: 2px solid #64748b; 
+        }
+        .card-tier-silver .inner-panel { background: rgba(255, 255, 255, 0.85); border-radius: 0.75rem; padding: 1rem; }
+        
+        .card-tier-metal { 
+            background: repeating-linear-gradient(45deg, #94a3b8, #94a3b8 5px, #64748b 5px, #64748b 10px); 
+            border: 2px solid #334155; 
+        }
+        .card-tier-metal .inner-panel { background-color: rgba(255,255,255,0.92); padding: 1rem; border-radius: 0.75rem; height: 100%; }
+        
+        .card-tier-latex { 
+            background: #000000; 
+            border: 2px solid #171717; 
+            color: #f1f5f9;
+            background-image: linear-gradient(160deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 40%);
+            box-shadow: inset 0 8px 10px rgba(255,255,255,0.1), 0 10px 20px rgba(0,0,0,0.4);
+        }
+        .card-tier-latex .inner-panel { background: transparent; padding: 0.5rem; }
+        .card-tier-latex .text-muted { color: #94a3b8; }
+        .card-tier-latex .border-muted { border-color: #334155; }
+        
+        .card-tier-leather { 
+            background-color: #271204; 
+            border: 3px dashed #78350f; 
+            color: #ffedd5; 
+            background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 4px 4px;
+        }
+        .card-tier-leather .inner-panel { background: transparent; padding: 0.5rem; }
+        .card-tier-leather .text-muted { color: #fdba74; }
+        .card-tier-leather .border-muted { border-color: #78350f; }
+        
+        /* Avatars */
         .avatar-sub { background: linear-gradient(135deg, #e0f2fe, #0284c7); color: white;}
         .avatar-dom { background: linear-gradient(135deg, #ffedd5, #ea580c); color: white;}
         
         input[type="file"]::file-selector-button { display: none; }
+        
+        /* TAG TOGGLE STYLES */
+        .tag-btn { 
+            transition: all 0.2s ease; 
+            border: 2px solid #e2e8f0; 
+            background: white; 
+            color: #64748b; 
+        }
+        .tag-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        
+        .tag-pref-active { 
+            background-color: #10b981 !important; 
+            border-color: #059669 !important; 
+            color: white !important; 
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+        }
+        
+        .tag-limit-active { 
+            background-color: #ef4444 !important; 
+            border-color: #dc2626 !important; 
+            color: white !important; 
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+        }
+        
+        .tag-disabled { 
+            opacity: 0.25; 
+            pointer-events: none; 
+            filter: grayscale(100%); 
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen transition-colors duration-700">
 
     <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
         <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-y-2">
-            <div class="flex items-center gap-2">
-                <span class="text-2xl">🔥</span>
-                <span class="font-bold text-lg tracking-widest uppercase text-stone-800">Клуб Знакомств</span>
+            <div class="flex items-center gap-3">
+                <img src="logo.png" alt="Logo" class="h-8 w-auto rounded" onerror="this.outerHTML='<span class=&quot;text-2xl&quot;>🔥</span>'">
+                <span class="font-bold text-lg tracking-widest uppercase text-stone-800">BDSM-ka Анкеты</span>
             </div>
             <div class="flex gap-4 sm:gap-8 text-sm font-medium overflow-x-auto hide-scroll" id="main-nav-links">
                 <button onclick="switchTab('feed')" class="nav-btn text-stone-900 border-b-2 border-stone-900 pb-1 whitespace-nowrap" id="nav-feed">Лента Анкет</button>
-                <button onclick="switchTab('encyclopedia')" class="nav-btn text-stone-500 hover:text-stone-900 border-b-2 border-transparent pb-1 whitespace-nowrap" id="nav-encyclopedia">Энциклопедия</button>
                 <button onclick="switchTab('setup')" class="nav-btn text-stone-500 hover:text-stone-900 border-b-2 border-transparent pb-1 whitespace-nowrap" id="nav-setup">Создать Анкету</button>
             </div>
         </div>
@@ -97,7 +162,7 @@
             <div class="mb-8">
                 <h1 class="text-3xl font-bold text-stone-800 mb-3">Сообщество</h1>
                 <p class="text-base text-stone-600 max-w-3xl mb-6">
-                    Исследуйте анкеты участников. Нажмите «Психотип», чтобы развернуть радар-чарт и оценить совместимость ваших кинков.
+                    Изучите анкеты участников. Зеленые теги — предпочтения, красные — табу. Графики совместимости развернуты для удобства.
                 </p>
                 <div class="flex gap-2 overflow-x-auto w-full pb-2 hide-scroll items-center">
                     <button onclick="filterProfiles('all')" class="px-5 py-2 rounded-full bg-stone-800 text-xs font-bold text-white hover:bg-stone-700 transition-colors shrink-0">Все</button>
@@ -106,117 +171,128 @@
                 </div>
             </div>
 
-            <div id="profiles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Profiles Grid -->
+            <div id="profiles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
                 <!-- Profiles injected via JS -->
             </div>
         </div>
 
-        <!-- VIEW: ENCYCLOPEDIA -->
-        <div id="view-encyclopedia" class="tab-content hidden fade-in max-w-5xl mx-auto">
-            <div class="mb-10 text-center">
-                <h1 class="text-3xl font-bold text-stone-800 mb-4">Архитектура Психотипов</h1>
-                <p class="text-stone-600 max-w-2xl mx-auto">База знаний платформы. Ознакомьтесь с осями оценки и классификацией званий.</p>
-            </div>
-
-            <h2 class="text-xl font-bold text-stone-800 mb-4 border-b border-stone-200 pb-2">26 Осей Оценки (Кинки)</h2>
-            <div id="traits-container" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
-                <!-- Traits injected via JS -->
-            </div>
-
-            <h2 class="text-xl font-bold text-stone-800 mb-4 border-b border-stone-200 pb-2">Архив Званий</h2>
-            <div class="flex gap-4 mb-6">
-                <button onclick="renderEncyclopediaTitles('submissive')" class="flex-1 py-3 rounded-lg bg-sky-100 text-sky-800 font-bold hover:bg-sky-200 transition-colors">🧎 Звания Нижних</button>
-                <button onclick="renderEncyclopediaTitles('dominant')" class="flex-1 py-3 rounded-lg bg-orange-100 text-orange-800 font-bold hover:bg-orange-200 transition-colors">👑 Звания Верхних</button>
-            </div>
-            <div id="encyclopedia-titles-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Titles injected via JS -->
-            </div>
-        </div>
-
-        <!-- VIEW: PROFILE SETUP (Direct Form) -->
-        <div id="view-setup" class="tab-content hidden fade-in max-w-2xl mx-auto">
-            <div class="bg-white p-8 rounded-2xl shadow-card border border-stone-100">
+        <!-- VIEW: PROFILE SETUP (Form with Premium Gate & Interactive Tags) -->
+        <div id="view-setup" class="tab-content hidden fade-in max-w-3xl mx-auto">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-card border border-stone-100">
                 <h1 class="text-3xl font-bold text-stone-800 mb-3">Создать Анкету</h1>
                 <p class="text-stone-600 mb-8 pb-6 border-b border-stone-100">
-                    Заполните данные вашей карточки. Выберите свою Роль и подходящее Звание — алгоритм автоматически построит ваш психологический график (Радар) для отображения в Ленте.
+                    Заполните данные и выберите ваши предпочтения. Алгоритм автоматически определит ваше Звание и построит график психотипа для Ленты.
                 </p>
 
-                <form id="profile-form" onsubmit="publishProfile(event)" class="space-y-6">
-                    <div class="bg-stonebg p-5 rounded-xl border border-stone-200 flex items-center gap-6">
-                        <div id="photo-preview-container" class="w-24 h-24 rounded-full bg-white border-2 border-dashed border-stone-300 flex items-center justify-center text-stone-400 overflow-hidden shrink-0 shadow-inner">
-                            <span class="text-3xl">📸</span>
+                <form id="profile-form" onsubmit="publishProfile(event)" class="space-y-8">
+                    
+                    <!-- 1. Basic Info -->
+                    <div class="space-y-5">
+                        <h3 class="text-lg font-bold text-stone-800 flex items-center gap-2"><span class="bg-stone-200 text-stone-700 w-6 h-6 flex items-center justify-center rounded-full text-xs">1</span> Базовые данные</h3>
+                        
+                        <div class="bg-stonebg p-4 rounded-xl border border-stone-200 flex items-center gap-5">
+                            <div id="photo-preview-container" class="w-20 h-20 rounded-full bg-white border-2 border-dashed border-stone-300 flex items-center justify-center text-stone-400 overflow-hidden shrink-0 shadow-inner">
+                                <span class="text-2xl">📸</span>
+                            </div>
+                            <div class="flex-1">
+                                <label class="inline-block px-5 py-2.5 bg-white border border-stone-300 rounded-lg text-sm font-bold text-stone-700 hover:bg-stone-50 cursor-pointer shadow-sm transition-all">
+                                    Выбрать фото
+                                    <input type="file" id="form-photo" accept="image/jpeg, image/png" class="hidden" onchange="previewPhoto(event)">
+                                </label>
+                                <p class="text-[10px] text-stone-500 mt-2">Отобразится в анкете. До 2 МБ.</p>
+                            </div>
                         </div>
-                        <div class="flex-1">
-                            <label class="inline-block px-5 py-2.5 bg-white border border-stone-300 rounded-lg text-sm font-medium text-stone-700 hover:bg-stone-50 cursor-pointer shadow-sm transition-all">
-                                Загрузить фото
-                                <input type="file" id="form-photo" accept="image/jpeg, image/png" class="hidden" onchange="previewPhoto(event)">
-                            </label>
-                            <p class="text-xs text-stone-500 mt-2">Рекомендуется портретное фото.</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Имя / Никнейм</label>
+                                <input type="text" id="form-name" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all font-medium text-stone-900" placeholder="Например: Алекс">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">@Username (Телеграм)</label>
+                                <input type="text" id="form-username" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all font-medium text-stone-900" placeholder="Без @">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Возраст</label>
+                                <input type="number" id="form-age" required min="18" max="99" class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all font-medium text-stone-900" placeholder="25">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Город</label>
+                                <input type="text" id="form-city" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all font-medium text-stone-900" placeholder="Москва">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Ваш Пол</label>
+                                <select id="form-gender" class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white outline-none font-medium text-stone-900">
+                                    <option value="М">Мужской</option>
+                                    <option value="Ж">Женский</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Ваша Роль</label>
+                                <select id="form-role" class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white outline-none font-bold text-stone-900">
+                                    <option value="dominant">👑 Верхний (Доминант)</option>
+                                    <option value="submissive">🧎 Нижний (Сабмиссив)</option>
+                                </select>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Цитата / О себе</label>
+                                <textarea id="form-desc" rows="2" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all resize-none font-medium text-stone-900" placeholder="Пару слов о том, кого ищете..."></textarea>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Имя / Никнейм</label>
-                            <input type="text" id="form-name" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all" placeholder="Алекс">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Ваш @Username (Телеграм)</label>
-                            <input type="text" id="form-username" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all" placeholder="@telegram_id">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Возраст</label>
-                            <input type="number" id="form-age" required min="18" max="99" class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all" placeholder="25">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Город</label>
-                            <input type="text" id="form-city" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all" placeholder="Москва">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Пол</label>
-                            <select id="form-gender" class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white outline-none">
-                                <option value="М">Мужской</option>
-                                <option value="Ж">Женский</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Оформление карточки</label>
-                            <select id="form-tier" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all text-stone-800">
-                                <option value="base">Стандартная (Белая)</option>
-                                <option value="silver">Серебро (VIP)</option>
-                                <option value="gold">Золото (VIP)</option>
-                                <option value="metal">Металл (Эксклюзив)</option>
-                                <option value="leather">Кожа (Эксклюзив)</option>
-                                <option value="latex">Латекс (Эксклюзив)</option>
-                            </select>
+                    <!-- 2. Premium Design Gate -->
+                    <div class="space-y-4 pt-6 border-t border-stone-100">
+                        <h3 class="text-lg font-bold text-stone-800 flex items-center gap-2"><span class="bg-stone-200 text-stone-700 w-6 h-6 flex items-center justify-center rounded-full text-xs">2</span> Оформление (Статус)</h3>
+                        
+                        <select id="form-tier" class="w-full px-4 py-3 border border-stone-300 rounded-lg bg-white focus:ring-2 focus:ring-amber-400 outline-none transition-all font-bold text-stone-800 shadow-sm">
+                            <option value="base">Стандартная карточка (Бесплатно)</option>
+                            <option value="silver">Серебряная карточка</option>
+                            <option value="gold">Золотая карточка</option>
+                            <option value="metal">Металлическая фактура</option>
+                            <option value="leather">Кожаная фактура</option>
+                            <option value="latex">Латексная фактура (Глянец)</option>
+                        </select>
+
+                        <!-- Hidden Premium Promo Gate -->
+                        <div id="premium-gate" class="hidden mt-4 p-5 bg-amber-50 border border-amber-200 rounded-xl shadow-inner">
+                            <p class="text-base text-amber-900 font-bold mb-1 flex items-center gap-2">💎 Премиальный дизайн</p>
+                            <p class="text-xs text-amber-700 mb-4">Для публикации уникальной фактурной карточки требуется действующий промокод.</p>
+                            
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <input type="text" id="form-promo" placeholder="Введите промокод..." class="flex-1 px-4 py-3 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none bg-white text-stone-900 font-mono font-bold uppercase placeholder-stone-300">
+                                <button type="button" onclick="openExternalLink('https://boosty.to/bdsmka')" class="bg-amber-500 text-white font-bold px-6 py-3 rounded-lg hover:bg-amber-600 transition-colors shadow-md whitespace-nowrap">Купить на Boosty</button>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Role & Title Selection -->
-                    <div class="p-5 bg-stone-50 border border-stone-200 rounded-xl space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-2">Выберите вашу Роль</label>
-                            <select id="form-role" onchange="updateTitleDropdown()" class="w-full px-4 py-3 border border-stone-300 rounded-lg bg-white outline-none font-bold text-stone-800">
-                                <option value="dominant">👑 Верхний (Доминант)</option>
-                                <option value="submissive">🧎 Нижний (Сабмиссив)</option>
-                            </select>
+                    <!-- 3. Preferences Section (Likes) -->
+                    <div class="space-y-4 pt-6 border-t border-stone-100">
+                        <div class="flex justify-between items-end mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-emerald-700 flex items-center gap-2"><span class="bg-emerald-100 text-emerald-800 w-6 h-6 flex items-center justify-center rounded-full text-xs">3</span> Предпочтения (Нравится)</h3>
+                                <p class="text-xs text-stone-500 mt-1">Отметьте практики, которые вас заводят. Это сформирует ваш график.</p>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-stone-600 uppercase tracking-wider mb-2">Выберите ваш Архетип (Звание)</label>
-                            <select id="form-title" required class="w-full px-4 py-3 border border-stone-300 rounded-lg bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all text-stone-800">
-                                <!-- Options populated by JS -->
-                            </select>
-                            <p class="text-[10px] text-stone-500 mt-2">Выбор звания автоматически настроит ваш психологический профиль (Радар).</p>
+                        <div id="preferences-container" class="flex flex-wrap gap-2">
+                            <!-- Populated via JS -->
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">Цитата о себе (Отобразится в анкете)</label>
-                        <textarea id="form-desc" rows="2" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all resize-none" placeholder="Ищу партнера для..."></textarea>
+                    <!-- 4. Limits Section (Taboos) -->
+                    <div class="space-y-4 pt-6 border-t border-stone-100">
+                        <div>
+                            <h3 class="text-lg font-bold text-red-700 flex items-center gap-2"><span class="bg-red-100 text-red-800 w-6 h-6 flex items-center justify-center rounded-full text-xs">4</span> Табу и Неприязнь (Лимиты)</h3>
+                            <p class="text-xs text-stone-500 mt-1">Отметьте то, что для вас категорически неприемлемо.</p>
+                        </div>
+                        <div id="limits-container" class="flex flex-wrap gap-2">
+                            <!-- Populated via JS -->
+                        </div>
                     </div>
 
-                    <button type="submit" class="w-full bg-stone-900 text-white font-bold py-4 rounded-xl hover:bg-stone-800 transition-all shadow-md mt-6 text-lg">
-                        Опубликовать Анкету
+                    <button type="submit" class="w-full bg-stone-900 text-white font-bold py-5 rounded-xl hover:bg-stone-800 transition-all shadow-card mt-8 text-lg flex items-center justify-center gap-2">
+                        Опубликовать в Клубе <span class="text-xl">→</span>
                     </button>
                 </form>
             </div>
@@ -225,14 +301,14 @@
     </main>
 
     <!-- Contact Modal -->
-    <div id="contact-modal" class="hidden fixed inset-0 z-[100] bg-stone-900/40 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
-        <div class="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center">
+    <div id="contact-modal" class="hidden fixed inset-0 z-[100] bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4 fade-in">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center border border-stone-200">
             <div class="text-5xl mb-4">💬</div>
-            <h3 class="text-xl font-bold text-stone-800 mb-2">Открыть диалог</h3>
+            <h3 class="text-xl font-bold text-stone-800 mb-2">Написать Владельцу</h3>
             <p class="text-sm text-stone-500 mb-8" id="contact-modal-text">Вы перейдете в Telegram.</p>
             <div class="flex gap-3">
                 <button onclick="closeModal('contact-modal')" class="flex-1 py-3 bg-stone-100 text-stone-700 rounded-xl font-bold hover:bg-stone-200 transition-colors">Отмена</button>
-                <button onclick="confirmContact()" class="flex-1 py-3 bg-stone-900 text-white rounded-xl font-bold hover:bg-stone-800 transition-colors shadow-md">Перейти</button>
+                <button onclick="confirmContact()" class="flex-1 py-3 bg-stone-900 text-white rounded-xl font-bold hover:bg-stone-800 transition-colors shadow-md">Перейти в Чат</button>
             </div>
         </div>
     </div>
@@ -251,7 +327,56 @@
             if (tg && tg.openLink) { tg.openLink(url); } else { window.open(url, '_blank'); }
         }
 
-        // --- Data ---
+        // --- Premium Gate Logic ---
+        document.getElementById('form-tier').addEventListener('change', function(e) {
+            const gate = document.getElementById('premium-gate');
+            const promoInput = document.getElementById('form-promo');
+            if(e.target.value !== 'base') {
+                gate.classList.remove('hidden');
+                promoInput.required = true;
+            } else {
+                gate.classList.add('hidden');
+                promoInput.required = false;
+                promoInput.value = '';
+            }
+        });
+
+        // --- Data: 30+ Kinks Database & Mapping to Axes ---
+        const kinksDatabase = [
+            { id: 'k1', name: 'Сисси', mappedAxisSub: 'degradation', mappedAxisDom: 'mind_control' },
+            { id: 'k2', name: 'Финдом', mappedAxisSub: 'service', mappedAxisDom: 'control' },
+            { id: 'k3', name: 'Переодевания', mappedAxisSub: 'degradation', mappedAxisDom: 'mind_control' },
+            { id: 'k4', name: 'Страпон (Пеггинг)', mappedAxisSub: 'submission', mappedAxisDom: 'control' },
+            { id: 'k5', name: 'Пояс верности', mappedAxisSub: 'chastity', mappedAxisDom: 'control' },
+            { id: 'k6', name: 'Бондаж (Веревки)', mappedAxisSub: 'bondage', mappedAxisDom: 'bondage' },
+            { id: 'k7', name: 'Шибари', mappedAxisSub: 'bondage', mappedAxisDom: 'bondage' },
+            { id: 'k8', name: 'Публичность', mappedAxisSub: 'risk', mappedAxisDom: 'risk' },
+            { id: 'k9', name: 'Латекс', mappedAxisSub: 'service', mappedAxisDom: 'strict' },
+            { id: 'k10', name: 'Шрамирование', mappedAxisSub: 'masochism', mappedAxisDom: 'edgeplay' },
+            { id: 'k11', name: 'Порезы (Бладплей)', mappedAxisSub: 'masochism', mappedAxisDom: 'edgeplay' },
+            { id: 'k12', name: 'Асфиксия (Удушье)', mappedAxisSub: 'risk', mappedAxisDom: 'edgeplay' },
+            { id: 'k13', name: 'Порка (Флоггинг)', mappedAxisSub: 'masochism', mappedAxisDom: 'sadism' },
+            { id: 'k14', name: 'Унижение', mappedAxisSub: 'degradation', mappedAxisDom: 'mind_control' },
+            { id: 'k15', name: 'Газлайтинг', mappedAxisSub: 'degradation', mappedAxisDom: 'mind_control' },
+            { id: 'k16', name: 'Электроигры', mappedAxisSub: 'masochism', mappedAxisDom: 'sadism' },
+            { id: 'k17', name: 'Игры с воском/льдом', mappedAxisSub: 'masochism', mappedAxisDom: 'sadism' },
+            { id: 'k18', name: 'Сенсорная депривация', mappedAxisSub: 'bondage', mappedAxisDom: 'mind_control' },
+            { id: 'k19', name: 'Петплей (Щенок/Кошка)', mappedAxisSub: 'degradation', mappedAxisDom: 'control' },
+            { id: 'k20', name: 'Куколдизм', mappedAxisSub: 'cuckold', mappedAxisDom: 'mind_control' },
+            { id: 'k21', name: 'Фейсситтинг', mappedAxisSub: 'service', mappedAxisDom: 'control' },
+            { id: 'k22', name: 'Трамплинг (Топтание)', mappedAxisSub: 'masochism', mappedAxisDom: 'sadism' },
+            { id: 'k23', name: 'Золотой дождь', mappedAxisSub: 'degradation', mappedAxisDom: 'strict' },
+            { id: 'k24', name: 'Медицинские игры', mappedAxisSub: 'risk', mappedAxisDom: 'edgeplay' },
+            { id: 'k25', name: 'Ролевые игры', mappedAxisSub: 'service', mappedAxisDom: 'strict' },
+            { id: 'k26', name: 'Поклонение', mappedAxisSub: 'service', mappedAxisDom: 'control' },
+            { id: 'k27', name: 'Оргазмический контроль', mappedAxisSub: 'submission', mappedAxisDom: 'strict' },
+            { id: 'k28', name: 'Плей-пирсинг (Иглы)', mappedAxisSub: 'masochism', mappedAxisDom: 'edgeplay' },
+            { id: 'k29', name: 'Дисциплина / Правила', mappedAxisSub: 'submission', mappedAxisDom: 'strict' },
+            { id: 'k30', name: 'Абсолютный CNC (Без стоп-слова)', mappedAxisSub: 'risk', mappedAxisDom: 'edgeplay' },
+            { id: 'k31', name: 'Афтеркеа (Aftercare)', mappedAxisSub: 'praise', mappedAxisDom: 'daddy' },
+            { id: 'k32', name: 'Служение по дому', mappedAxisSub: 'service', mappedAxisDom: 'control' }
+        ];
+
         const traitLabels = {
             'submission': 'Покорность', 'service': 'Служение', 'findom': 'Финдом', 'chastity': 'Воздержание',
             'masochism': 'Мазохизм', 'oral': 'Орал/Фейсситтинг', 'brat': 'Строптивость', 'objectification': 'Объективизация',
@@ -269,33 +394,20 @@
 
         const titlesData = {
             submissive: [
-                { id: "s1", title: "«Безупречный Слуга»", traits: ['service', 'submission', 'strict'], desc: "Мечта для Госпожи, ценящей идеальный порядок. Круглосуточное, беспрекословное служение." },
-                { id: "s2", title: "«Финансовый Донор»", traits: ['findom'], desc: "Слова ничего не стоят без ресурсов. Наслаждение в оплате капризов." },
-                { id: "s3", title: "«Узник Похоти»", traits: ['chastity', 'submission'], desc: "Похоть больше не принадлежит тебе. Готов запереть себя в пояс верности." },
-                { id: "s4", title: "«Неутомимая Груша»", traits: ['masochism', 'edgeplay'], desc: "Высокий болевой порог. Живой холст для плетей, жажда жестких практик." },
-                { id: "s5", title: "«Одержимый Жрец»", traits: ['oral', 'service'], desc: "Её тело — храм. Готов часами вылизывать Её до изнеможения." },
-                { id: "s6", title: "«Дерзкая Игрушка»", traits: ['brat', 'masochism'], desc: "Дерзит не потому, что не хочет служить, а потому, что отчаянно жаждет порки." },
-                { id: "s7", title: "«Живая Мебель»", traits: ['objectification', 'degradation'], desc: "Отказ от права называться человеком. Объективизация и сломленность." },
-                { id: "s8", title: "«Покорная Сучка»", traits: ['pegging', 'degradation'], desc: "Мечтает о тотальной инверсии ролей и страпоне." },
-                { id: "s9", title: "«Адреналиновый Наркоман»", traits: ['risk', 'edgeplay'], desc: "Риск публичного разоблачения или асфиксия слаще любой порки." },
-                { id: "s10", title: "«Сломанная Воля»", traits: ['mind_control', 'degradation'], desc: "Жажда жесткого психологического доминирования и газлайтинга." },
-                { id: "s11", title: "«Покорный Зритель»", traits: ['cuckold', 'submission'], desc: "Осознание своей ничтожности на фоне других мужчин Госпожи." },
-                { id: "s12", title: "«Хороший Мальчик»", traits: ['praise', 'daddy'], desc: "Потребность в строгой опеке и поглаживаниях по голове за послушание." },
-                { id: "s13", title: "«Чистый Холст»", traits: ['newbie', 'submission'], desc: "Мало опыта, но горит безумное желание принадлежать. Идеальный проект." },
-                { id: "s14", title: "«Узник Темноты»", traits: ['bondage', 'deprivation'], desc: "Жажда абсолютной сенсорной и физической беспомощности. Шибари." },
-                { id: "s15", title: "«Виртуальный Раб»", traits: ['online', 'service'], desc: "Преданное служение на расстоянии по видеосвязи." }
+                { id: "s1", title: "«Безупречный Слуга»", trait: 'service', desc: "Мечта для Госпожи, ценящей идеальный порядок. Круглосуточное, беспрекословное служение." },
+                { id: "s2", title: "«Узник Темноты»", trait: 'bondage', desc: "Твое доверие безгранично. Жаждешь абсолютной сенсорной и физической беспомощности." },
+                { id: "s3", title: "«Неутомимая Груша»", trait: 'masochism', desc: "Высокий болевой порог. Живой холст для плетей, жажда жестких практик." },
+                { id: "s4", title: "«Живая Мебель»", trait: 'degradation', desc: "Отказ от права называться человеком. Объективизация и сломленность." },
+                { id: "s5", title: "«Адреналиновый Наркоман»", trait: 'risk', desc: "Риск публичного разоблачения или асфиксия слаще любой порки." },
+                { id: "s6", title: "«Идеальная Собственность»", trait: 'submission', desc: "Тотальное подчинение. У тебя нет своих желаний, только воля Госпожи." }
             ],
             dominant: [
-                { id: "d1", title: "«Абсолютный Владелец»", traits: ['control', 'strict'], desc: "Власть 24/7. Микро-контроль расписания и ритуалов." },
-                { id: "d2", title: "«Властный Покровитель»", traits: ['daddy', 'praise'], desc: "Власть строится на опеке и уважении. Щедр на ласку, но строг." },
-                { id: "d3", title: "«Изощрённый Эстет»", traits: ['sadism', 'bondage'], desc: "Тело — холст для боли. Обожает оставлять метки и связывать." },
-                { id: "d4", title: "«Искусный Кукловод»", traits: ['mind_control', 'degradation'], desc: "Ломает сознание. Обожает газлайтинг, словесное унижение и разрушение эго." },
-                { id: "d5", title: "«Азартный Укротитель»", traits: ['brat_tamer', 'sadism'], desc: "Охота на строптивых. Порка быстро возвращает правильные настройки." },
-                { id: "d6", title: "«Порочный Режиссёр»", traits: ['risk', 'cuckold'], desc: "Азарт риска и публичности. Превращает выход из дома в опасную игру." },
-                { id: "d7", title: "«Хранитель Оков»", traits: ['bondage', 'deprivation'], desc: "Мастер тотальной фиксации. Лишает возможности шевелиться." },
-                { id: "d8", title: "«Тёмный Скульптор»", traits: ['teacher', 'strict'], desc: "Терпеливый Наставник. Перепрошивает границы шаг за шагом." },
-                { id: "d9", title: "«Первобытный Хищник»", traits: ['primal', 'edgeplay'], desc: "Чистая животная агрессия. Использует руки, укусы и жесткое удушье." },
-                { id: "d10", title: "«Ледяной Диктатор»", traits: ['strict', 'control'], desc: "Бескомпромиссный надзиратель с абсурдным уровнем требований." }
+                { id: "d1", title: "«Абсолютный Владелец»", trait: 'control', desc: "Власть 24/7. Микро-контроль расписания и ритуалов." },
+                { id: "d2", title: "«Изощрённый Эстет»", trait: 'sadism', desc: "Тело — холст для боли. Обожаешь оставлять метки и причинять эстетичную боль." },
+                { id: "d3", title: "«Искусный Кукловод»", trait: 'mind_control', desc: "Ломаешь сознание. Обожаешь газлайтинг, словесное унижение и разрушение эго." },
+                { id: "d4", title: "«Хранитель Оков»", trait: 'bondage', desc: "Мастер тотальной фиксации. Лишаешь возможности шевелиться." },
+                { id: "d5", title: "«Первобытный Хищник»", trait: 'edgeplay', desc: "Чистая животная агрессия. Готов зайти за грань ради власти." },
+                { id: "d6", title: "«Ледяной Диктатор»", trait: 'strict', desc: "Бескомпромиссный надзиратель с абсурдным уровнем требований." }
             ]
         };
 
@@ -304,29 +416,23 @@
             {
                 id: 1, role: 'dominant', tier: 'leather', username: 'mr_dom_88',
                 name: 'Александр', age: 34, city: 'Москва', gender: 'М',
-                title: '«Абсолютный Владелец»',
-                desc: 'Живу властью 24/7. Для меня нижняя — личная собственность.',
-                dominantTrait: 'control',
-                scores: [10, 10, 4, 6, 2, 3], // Base scores for demo
-                avatarUrl: null
+                title: '«Абсолютный Владелец»', desc: 'Живу властью 24/7. Для меня нижняя — личная собственность.',
+                dominantTrait: 'control', scores: [10, 8, 4, 6, 2, 3],
+                prefs: ['Бондаж', 'Оргазмический контроль', 'Порка', 'Дисциплина / Правила'], limits: ['Сисси', 'Порезы (Бладплей)'], avatarUrl: null
             },
             {
-                id: 2, role: 'submissive', tier: 'latex', username: 'cute_brat_spb',
+                id: 2, role: 'submissive', tier: 'base', username: 'cute_brat_spb',
                 name: 'Елена', age: 22, city: 'Санкт-Петербург', gender: 'Ж',
-                title: '«Дерзкая Игрушка»',
-                desc: 'Обожаю проверять нервы на прочность. Дерзю, чтобы быть наказанной.',
-                dominantTrait: 'brat',
-                scores: [3, 2, 10, 4, 3, 7],
-                avatarUrl: null
+                title: '«Дерзкая Игрушка»', desc: 'Обожаю проверять нервы на прочность. Дерзю, чтобы быть наказанной.',
+                dominantTrait: 'brat', scores: [5, 2, 8, 4, 3, 7],
+                prefs: ['Порка (Флоггинг)', 'Публичность', 'Афтеркеа (Aftercare)'], limits: ['Унижение', 'Золотой дождь'], avatarUrl: null
             },
             {
                 id: 3, role: 'dominant', tier: 'gold', username: 'mistress_v',
                 name: 'Виктория', age: 29, city: 'Казань', gender: 'Ж',
-                title: '«Искусный Кукловод»',
-                desc: 'Ломаю не тело, а виртуозно подчиняю сознание.',
-                dominantTrait: 'mind_control',
-                scores: [5, 4, 3, 10, 2, 2],
-                avatarUrl: null
+                title: '«Искусный Кукловод»', desc: 'Ломаю не тело, а виртуозно подчиняю сознание. Обожаю газлайтинг и разрушение эго.',
+                dominantTrait: 'mind_control', scores: [5, 4, 3, 10, 2, 2],
+                prefs: ['Газлайтинг', 'Унижение', 'Сенсорная депривация'], limits: ['Кровь', 'Медицинские игры'], avatarUrl: null
             }
         ];
 
@@ -334,6 +440,64 @@
         let pendingContactUsername = '';
         let currentUploadedPhotoBase64 = null;
         let charts = {};
+        
+        // Form State
+        let selectedPrefs = new Set();
+        let selectedLimits = new Set();
+
+        // --- Init Tags ---
+        function initTagsUI() {
+            const prefsContainer = document.getElementById('preferences-container');
+            const limitsContainer = document.getElementById('limits-container');
+            prefsContainer.innerHTML = '';
+            limitsContainer.innerHTML = '';
+
+            kinksDatabase.forEach(kink => {
+                // Pref Button
+                const btnP = document.createElement('button');
+                btnP.type = 'button';
+                btnP.className = 'tag-btn px-4 py-2 rounded-full text-xs font-bold shadow-sm';
+                btnP.textContent = kink.name;
+                
+                // Limit Button
+                const btnL = document.createElement('button');
+                btnL.type = 'button';
+                btnL.className = 'tag-btn px-4 py-2 rounded-full text-xs font-bold shadow-sm';
+                btnL.textContent = kink.name;
+
+                btnP.onclick = () => toggleTag('pref', kink.name, btnP, btnL);
+                btnL.onclick = () => toggleTag('limit', kink.name, btnL, btnP);
+
+                prefsContainer.appendChild(btnP);
+                limitsContainer.appendChild(btnL);
+            });
+        }
+
+        function toggleTag(type, itemName, clickedBtn, oppositeBtn) {
+            if (type === 'pref') {
+                if (selectedLimits.has(itemName)) return; // Can't be both
+                if (selectedPrefs.has(itemName)) {
+                    selectedPrefs.delete(itemName);
+                    clickedBtn.classList.remove('tag-pref-active');
+                    oppositeBtn.classList.remove('tag-disabled');
+                } else {
+                    selectedPrefs.add(itemName);
+                    clickedBtn.classList.add('tag-pref-active');
+                    oppositeBtn.classList.add('tag-disabled');
+                }
+            } else {
+                if (selectedPrefs.has(itemName)) return; // Can't be both
+                if (selectedLimits.has(itemName)) {
+                    selectedLimits.delete(itemName);
+                    clickedBtn.classList.remove('tag-limit-active');
+                    oppositeBtn.classList.remove('tag-disabled');
+                } else {
+                    selectedLimits.add(itemName);
+                    clickedBtn.classList.add('tag-limit-active');
+                    oppositeBtn.classList.add('tag-disabled');
+                }
+            }
+        }
 
         // --- Navigation ---
         function showScreen(screenId) {
@@ -345,7 +509,6 @@
             if (screen) {
                 screen.classList.remove('hidden');
                 window.scrollTo(0, 0); 
-                void screen.offsetWidth;
                 screen.classList.add('fade-in');
             }
         }
@@ -364,23 +527,9 @@
             }
             
             if(tabId === 'feed') renderProfiles(mockProfiles);
-            if(tabId === 'encyclopedia') renderEncyclopedia();
         }
 
-        // --- Form Logic ---
-        function updateTitleDropdown() {
-            const role = document.getElementById('form-role').value;
-            const titleSelect = document.getElementById('form-title');
-            titleSelect.innerHTML = '';
-            
-            titlesData[role].forEach(t => {
-                const opt = document.createElement('option');
-                opt.value = t.id;
-                opt.textContent = t.title;
-                titleSelect.appendChild(opt);
-            });
-        }
-
+        // --- Photo Upload ---
         function previewPhoto(event) {
             const file = event.target.files[0];
             const previewContainer = document.getElementById('photo-preview-container');
@@ -395,26 +544,65 @@
                 reader.onload = function(e) {
                     currentUploadedPhotoBase64 = e.target.result;
                     previewContainer.innerHTML = `<img src="${currentUploadedPhotoBase64}" class="w-full h-full object-cover" />`;
+                    previewContainer.classList.remove('border-dashed', 'border-stone-300', 'text-stone-400');
+                    previewContainer.classList.add('border-solid', 'border-sky-500', 'shadow-md');
                 }
                 reader.readAsDataURL(file);
             }
         }
 
+        // --- Profile Generation & Publishing ---
         function publishProfile(e) {
             e.preventDefault();
             
             const role = document.getElementById('form-role').value;
-            const titleId = document.getElementById('form-title').value;
-            const titleObj = titlesData[role].find(t => t.id === titleId);
+            const tier = document.getElementById('form-tier').value || 'base';
             
-            // Auto-generate scores based on the selected title's traits
+            if (tier !== 'base') {
+                const promo = document.getElementById('form-promo').value.trim();
+                if (!promo) {
+                    alert("Пожалуйста, введите промокод для премиального оформления.");
+                    return;
+                }
+            }
+
+            if (selectedPrefs.size === 0) {
+                alert("Пожалуйста, выберите хотя бы одно предпочтение, чтобы мы могли построить ваш Психотип.");
+                return;
+            }
+
+            // Calculate Scores based on selected preferences
+            let rawScores = { 'submission': 2, 'service': 2, 'masochism': 2, 'degradation': 2, 'bondage': 2, 'risk': 2, 
+                              'control': 2, 'strict': 2, 'sadism': 2, 'mind_control': 2, 'edgeplay': 2 };
+            
+            selectedPrefs.forEach(prefName => {
+                const kink = kinksDatabase.find(k => k.name === prefName);
+                if(kink) {
+                    if(role === 'submissive' && kink.mappedAxisSub) rawScores[kink.mappedAxisSub] += 3;
+                    if(role === 'dominant' && kink.mappedAxisDom) rawScores[kink.mappedAxisDom] += 3;
+                }
+            });
+
+            // Convert to Radar format
             const axes = radarAxes[role];
-            const generatedScores = axes.map(axis => titleObj.traits.includes(axis) ? 10 : 3); // 10 for primary, 3 for baseline
+            let finalScoresArray = axes.map(axis => Math.min(10, rawScores[axis])); 
+
+            // Find Dominant Axis
+            let maxAxis = axes[0];
+            let maxScore = -1;
+            axes.forEach(axis => {
+                if(rawScores[axis] > maxScore) { maxScore = rawScores[axis]; maxAxis = axis; }
+            });
+
+            // Assign Title based on Dominant Axis
+            const possibleTitles = titlesData[role];
+            let assignedTitle = possibleTitles.find(t => t.trait === maxAxis);
+            if(!assignedTitle) assignedTitle = possibleTitles[0];
 
             const newProfile = {
                 id: CURRENT_USER_ID,
                 role: role,
-                tier: document.getElementById('form-tier').value || 'base',
+                tier: tier,
                 username: document.getElementById('form-username').value.replace('@', ''),
                 name: document.getElementById('form-name').value,
                 age: document.getElementById('form-age').value,
@@ -422,17 +610,24 @@
                 gender: document.getElementById('form-gender').value,
                 desc: document.getElementById('form-desc').value,
                 avatarUrl: currentUploadedPhotoBase64,
-                title: titleObj.title,
-                dominantTrait: titleObj.traits[0] || axes[0],
-                scores: generatedScores
+                title: assignedTitle.title,
+                dominantTrait: maxAxis,
+                scores: finalScoresArray,
+                prefs: Array.from(selectedPrefs),
+                limits: Array.from(selectedLimits)
             };
 
             // Update Mock Database
             mockProfiles = mockProfiles.filter(p => p.id !== CURRENT_USER_ID);
             mockProfiles.unshift(newProfile);
 
-            // Background Webhook (Optional, silent fail if errors)
-            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxdJtjTKeIJnlGbs_BF7m19j04iUyoa01cEJkrVlmLVnoF1aNs6s36dHh2EZ4Sz59FYeQ/exec';
+            // Create Tags for the webhook
+            const isDomWebhook = newProfile.role === 'dominant';
+            const genderTag = newProfile.gender === 'М' ? 'М' : 'Ж';
+            const generatedTags = `#${isDomWebhook ? 'Верхний' : 'Нижний'} #${newProfile.city.replace(/\s+/g, '')} #${genderTag}${newProfile.age}`;
+
+            // Webhook payload including tags
+            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwl6A-ZvHEt0vSRjFR2lkZdAwjlXccwmpJRBWzGou9l2sYfFZzCaUVwiphBCjJ5stYgXw/exec';
             try {
                 fetch(WEBHOOK_URL, {
                     method: 'POST',
@@ -443,79 +638,89 @@
                         tgUsername: newProfile.username,
                         role: newProfile.role,
                         title: newProfile.title,
-                        answers: "Ручной выбор (Тест пропущен)"
+                        prefs: newProfile.prefs.join(', '),
+                        limits: newProfile.limits.join(', '),
+                        tags: generatedTags,
+                        name: newProfile.name,
+                        city: newProfile.city
                     })
                 });
-            } catch(e) { console.log('Webhook sync skipped.'); }
+            } catch(err) { console.log('Webhook logic running.'); }
 
             if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
             
-            // Reset form for future use if needed, but not strictly required
-            e.target.reset();
-            document.getElementById('photo-preview-container').innerHTML = '<span class="text-3xl">📸</span>';
-            currentUploadedPhotoBase64 = null;
-            updateTitleDropdown();
-
-            alert(`Анкета успешно опубликована!\nЗвание: ${newProfile.title}`);
+            alert(`Анкета опубликована!\nВаше звание: ${newProfile.title}`);
             switchTab('feed');
         }
 
-
         // --- Rendering Logic ---
-        function createCardHTML(profile, isEncyclopedia = false) {
+        function createCardHTML(profile) {
             const isDom = profile.role === 'dominant';
             const colorClass = isDom ? 'text-orange-600' : 'text-sky-600';
             const avatarClass = isDom ? 'avatar-dom' : 'avatar-sub';
-            const tierClass = isEncyclopedia ? 'card-tier-base' : `card-tier-${profile.tier || 'base'}`;
+            const tierClass = `card-tier-${profile.tier || 'base'}`;
 
             let avatarContent = profile.avatarUrl 
                 ? `<img src="${profile.avatarUrl}" class="w-full h-full object-cover">` 
                 : (profile.gender === 'М' ? '🧔' : '👩');
 
-            const headerHTML = isEncyclopedia ? '' : `
+            const headerHTML = `
                 <div class="flex items-center gap-4 mb-4">
-                    <div class="w-14 h-14 rounded-full ${avatarClass} flex items-center justify-center text-xl shadow-md border border-black/10 shrink-0 overflow-hidden">
+                    <div class="w-14 h-14 rounded-full ${avatarClass} flex items-center justify-center text-2xl shadow-md border border-black/10 shrink-0 overflow-hidden">
                         ${avatarContent}
                     </div>
                     <div class="min-w-0 flex-1">
-                        <h3 class="font-bold text-lg leading-tight truncate">${profile.name}, ${profile.age}</h3>
-                        <p class="text-xs opacity-70 flex items-center gap-1 truncate"><span>📍</span> ${profile.city}</p>
+                        <h3 class="font-bold text-xl leading-tight truncate">${profile.name}, ${profile.age}</h3>
+                        <p class="text-sm opacity-70 flex items-center gap-1 truncate"><span>📍</span> ${profile.city}</p>
                     </div>
                 </div>`;
 
-            const footerHTML = isEncyclopedia ? '' : `
-                <div class="flex gap-2 mt-auto pt-4 border-t border-black/10">
-                    <button onclick="toggleChart('${profile.id}', '${profile.role}')" class="flex-1 py-2.5 rounded-lg bg-black/5 hover:bg-black/10 text-xs font-bold transition-colors border border-black/10 text-inherit flex justify-center items-center">
-                        📊 Психотип
-                    </button>
-                    <button onclick="openContactModal('${profile.username}')" class="flex-1 py-2.5 rounded-lg ${isDom ? 'bg-orange-600 hover:bg-orange-700' : 'bg-sky-600 hover:bg-sky-700'} text-white text-xs font-bold transition-colors shadow-md flex justify-center items-center">
-                        💬 Написать
-                    </button>
-                </div>`;
+            // Tags HTML (Green for Prefs, Red for Limits)
+            let tagsHtml = '';
+            const pTags = (profile.prefs || []).map(p => `<span class="inline-block px-2 py-1 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-bold mr-1 mb-1">✓ ${p}</span>`).join('');
+            const lTags = (profile.limits || []).map(l => `<span class="inline-block px-2 py-1 rounded bg-red-100 text-red-800 border border-red-200 text-[10px] font-bold mr-1 mb-1">✕ ${l}</span>`).join('');
+            tagsHtml = `<div class="mb-4 flex flex-wrap">${pTags}${lTags}</div>`;
+            
+            // Fully expanded chart
+            const chartHtml = `
+                <div class="border-t border-black/10 pt-4 mb-4 relative z-0">
+                    <div class="text-center text-xs font-bold uppercase tracking-widest opacity-40 mb-2">Психотип</div>
+                    <div class="chart-container">
+                        <canvas id="canvas-${profile.id}"></canvas>
+                    </div>
+                </div>
+            `;
+
+            const footerBrandingHTML = `
+                <div class="mt-4 pt-4 border-t border-black/10 border-muted flex justify-between items-center opacity-80">
+                    <div class="flex items-center gap-2">
+                        <img src="logo.png" alt="BDSM-ka" class="h-6 w-auto" onerror="this.outerHTML='<span class=&quot;text-xs font-bold opacity-60 uppercase tracking-widest&quot;>Клуб Знакомств</span>'">
+                    </div>
+                    <img src="qr_tg.png" alt="QR" class="w-10 h-10 rounded bg-white p-0.5 shadow-sm" onerror="this.style.display='none'">
+                </div>
+            `;
+
+            const actionBtnHTML = `
+                <button onclick="openContactModal('${profile.username}')" class="w-full mt-4 py-3.5 rounded-xl ${isDom ? 'bg-orange-600 hover:bg-orange-700' : 'bg-sky-600 hover:bg-sky-700'} text-white text-sm font-bold transition-colors shadow-md flex justify-center items-center gap-2 relative z-10">
+                    💬 Написать Владельцу
+                </button>`;
 
             return `
-                <div class="${tierClass} rounded-2xl p-5 h-full flex flex-col transition-transform hover:-translate-y-1 hover:shadow-card shadow-soft" data-role="${profile.role}">
+                <div class="${tierClass} rounded-2xl p-6 flex flex-col shadow-card transition-all" data-role="${profile.role}">
                     <div class="inner-panel flex flex-col h-full relative z-10">
                         ${headerHTML}
-                        <div class="mb-3">
-                            <span class="text-[9px] uppercase tracking-widest opacity-60">Звание</span>
-                            <h4 class="font-bold ${colorClass} text-md leading-tight">${profile.title}</h4>
-                        </div>
-                        ${profile.dominantTrait ? `
                         <div class="mb-4">
-                            <span class="inline-block px-2 py-1 rounded bg-black/10 text-[10px] font-mono border border-black/10 opacity-80">
-                                Основа: ${traitLabels[profile.dominantTrait] || profile.dominantTrait}
-                            </span>
-                        </div>` : ''}
-                        <p class="text-xs italic leading-relaxed border-l-2 pl-2 mb-4 flex-grow opacity-90 border-black/20">
+                            <span class="text-[10px] uppercase tracking-widest opacity-60">Звание</span>
+                            <h4 class="font-bold ${colorClass} text-lg leading-tight mt-0.5">${profile.title}</h4>
+                        </div>
+                        ${tagsHtml}
+                        <p class="text-sm italic leading-relaxed border-l-2 pl-3 mb-6 opacity-90 border-black/20">
                             "${profile.desc}"
                         </p>
-                        ${footerHTML}
-                        <div id="chart-wrap-${profile.id}" class="${isEncyclopedia ? 'block' : 'hidden'} mt-4 pt-4 border-t border-black/10">
-                            <div class="chart-container">
-                                <canvas id="canvas-${profile.id}"></canvas>
-                            </div>
-                        </div>
+                        
+                        ${chartHtml}
+                        ${footerBrandingHTML}
+                        ${actionBtnHTML}
                     </div>
                 </div>
             `;
@@ -529,6 +734,10 @@
                 return;
             }
             grid.innerHTML = profilesToRender.map(p => createCardHTML(p)).join('');
+            
+            profilesToRender.forEach(p => {
+                renderChart(p.id, p.role, p.scores, p.tier);
+            });
         }
 
         function filterProfiles(type) {
@@ -539,26 +748,22 @@
             renderProfiles(filtered);
         }
 
-        function toggleChart(id, role) {
-            const wrap = document.getElementById(`chart-wrap-${id}`);
-            if (!wrap) return;
-            if (wrap.classList.contains('hidden')) {
-                wrap.classList.remove('hidden');
-                const profile = mockProfiles.find(p => p.id == id);
-                if (profile) {
-                    renderChart(id, role, profile.scores);
-                }
-            } else {
-                wrap.classList.add('hidden');
-            }
-        }
-
-        function renderChart(id, role, scoresData) {
+        function renderChart(id, role, scoresData, tier) {
             if (charts[id]) { charts[id].destroy(); }
-            const ctx = document.getElementById(`canvas-${id}`).getContext('2d');
+            const canvas = document.getElementById(`canvas-${id}`);
+            if (!canvas) return; 
+            const ctx = canvas.getContext('2d');
             
             const axes = radarAxes[role];
             const labels = axes.map(t => traitLabels[t] || t);
+            
+            let gridColor = 'rgba(0, 0, 0, 0.1)';
+            let labelColor = 'rgba(0, 0, 0, 0.7)';
+            if(tier === 'latex' || tier === 'leather') {
+                gridColor = 'rgba(255, 255, 255, 0.15)';
+                labelColor = 'rgba(255, 255, 255, 0.8)';
+            }
+
             const rgbLine = role === 'dominant' ? '234, 88, 12' : '2, 132, 199'; 
 
             charts[id] = new Chart(ctx, {
@@ -580,41 +785,14 @@
                         r: {
                             beginAtZero: true,
                             suggestedMax: 10,
-                            angleLines: { color: 'rgba(0,0,0,0.1)' },
-                            grid: { color: 'rgba(0,0,0,0.1)' },
-                            pointLabels: { color: 'rgba(0,0,0,0.7)', font: { size: 9, family: "sans-serif", weight: 'bold' } },
+                            angleLines: { color: gridColor },
+                            grid: { color: gridColor },
+                            pointLabels: { color: labelColor, font: { size: 10, family: "sans-serif", weight: 'bold' } },
                             ticks: { display: false }
                         }
                     },
                     plugins: { legend: { display: false } }
                 }
-            });
-        }
-
-        function renderEncyclopedia() {
-            const tCont = document.getElementById('traits-container');
-            let tHtml = '';
-            for(const [key, val] of Object.entries(traitLabels)) {
-                tHtml += `<div class="bg-white border border-stone-200 p-2 rounded text-center shadow-sm"><div class="text-[10px] text-stone-400 font-mono">${key}</div><div class="text-sm font-bold text-stone-700">${val}</div></div>`;
-            }
-            tCont.innerHTML = tHtml;
-            renderEncyclopediaTitles('submissive');
-        }
-
-        function renderEncyclopediaTitles(role) {
-            const container = document.getElementById('encyclopedia-titles-grid');
-            const data = titlesData[role];
-            
-            let html = '';
-            data.forEach((t, idx) => {
-                const mockProfile = { id: `enc_${role}_${idx}`, role: role, title: t.title, desc: t.desc, dominantTrait: t.traits[0] };
-                html += createCardHTML(mockProfile, true);
-            });
-            container.innerHTML = html;
-
-            data.forEach((t, idx) => {
-                const scores = radarAxes[role].map(axis => t.traits.includes(axis) ? 10 : 2);
-                renderChart(`enc_${role}_${idx}`, role, scores);
             });
         }
 
@@ -643,7 +821,7 @@
 
         // --- Init ---
         window.onload = () => { 
-            updateTitleDropdown(); // Initialize dropdown based on default role
+            initTagsUI();
             switchTab('feed'); 
         };
     </script>
