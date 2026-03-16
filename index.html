@@ -627,7 +627,7 @@
             const generatedTags = `#${isDomWebhook ? 'Верхний' : 'Нижний'} #${newProfile.city.replace(/\s+/g, '')} #${genderTag}${newProfile.age}`;
 
             // Webhook payload including tags
-            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwl6A-ZvHEt0vSRjFR2lkZdAwjlXccwmpJRBWzGou9l2sYfFZzCaUVwiphBCjJ5stYgXw/exec';
+            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxFo7sRXUOJ_Prme_3htjsEVmC3CWw3TaHUImMoB95t2ZEct1K-KSqVZ7k0b4KQv3y1vQ/exec';
             try {
                 fetch(WEBHOOK_URL, {
                     method: 'POST',
