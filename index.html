@@ -689,7 +689,7 @@
             const generatedTags = `#${isDomWebhook ? 'Верхний' : 'Нижний'} #${newProfile.city.replace(/\s+/g, '')} #${genderTag}${newProfile.age}`;
 
             // Отправляем на Гугл сервер
-            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxdJtjTKeIJnlGbs_BF7m19j04iUyoa01cEJkrVlmLVnoF1aNs6s36dHh2EZ4Sz59FYeQ/exec'; 
+            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbysvF71_1rBa5TeRzU9FIA_KiCA_a07r71aoNqOh8ELtYXIyibpsqENy2k_0JXwgz1_0Q/exec'; 
             try {
                 await fetch(WEBHOOK_URL, {
                     method: 'POST',
