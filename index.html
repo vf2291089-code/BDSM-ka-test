@@ -116,6 +116,7 @@
         .tag-limit-active { background-color: #ef4444 !important; border-color: #dc2626 !important; color: white !important; }
         .tag-disabled { opacity: 0.25; pointer-events: none; filter: grayscale(100%); }
 
+        /* Компактные теги в ленте сайта */
         .tag-badge { display: inline-flex; align-items: center; justify-content: center; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; text-align: center; }
         .tag-gold-special { background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 1px solid #ca8a04; box-shadow: 0 1px 3px rgba(234,179,8,0.4); }
     </style>
@@ -166,7 +167,6 @@
 
                 <form id="profile-form" onsubmit="publishProfile(event)" class="space-y-8">
                     
-                    <!-- 1. Базовые данные -->
                     <div class="space-y-5">
                         <h3 class="text-lg font-bold text-stone-800 flex items-center gap-2"><span class="bg-stone-200 text-stone-700 w-6 h-6 flex items-center justify-center rounded-full text-xs">1</span> Базовые данные</h3>
                         
@@ -221,7 +221,6 @@
                         </div>
                     </div>
 
-                    <!-- 2. Оформление -->
                     <div class="space-y-4 pt-6 border-t border-stone-100">
                         <h3 class="text-lg font-bold text-stone-800 flex items-center gap-2"><span class="bg-stone-200 text-stone-700 w-6 h-6 flex items-center justify-center rounded-full text-xs">2</span> Оформление (Статус)</h3>
                         
@@ -237,13 +236,11 @@
                             <option value="ceramic">Керамика 🔒</option>
                         </select>
 
-                        <!-- Предпросмотр -->
                         <div id="tier-preview" class="w-full h-28 mt-4 rounded-xl flex flex-col items-center justify-center font-bold transition-all shadow-md card-base border-2 border-transparent">
                             <span class="opacity-90" id="preview-text-1">Предпросмотр стиля</span>
                             <span class="text-xs opacity-60 font-normal mt-1" id="preview-text-2">Вся карточка будет в этой текстуре</span>
                         </div>
 
-                        <!-- Промокод -->
                         <div class="mt-4 p-5 bg-amber-50 border border-amber-200 rounded-xl shadow-inner">
                             <p class="text-sm text-amber-900 font-bold mb-3 flex items-center gap-2">💎 Разблокировать премиум-стиль</p>
                             <div class="flex flex-col sm:flex-row gap-3">
@@ -253,7 +250,6 @@
                         </div>
                     </div>
 
-                    <!-- 3 & 4. Предпочтения -->
                     <div class="space-y-4 pt-6 border-t border-stone-100">
                         <div class="flex justify-between items-end mb-4">
                             <div>
@@ -307,7 +303,7 @@
             if (tg && tg.openLink) { tg.openLink(url); } else { window.open(url, '_blank'); }
         }
 
-        // --- ЛОГИКА ПРОМОКОДОВ И ДОСТУПОВ ---
+        // --- ЛОГИКА ПРОМОКОДОВ ---
         const promoCodes = {
             'SERB2': 'silver',
             '1GOLD9E': 'gold',
@@ -317,7 +313,6 @@
             'KER849AMA': 'ceramic'
         };
 
-        // Изначально открыты только бесплатные стили
         let unlockedTiers = new Set(['base', 'sub-free', 'dom-free']);
 
         function applyPromoCode() {
@@ -341,10 +336,8 @@
         function updateTierPreview() {
             const tier = document.getElementById('form-tier').value;
             const preview = document.getElementById('tier-preview');
-            // Применяем классы для UI предпросмотра
             preview.className = `w-full h-28 mt-4 rounded-xl flex flex-col items-center justify-center font-bold transition-all shadow-md card-${tier} border-2 border-transparent`;
             
-            // Настраиваем цвет текста предпросмотра чтобы было видно на темных и светлых скинах
             const isDark = (tier === 'latex' || tier === 'leather' || tier === 'metal');
             document.getElementById('preview-text-1').style.color = isDark ? '#ffffff' : 'inherit';
             document.getElementById('preview-text-2').style.color = isDark ? 'rgba(255,255,255,0.7)' : 'inherit';
@@ -429,7 +422,7 @@
             ]
         };
 
-        // Разнообразные моковые профили для презентации всех стилей в ленте
+        // Моковые профили для презентации всех стилей в ленте
         let mockProfiles = [
             {
                 id: 1, role: 'dominant', tier: 'ceramic', username: 'mr_dom_88',
@@ -599,7 +592,6 @@
             const role = document.getElementById('form-role').value;
             const tier = document.getElementById('form-tier').value || 'base';
             
-            // Проверка: открыт ли выбранный стиль
             if (!unlockedTiers.has(tier)) {
                 alert("Этот стиль платный! Пожалуйста, введите верный промокод и нажмите 'Применить'.");
                 return;
@@ -654,33 +646,35 @@
                 limits: Array.from(selectedLimits)
             };
 
-            // Создаем скрытый контейнер для генерации картинки (Шире, чтобы текст не жал)
+            // Создаем скрытый контейнер для генерации картинки
+            // УБРАНЫ ВНЕШНИЕ ОТСТУПЫ (padding), ЧТОБЫ РАМКА БЫЛА ГРАНИЦЕЙ
             const offscreen = document.createElement('div');
             offscreen.style.position = 'absolute';
             offscreen.style.left = '-9999px';
             offscreen.style.top = '0';
-            offscreen.style.width = '500px'; 
-            offscreen.style.background = '#fdfbf7';
-            offscreen.style.padding = '24px';
+            offscreen.style.width = '460px'; // Ширина самой карточки
+            offscreen.style.background = 'transparent'; // Прозрачный фон
+            offscreen.style.padding = '0'; // Без отступов
             document.body.appendChild(offscreen);
 
             const tempId = 'capture_' + newProfile.id;
             const tempProfile = { ...newProfile, id: tempId };
-            // Вызываем HTML генератор с флагом isCapture = true
+            
+            // Генерируем карточку для картинки
             offscreen.innerHTML = createCardHTML(tempProfile, true); 
             
-            await new Promise(r => setTimeout(r, 400));
+            await new Promise(r => setTimeout(r, 600));
 
             let base64Image = null;
             try {
-                // scale 2 для высокого качества скриншота
-                const canvas = await html2canvas(offscreen, { scale: 2, useCORS: true, backgroundColor: '#fdfbf7' });
-                base64Image = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+                // Генерируем прозрачный PNG с высоким качеством (scale: 2)
+                const canvas = await html2canvas(offscreen, { scale: 2, useCORS: true, backgroundColor: null });
+                base64Image = canvas.toDataURL('image/png', 1.0).split(',')[1];
             } catch(err) { console.error("Ошибка html2canvas:", err); }
             
             document.body.removeChild(offscreen);
 
-            // Сохраняем локально
+            // Сохраняем локально для отображения в ленте сайта
             mockProfiles = mockProfiles.filter(p => p.id !== CURRENT_USER_ID);
             mockProfiles.unshift(newProfile);
 
@@ -689,7 +683,7 @@
             const generatedTags = `#${isDomWebhook ? 'Верхний' : 'Нижний'} #${newProfile.city.replace(/\s+/g, '')} #${genderTag}${newProfile.age}`;
 
             // Отправляем на Гугл сервер
-            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbysvF71_1rBa5TeRzU9FIA_KiCA_a07r71aoNqOh8ELtYXIyibpsqENy2k_0JXwgz1_0Q/exec'; 
+            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzx604SmVEuJtN5Emziu5C9lj0_hPxNDZho0jjXp5DAztEdyyi_gjY6ZWXhlDptDZtQTA/exec'; 
             try {
                 await fetch(WEBHOOK_URL, {
                     method: 'POST',
@@ -719,28 +713,32 @@
             switchTab('feed');
         }
 
-        // --- ВЕРСТКА КАРТОЧКИ (ДЛЯ ЛЕНТЫ И ДЛЯ КАРТИНКИ) ---
+        // --- ВЕРСТКА КАРТОЧКИ ---
         function createCardHTML(profile, isCapture = false) {
             const isDom = profile.role === 'dominant';
             const colorClass = isDom ? 'text-orange-600' : 'text-sky-600';
             const tierClass = `card-${profile.tier || 'base'}`;
 
-            // Железобетонные стили для html2canvas (чтобы текстура заливала всю карту)
             const tierStyles = getTierStyles(profile.tier);
 
-            let avatarContent = profile.avatarUrl 
-                ? `<img src="${profile.avatarUrl}" style="width: 100%; height: 100%; object-fit: cover; display: block;">` 
-                : `<span style="font-size: ${isCapture ? '42px' : '32px'};">${profile.gender === 'М' ? '🧔' : '👩'}</span>`;
+            // ИСПРАВЛЕНИЕ АВАТАРА: Используем background-image вместо img для обхода бага html2canvas (object-fit: cover)
+            let avatarContentCapture = profile.avatarUrl 
+                ? `<div style="width: 100%; height: 100%; background-image: url('${profile.avatarUrl}'); background-size: cover; background-position: center; border-radius: 50%;"></div>` 
+                : `<span style="font-size: 42px;">${profile.gender === 'М' ? '🧔' : '👩'}</span>`;
 
-            // ТЕГИ (С жесткими margin вместо gap, чтобы не ломалось в картинке)
+            let avatarContentFeed = profile.avatarUrl 
+                ? `<img src="${profile.avatarUrl}" class="w-full h-full object-cover">` 
+                : (profile.gender === 'М' ? '🧔' : '👩');
+
+            // ТЕГИ: ИСПРАВЛЕНИЕ ВЫРАВНИВАНИЯ ТЕКСТА
             let tagsHtml = '';
             if (isCapture) {
                 const pTags = (profile.prefs || []).map(p => {
-                    if(p === 'Готов платить дань') return `<span style="display:inline-block; margin-right: 4px; margin-bottom: 4px; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 1px solid #ca8a04; box-shadow: 0 1px 3px rgba(234,179,8,0.4); white-space: nowrap;">✓ ${p}</span>`;
-                    return `<span style="display:inline-block; margin-right: 4px; margin-bottom: 4px; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; background: #dcfce7; color: #065f46; border: 1px solid #6ee7b7; white-space: nowrap;">✓ ${p}</span>`;
+                    if(p === 'Готов платить дань') return `<span style="display:inline-flex; align-items:center; justify-content:center; height: 26px; margin: 0 5px 6px 0; padding: 0 10px; border-radius: 6px; font-size: 11px; font-weight: bold; background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 1px solid #ca8a04; box-shadow: 0 1px 3px rgba(234,179,8,0.4); white-space: nowrap;">✓ ${p}</span>`;
+                    return `<span style="display:inline-flex; align-items:center; justify-content:center; height: 26px; margin: 0 5px 6px 0; padding: 0 10px; border-radius: 6px; font-size: 11px; font-weight: bold; background: #dcfce7; color: #065f46; border: 1px solid #6ee7b7; white-space: nowrap;">✓ ${p}</span>`;
                 }).join('');
-                const lTags = (profile.limits || []).map(l => `<span style="display:inline-block; margin-right: 4px; margin-bottom: 4px; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; white-space: nowrap;">✕ ${l}</span>`).join('');
-                tagsHtml = `<div style="margin-bottom: 16px; width: 100%; line-height: 1.5;">${pTags}${lTags}</div>`;
+                const lTags = (profile.limits || []).map(l => `<span style="display:inline-flex; align-items:center; justify-content:center; height: 26px; margin: 0 5px 6px 0; padding: 0 10px; border-radius: 6px; font-size: 11px; font-weight: bold; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; white-space: nowrap;">✕ ${l}</span>`).join('');
+                tagsHtml = `<div style="margin-bottom: 16px; width: 100%; display: flex; flex-wrap: wrap;">${pTags}${lTags}</div>`;
             } else {
                 const pTags = (profile.prefs || []).map(p => {
                     if(p === 'Готов платить дань') return `<span class="tag-badge tag-gold-special">✓ ${p}</span>`;
@@ -751,23 +749,23 @@
             }
 
             if (isCapture) {
-                // ВАРИАНТ 1: ДЛЯ ГЕНЕРАЦИИ КАРТИНКИ (Абсолютные инлайн-стили без truncate)
+                // ВАРИАНТ 1: ДЛЯ КАРТИНКИ (Абсолютные инлайн-стили без truncate, фото через background, без внешней рамки)
                 return `
-                <div style="width: 100%; border-radius: 24px; padding: 36px; box-sizing: border-box; ${tierStyles.bg}">
+                <div style="width: 100%; border-radius: 20px; padding: 32px; box-sizing: border-box; ${tierStyles.bg}; overflow: hidden;">
                     
-                    <!-- Шапка с Именем -->
-                    <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 30px; min-height: 110px;">
+                    <!-- Шапка с Именем (Жесткие отступы) -->
+                    <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 24px; min-height: 110px;">
                         <div style="width: 110px; height: 110px; border-radius: 50%; overflow: hidden; margin-right: 24px; flex-shrink: 0; border: 4px solid ${tierStyles.borderMuted}; box-shadow: 0 6px 15px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.05);">
-                            ${avatarContent}
+                            ${avatarContentCapture}
                         </div>
-                        <div style="display: flex; flex-direction: column; justify-content: center;">
-                            <div style="font-size: 34px; font-weight: 900; line-height: 1.2; margin-bottom: 6px; word-wrap: break-word;">${profile.name}, ${profile.age}</div>
+                        <div style="display: flex; flex-direction: column; justify-content: center; padding-top: 4px;">
+                            <div style="font-size: 34px; font-weight: 900; line-height: 1.1; margin-bottom: 8px; word-wrap: break-word;">${profile.name}, ${profile.age}</div>
                             <div style="font-size: 18px; opacity: 0.8; font-weight: 600;">📍 ${profile.city}</div>
                         </div>
                     </div>
 
                     <!-- Звание -->
-                    <div style="margin-bottom: 24px;">
+                    <div style="margin-bottom: 20px;">
                         <span style="font-size: 13px; text-transform: uppercase; letter-spacing: 2px; color: ${tierStyles.textMuted}; font-weight: bold;">Звание</span>
                         <div style="font-size: 26px; font-weight: 900; line-height: 1.3; color: ${tierStyles.titleColor}; margin-top: 4px;">${profile.title}</div>
                     </div>
@@ -776,17 +774,17 @@
                     ${tagsHtml}
 
                     <!-- Описание -->
-                    <div style="font-size: 18px; font-style: italic; line-height: 1.6; border-left: 4px solid ${tierStyles.borderMuted}; padding-left: 18px; margin-bottom: 12px; color: ${tierStyles.textColor}; opacity: 0.95;">
+                    <div style="font-size: 17px; font-style: italic; line-height: 1.6; border-left: 4px solid ${tierStyles.borderMuted}; padding-left: 18px; margin-bottom: 12px; color: ${tierStyles.textColor}; opacity: 0.95;">
                         "${profile.desc}"
                     </div>
 
-                    <!-- Лого и QR внизу -->
+                    <!-- Лого и QR внизу (Не сплющиваются) -->
                     <div style="margin-top: 40px; padding-top: 24px; border-top: 2px solid ${tierStyles.borderMuted}; display: flex; justify-content: space-between; align-items: flex-end;">
                         <div style="display: flex; flex-direction: column; gap: 6px;">
                             <span style="font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; color: ${tierStyles.textMuted};">Клуб Знакомств</span>
-                            <img src="logo.png" style="height: 60px; width: auto; object-fit: contain; display: block;" onerror="this.outerHTML='<span style=\\'font-size:32px; font-weight:900; color:${tierStyles.titleColor};\\'>BDSM-ka</span>'">
+                            <img src="logo.png" style="height: 50px; width: auto;" onerror="this.outerHTML='<span style=\\'font-size:32px; font-weight:900; color:${tierStyles.titleColor};\\'>BDSM-ka</span>'">
                         </div>
-                        <img src="qr_tg.png" style="width: 120px; height: 120px; border-radius: 12px; background: white; padding: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: block;" onerror="this.style.display='none'">
+                        <img src="qr_tg.png" style="width: 110px; height: 110px; border-radius: 12px; background: white; padding: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" onerror="this.style.display='none'">
                     </div>
                 </div>
                 `;
@@ -798,7 +796,7 @@
                     <!-- Шапка -->
                     <div class="flex items-center gap-4 mb-4 w-full relative z-10">
                         <div class="w-16 h-16 rounded-full ${avatarClass} flex items-center justify-center text-2xl shadow-md border-2 border-black/10 shrink-0 overflow-hidden">
-                            ${profile.avatarUrl ? `<img src="${profile.avatarUrl}" class="w-full h-full object-cover">` : (profile.gender === 'М' ? '🧔' : '👩')}
+                            ${avatarContentFeed}
                         </div>
                         <div class="flex-1 min-w-0 flex flex-col justify-center">
                             <h3 class="font-bold text-xl leading-tight mb-1 truncate w-full">${profile.name}, ${profile.age}</h3>
@@ -838,7 +836,7 @@
             }
         }
 
-        // Логика подстановки правильных цветов для создания картинки, чтобы текст не сливался
+        // Логика подстановки правильных цветов для создания картинки
         function getTierStyles(tier) {
             let bg = "background: #ffffff; border: 2px solid #e7e5e4; color: #292524;";
             let textMuted = "rgba(0,0,0,0.5)";
