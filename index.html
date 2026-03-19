@@ -169,7 +169,8 @@
                     Заполните данные. <b>При публикации новой анкеты, ваша предыдущая анкета в канале будет автоматически удалена.</b>
                 </p>
 
-                <form id="profile-form" onsubmit="showPreview(event)" class="space-y-8">
+                <!-- Обратите внимание: убран onsubmit, чтобы избежать конфликтов с мобильным Telegram WebApp -->
+                <form id="profile-form" class="space-y-8">
                     
                     <div class="space-y-5">
                         <h3 class="text-lg font-bold text-stone-800 flex items-center gap-2"><span class="bg-stone-200 text-stone-700 w-6 h-6 flex items-center justify-center rounded-full text-xs">1</span> Базовые данные</h3>
@@ -321,7 +322,8 @@
                     </div>
 
                     <div class="pt-4">
-                        <button type="submit" id="preview-btn" class="w-full bg-stone-900 text-white font-bold py-5 rounded-xl hover:bg-stone-800 transition-all shadow-card text-lg flex items-center justify-center gap-2">
+                        <!-- Кнопка изменена на type="button", валидация происходит вручную -->
+                        <button type="button" id="preview-btn" onclick="showPreview(event)" class="w-full bg-stone-900 text-white font-bold py-5 rounded-xl hover:bg-stone-800 transition-all shadow-card text-lg flex items-center justify-center gap-2">
                             👀 Предпросмотр Анкеты
                         </button>
                         <p class="text-center text-xs text-stone-500 mt-3 font-medium">Размещая или редактируя анкету, ваша старая удаляется и постится новая.</p>
@@ -400,16 +402,20 @@
         let appliedPromoCode = '';
 
         function applyPromoCode() {
-            const code = document.getElementById('form-promo').value.trim().toUpperCase();
+            const promoInput = document.getElementById('form-promo');
+            if (!promoInput) return;
+            const code = promoInput.value.trim().toUpperCase();
             
             if (code === 'BDSMKAU' || code === 'BEZLIM') {
                 Object.values(promoCodes).forEach(tier => unlockedTiers.add(tier));
                 const select = document.getElementById('form-tier');
-                Array.from(select.options).forEach(opt => {
-                    if (opt.text.includes('🔒')) {
-                        opt.text = opt.text.replace(' 🔒', ' 🔓 (Открыто)');
-                    }
-                });
+                if (select) {
+                    Array.from(select.options).forEach(opt => {
+                        if (opt.text.includes('🔒')) {
+                            opt.text = opt.text.replace(' 🔒', ' 🔓 (Открыто)');
+                        }
+                    });
+                }
                 updateTierPreview();
                 if (code === 'BEZLIM') appliedPromoCode = code; // Сохраняем для отправки на бэкенд
                 alert('Мастер-промокод принят! Разблокированы абсолютно все стили оформления.');
@@ -420,12 +426,14 @@
             if (tier) {
                 unlockedTiers.add(tier);
                 const select = document.getElementById('form-tier');
-                const option = Array.from(select.options).find(opt => opt.value === tier);
-                if (option) {
-                    option.text = option.text.replace(' 🔒', ' 🔓 (Открыто)');
-                    select.value = tier;
-                    updateTierPreview();
-                    alert(`Промокод принят! Открыто премиум оформление.`);
+                if (select) {
+                    const option = Array.from(select.options).find(opt => opt.value === tier);
+                    if (option) {
+                        option.text = option.text.replace(' 🔒', ' 🔓 (Открыто)');
+                        select.value = tier;
+                        updateTierPreview();
+                        alert(`Промокод принят! Открыто премиум оформление.`);
+                    }
                 }
             } else {
                 alert('Неверный промокод!');
@@ -433,13 +441,18 @@
         }
 
         function updateTierPreview() {
-            const tier = document.getElementById('form-tier').value;
+            const tierEl = document.getElementById('form-tier');
+            const tier = tierEl?.value || 'base';
             const preview = document.getElementById('tier-preview');
-            preview.className = `w-full h-24 mt-2 rounded-xl flex flex-col items-center justify-center font-bold transition-all shadow-md card-${tier} border-2 border-transparent`;
+            if (preview) {
+                preview.className = `w-full h-24 mt-2 rounded-xl flex flex-col items-center justify-center font-bold transition-all shadow-md card-${tier} border-2 border-transparent`;
+            }
             
             const isDark = (tier === 'latex' || tier === 'leather' || tier === 'metal');
-            document.getElementById('preview-text-1').style.color = isDark ? '#ffffff' : 'inherit';
-            document.getElementById('preview-text-2').style.color = isDark ? 'rgba(255,255,255,0.7)' : 'inherit';
+            const p1 = document.getElementById('preview-text-1');
+            const p2 = document.getElementById('preview-text-2');
+            if (p1) p1.style.color = isDark ? '#ffffff' : 'inherit';
+            if (p2) p2.style.color = isDark ? 'rgba(255,255,255,0.7)' : 'inherit';
         }
 
         // --- БАЗЫ ДАННЫХ ---
@@ -504,7 +517,9 @@
             const prefsContainer = document.getElementById('preferences-container');
             const limitsContainer = document.getElementById('limits-container');
             const interestsContainer = document.getElementById('interests-container');
-            prefsContainer.innerHTML = ''; limitsContainer.innerHTML = ''; interestsContainer.innerHTML = '';
+            if(prefsContainer) prefsContainer.innerHTML = ''; 
+            if(limitsContainer) limitsContainer.innerHTML = ''; 
+            if(interestsContainer) interestsContainer.innerHTML = '';
 
             kinksDatabase.forEach(kink => {
                 const btnP = document.createElement('button');
@@ -520,8 +535,8 @@
                 btnP.onclick = () => toggleTag('pref', kink.name, btnP, btnL);
                 btnL.onclick = () => toggleTag('limit', kink.name, btnL, btnP);
 
-                prefsContainer.appendChild(btnP);
-                limitsContainer.appendChild(btnL);
+                if(prefsContainer) prefsContainer.appendChild(btnP);
+                if(limitsContainer) limitsContainer.appendChild(btnL);
             });
 
             interestsDatabase.forEach(interest => {
@@ -531,7 +546,7 @@
                 btnI.innerHTML = `<span>${interest.emoji}</span> <span>${interest.name}</span>`;
                 
                 btnI.onclick = () => toggleInterest(interest.name, btnI);
-                interestsContainer.appendChild(btnI);
+                if(interestsContainer) interestsContainer.appendChild(btnI);
             });
         }
 
@@ -611,15 +626,17 @@
             if (file) {
                 if (file.size > 2097152) {
                     alert("Файл слишком большой! Максимальный размер 2 МБ.");
-                    event.target.value = "";
+                    if(event.target) event.target.value = "";
                     return;
                 }
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     currentUploadedPhotoBase64 = e.target.result;
-                    previewContainer.innerHTML = `<img src="${currentUploadedPhotoBase64}" class="w-full h-full object-cover" />`;
-                    previewContainer.classList.remove('border-dashed', 'border-stone-300', 'text-stone-400');
-                    previewContainer.classList.add('border-solid', 'border-sky-500', 'shadow-md');
+                    if(previewContainer) {
+                        previewContainer.innerHTML = `<img src="${currentUploadedPhotoBase64}" class="w-full h-full object-cover" />`;
+                        previewContainer.classList.remove('border-dashed', 'border-stone-300', 'text-stone-400');
+                        previewContainer.classList.add('border-solid', 'border-sky-500', 'shadow-md');
+                    }
                 }
                 reader.readAsDataURL(file);
             }
@@ -627,11 +644,32 @@
 
         // --- ГЕНЕРАЦИЯ ПРЕДПРОСМОТРА ---
         function showPreview(e) {
-            e.preventDefault();
-            document.getElementById('error-message').textContent = '';
+            if (e) e.preventDefault();
             
-            const role = document.getElementById('form-role').value;
-            const tier = document.getElementById('form-tier').value || 'base';
+            // Ручная проверка всех обязательных полей (для обхода бага Telegram WebApp)
+            const requiredFields = [
+                {id: 'form-name', name: 'Имя / Никнейм'},
+                {id: 'form-username', name: '@Username (Телеграм)'},
+                {id: 'form-age', name: 'Возраст'},
+                {id: 'form-city', name: 'Город'},
+                {id: 'form-desc', name: 'О себе (Коротко)'},
+                {id: 'form-looking-for', name: 'Кого вы ищете?'}
+            ];
+            
+            for (let field of requiredFields) {
+                const el = document.getElementById(field.id);
+                if (!el || !el.value.trim()) {
+                    alert(`Пожалуйста, заполните поле:\n"${field.name}"`);
+                    if(el) el.focus();
+                    return;
+                }
+            }
+
+            const errorMsg = document.getElementById('error-message');
+            if(errorMsg) errorMsg.textContent = '';
+            
+            const role = document.getElementById('form-role')?.value || 'submissive';
+            const tier = document.getElementById('form-tier')?.value || 'base';
             
             if (!unlockedTiers.has(tier)) {
                 alert("Этот стиль платный! Пожалуйста, введите верный промокод и нажмите 'Применить'.");
@@ -647,39 +685,44 @@
                 id: tgUserId,
                 role: role,
                 tier: tier,
-                cardBorder: document.getElementById('form-card-border').value,
-                photoBorder: document.getElementById('form-photo-border').value,
-                username: document.getElementById('form-username').value.replace('@', ''),
-                name: document.getElementById('form-name').value,
-                age: document.getElementById('form-age').value,
-                city: document.getElementById('form-city').value,
-                gender: document.getElementById('form-gender').value,
-                desc: document.getElementById('form-desc').value,
-                lookingFor: document.getElementById('form-looking-for').value,
+                cardBorder: document.getElementById('form-card-border')?.value || 'default',
+                photoBorder: document.getElementById('form-photo-border')?.value || 'default',
+                username: (document.getElementById('form-username')?.value || '').replace('@', ''),
+                name: document.getElementById('form-name')?.value || '',
+                age: document.getElementById('form-age')?.value || '',
+                city: document.getElementById('form-city')?.value || '',
+                gender: document.getElementById('form-gender')?.value || 'Ж',
+                desc: document.getElementById('form-desc')?.value || '',
+                lookingFor: document.getElementById('form-looking-for')?.value || '',
                 avatarUrl: currentUploadedPhotoBase64,
                 prefs: Array.from(selectedPrefs),
                 limits: Array.from(selectedLimits),
                 interests: Array.from(selectedInterests),
-                bubbleStyle: document.getElementById('form-bubble-style').value
+                bubbleStyle: document.getElementById('form-bubble-style')?.value || 'none'
             };
 
             const container = document.getElementById('preview-card-container');
-            container.innerHTML = createCardHTML(pendingProfile, false);
+            if(container) container.innerHTML = createCardHTML(pendingProfile, false);
             
-            document.getElementById('preview-modal').classList.remove('hidden');
+            const modal = document.getElementById('preview-modal');
+            if(modal) modal.classList.remove('hidden');
         }
 
         function closePreview() {
-            document.getElementById('preview-modal').classList.add('hidden');
+            const modal = document.getElementById('preview-modal');
+            if(modal) modal.classList.add('hidden');
         }
 
         // --- ПУБЛИКАЦИЯ ---
         async function confirmPublish() {
             const btn = document.getElementById('confirm-publish-btn');
+            if(!btn) return;
             const originalText = btn.innerHTML;
             btn.innerHTML = '⏳ Создание карточки...';
             btn.disabled = true;
-            document.getElementById('error-message').textContent = '';
+            
+            const errorMsg = document.getElementById('error-message');
+            if(errorMsg) errorMsg.textContent = '';
 
             const offscreen = document.createElement('div');
             offscreen.style.position = 'absolute';
@@ -711,7 +754,6 @@
 
             const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwDDDrg2jjJfS45XEKJX2sBBcUOOGS7b4tcc0ZkDQZyBq1koslORa-D6ltNJm5gTdHR/exec'; 
             try {
-                // ВНИМАНИЕ: Убрали mode: 'no-cors', чтобы прочитать JSON ответ от сервера
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -725,14 +767,14 @@
                         name: pendingProfile.name,
                         city: pendingProfile.city,
                         imageBase64: base64Image,
-                        promoCode: appliedPromoCode // Отправляем промокод, если он был введен
+                        promoCode: appliedPromoCode 
                     })
                 });
 
                 const result = await response.json();
                 
                 if (result.status === 'error') {
-                    document.getElementById('error-message').innerText = result.message;
+                    if(errorMsg) errorMsg.innerText = result.message;
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                     return; 
@@ -750,7 +792,7 @@
 
             } catch(err) { 
                 console.error('Ошибка сервера:', err); 
-                document.getElementById('error-message').innerText = "Сбой сети. Попробуйте еще раз.";
+                if(errorMsg) errorMsg.innerText = "Сбой сети. Попробуйте еще раз.";
             }
 
             btn.innerHTML = originalText;
@@ -805,20 +847,17 @@
                 });
             }
 
-            // ТЕГИ: ИСПРАВЛЕНИЕ ВЫРАВНИВАНИЯ (Обход бага html2canvas через вложенные блоки)
+            // ТЕГИ: Максимально надежное центрирование для html2canvas
             let tagsHtml = '';
             if (isCapture) {
-                // Обертка: отвечает за фон, рамку и скругление.
-                const outerBase = "display: inline-block; margin: 0 4px 8px 4px; border-radius: 6px; overflow: hidden; vertical-align: middle;";
-                // Внутренний блок: отвечает за отступы от текста. Даем снизу на 1px больше (6px), сверху (5px), чтобы визуально поднять текст по центру. line-height: 1 убирает лишние пробелы шрифта.
-                const innerBase = "display: block; padding: 5px 12px 6px 12px; font-size: 11px; font-weight: bold; line-height: 1; white-space: nowrap;";
+                const baseTagStyle = "display: inline-block; padding: 6px 12px; margin: 0 4px 8px 4px; border-radius: 6px; font-size: 12px; font-weight: bold; line-height: normal; white-space: nowrap; vertical-align: middle;";
                 
                 const pTags = (profile.prefs || []).map(p => {
-                    if(p === 'Готов платить дань') return `<div style="${outerBase} background: linear-gradient(135deg, #fef08a, #eab308); border: 1px solid #ca8a04; box-shadow: 0 1px 2px rgba(234,179,8,0.3);"><div style="${innerBase} color: #422006;">✓ ${p}</div></div>`;
-                    return `<div style="${outerBase} background: #dcfce7; border: 1px solid #6ee7b7;"><div style="${innerBase} color: #065f46;">✓ ${p}</div></div>`;
+                    if(p === 'Готов платить дань') return `<span style="${baseTagStyle} background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 1px solid #ca8a04; box-shadow: 0 1px 2px rgba(234,179,8,0.3);">✓ ${p}</span>`;
+                    return `<span style="${baseTagStyle} background: #dcfce7; color: #065f46; border: 1px solid #6ee7b7;">✓ ${p}</span>`;
                 }).join('');
                 
-                const lTags = (profile.limits || []).map(l => `<div style="${outerBase} background: #fee2e2; border: 1px solid #fca5a5;"><div style="${innerBase} color: #991b1b;">✕ ${l}</div></div>`).join('');
+                const lTags = (profile.limits || []).map(l => `<span style="${baseTagStyle} background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;">✕ ${l}</span>`).join('');
                 
                 tagsHtml = `<div style="text-align: center; margin-bottom: 24px; width: 100%;">${pTags}${lTags}</div>`;
             } else {
@@ -971,11 +1010,13 @@
         function openContactModal(username) {
             pendingContactUsername = username;
             document.getElementById('contact-modal-text').innerHTML = `Перейти в Telegram для начала диалога с <b>@${username}</b>?`;
-            document.getElementById('contact-modal').classList.remove('hidden');
+            const modal = document.getElementById('contact-modal');
+            if(modal) modal.classList.remove('hidden');
         }
 
         function closeModal() {
-            document.getElementById('contact-modal').classList.add('hidden');
+            const modal = document.getElementById('contact-modal');
+            if(modal) modal.classList.add('hidden');
         }
 
         function confirmContact() {
