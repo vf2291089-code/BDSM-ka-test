@@ -166,7 +166,7 @@
             <div class="bg-white p-6 md:p-8 rounded-2xl shadow-card border border-stone-100">
                 <h1 class="text-3xl font-bold text-stone-800 mb-3">Создать Анкету</h1>
                 <p class="text-stone-600 mb-8 pb-6 border-b border-stone-100">
-                    Заполните данные и выберите предпочтения. Размещать анкету можно не чаще 1 раза в 12 часов.
+                    Заполните данные. <b>При публикации новой анкеты, ваша предыдущая анкета в канале будет автоматически удалена.</b>
                 </p>
 
                 <form id="profile-form" onsubmit="showPreview(event)" class="space-y-8">
@@ -183,7 +183,7 @@
                                     Выбрать фото
                                     <input type="file" id="form-photo" accept="image/jpeg, image/png" class="hidden" onchange="previewPhoto(event)">
                                 </label>
-                                <p class="text-[10px] text-stone-500 mt-2">До 2 МБ.</p>
+                                <p class="text-[10px] text-stone-500 mt-2">Отобразится крупно по центру карточки. До 2 МБ.</p>
                             </div>
                         </div>
 
@@ -230,7 +230,7 @@
                     </div>
 
                     <div class="space-y-4 pt-6 border-t border-stone-100">
-                        <h3 class="text-lg font-bold text-stone-800 flex items-center gap-2"><span class="bg-stone-200 text-stone-700 w-6 h-6 flex items-center justify-center rounded-full text-xs">2</span> Оформление и Рамки</h3>
+                        <h3 class="text-lg font-bold text-stone-800 flex items-center gap-2"><span class="bg-stone-200 text-stone-700 w-6 h-6 flex items-center justify-center rounded-full text-xs">2</span> Оформление (Цвета и Фактуры)</h3>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-4">
                             <!-- Выбор текстуры -->
@@ -344,7 +344,7 @@
                         <button type="submit" id="preview-btn" class="w-full bg-stone-900 text-white font-bold py-5 rounded-xl hover:bg-stone-800 transition-all shadow-card text-lg flex items-center justify-center gap-2">
                             👀 Предпросмотр Анкеты
                         </button>
-                        <p class="text-center text-xs text-stone-500 mt-3 font-medium">Размещать или обновлять анкету можно только 1 раз в 12 часов.</p>
+                        <p class="text-center text-xs text-stone-500 mt-3 font-medium">Размещая или редактируя анкету, ваша старая удаляется и постится новая.</p>
                     </div>
                 </form>
             </div>
@@ -432,7 +432,7 @@
                 });
                 updateTierPreview();
                 if (code === 'BEZLIM') appliedPromoCode = code; // Сохраняем для отправки на бэкенд
-                alert(`Мастер-промокод принят! Разблокированы все стили ${code === 'BEZLIM' ? 'и сняты лимиты по времени' : ''}.`);
+                alert('Мастер-промокод принят! Разблокированы абсолютно все стили оформления.');
                 return;
             }
 
@@ -663,10 +663,6 @@
                 return;
             }
 
-            // Для заглушки Звания генерируем случайное или берем первое
-            const isDom = role === 'dominant';
-            const titleStr = isDom ? "«Абсолютный Владелец»" : "«Преданный Слуга»";
-
             pendingProfile = {
                 id: tgUserId,
                 role: role,
@@ -684,8 +680,7 @@
                 prefs: Array.from(selectedPrefs),
                 limits: Array.from(selectedLimits),
                 interests: Array.from(selectedInterests),
-                bubbleStyle: document.getElementById('form-bubble-style').value,
-                title: titleStr
+                bubbleStyle: document.getElementById('form-bubble-style').value
             };
 
             const container = document.getElementById('preview-card-container');
@@ -734,8 +729,9 @@
             const genderTag = pendingProfile.gender === 'М' ? 'М' : 'Ж';
             const generatedTags = `#${isDomWebhook ? 'Верхний' : 'Нижний'} #${pendingProfile.city.replace(/\s+/g, '')} #${genderTag}${pendingProfile.age}`;
 
-            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwBhw2y-RiUrqReM2s41WAsp5ZUwzPV712eYtutKB61vMULrqvtsw3qBRyRfbNiUoKY_Q/exec'; 
+            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwDDDrg2jjJfS45XEKJX2sBBcUOOGS7b4tcc0ZkDQZyBq1koslORa-D6ltNJm5gTdHR/exec'; 
             try {
+                // ВНИМАНИЕ: Убрали mode: 'no-cors', чтобы прочитать JSON ответ от сервера
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -749,7 +745,7 @@
                         name: pendingProfile.name,
                         city: pendingProfile.city,
                         imageBase64: base64Image,
-                        promoCode: document.getElementById('form-promo').value // Передаем промокод для BEZLIM
+                        promoCode: appliedPromoCode // Отправляем промокод, если он был введен
                     })
                 });
 
@@ -804,7 +800,6 @@
             if (profile.interests && profile.interests.length > 0) {
                 const bubbleStyle = profile.bubbleStyle || 'none';
                 
-                // Предустановленные позиции для 5 пузырьков вокруг круга
                 const bPositions = [
                     { top: '-5%', left: '0%', size: isCapture ? '50px' : '22px', rot: '-15deg' },
                     { top: '15%', right: '-5%', size: isCapture ? '45px' : '18px', rot: '10deg' },
