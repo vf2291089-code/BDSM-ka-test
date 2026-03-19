@@ -249,39 +249,19 @@
                                 </select>
                             </div>
 
-                            <!-- Цвет рамки карточки (10+ стилей) -->
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Рамка Карточки</label>
-                                <select id="form-card-border" class="w-full px-4 py-3 border border-stone-300 rounded-lg bg-white outline-none font-bold text-stone-800 shadow-sm cursor-pointer">
-                                    <option value="default">По умолчанию</option>
-                                    <option value="#ffffff">Белоснежная</option>
-                                    <option value="#000000">Глубокая Черная</option>
-                                    <option value="#d4af37">Классическое Золото</option>
-                                    <option value="#94a3b8">Матовое Серебро</option>
-                                    <option value="#b08d57">Винтажная Бронза</option>
-                                    <option value="#dc2626">Кроваво-Красная</option>
-                                    <option value="#ea580c">Яркая Оранжевая</option>
-                                    <option value="#0284c7">Океаническая Синяя</option>
-                                    <option value="#9333ea">Мистическая Фиолетовая</option>
-                                    <option value="#10b981">Неоновая Изумрудная</option>
-                                </select>
-                            </div>
-
                             <!-- Цвет рамки фото -->
                             <div>
-                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Рамка вокруг Фото</label>
+                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Цвет рамки вокруг фото</label>
                                 <select id="form-photo-border" class="w-full px-4 py-3 border border-stone-300 rounded-lg bg-white outline-none font-bold text-stone-800 shadow-sm cursor-pointer">
                                     <option value="default">По умолчанию</option>
-                                    <option value="#ffffff">Белоснежная</option>
-                                    <option value="#000000">Глубокая Черная</option>
-                                    <option value="#d4af37">Классическое Золото</option>
-                                    <option value="#94a3b8">Матовое Серебро</option>
-                                    <option value="#b08d57">Винтажная Бронза</option>
-                                    <option value="#dc2626">Кроваво-Красная</option>
-                                    <option value="#ea580c">Яркая Оранжевая</option>
-                                    <option value="#0284c7">Океаническая Синяя</option>
-                                    <option value="#9333ea">Мистическая Фиолетовая</option>
-                                    <option value="#10b981">Неоновая Изумрудная</option>
+                                    <option value="#d4af37">Золотая</option>
+                                    <option value="#94a3b8">Серебряная</option>
+                                    <option value="#dc2626">Красная</option>
+                                    <option value="#ea580c">Оранжевая</option>
+                                    <option value="#0284c7">Синяя</option>
+                                    <option value="#9333ea">Фиолетовая</option>
+                                    <option value="#000000">Черная</option>
+                                    <option value="#ffffff">Белая</option>
                                 </select>
                             </div>
                         </div>
@@ -292,7 +272,7 @@
                         </div>
 
                         <div class="mt-4 p-5 bg-amber-50 border border-amber-200 rounded-xl shadow-inner">
-                            <p class="text-sm text-amber-900 font-bold mb-3 flex items-center gap-2">💎 Промокод (Снятие лимитов / VIP)</p>
+                            <p class="text-sm text-amber-900 font-bold mb-3 flex items-center gap-2">💎 Разблокировать премиум-текстуру</p>
                             <div class="flex flex-col sm:flex-row gap-3">
                                 <input type="text" id="form-promo" placeholder="Введите промокод..." class="flex-1 px-4 py-3 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none bg-white text-stone-900 font-mono font-bold uppercase placeholder-stone-300">
                                 <button type="button" onclick="applyPromoCode()" class="bg-amber-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-amber-700 transition-colors shadow-md whitespace-nowrap">Применить</button>
@@ -825,19 +805,20 @@
                 });
             }
 
-            // ТЕГИ: ИСПРАВЛЕНИЕ ВЫРАВНИВАНИЯ (Рамка "в облипку")
+            // ТЕГИ: ИСПРАВЛЕНИЕ ВЫРАВНИВАНИЯ (Обход бага html2canvas через вложенные блоки)
             let tagsHtml = '';
             if (isCapture) {
-                // Делаем рамку максимально плотной (padding: 2px 8px) и убираем лишнюю высоту.
-                // Текст физически не сможет сместиться вниз, так как рамка облегает его вплотную.
-                const baseTagStyle = "display: inline-block; padding: 2px 8px; margin: 0 3px 6px 3px; border-radius: 5px; font-size: 11px; font-weight: bold; line-height: 1.1; white-space: nowrap; vertical-align: middle;";
+                // Обертка: отвечает за фон, рамку и скругление.
+                const outerBase = "display: inline-block; margin: 0 4px 8px 4px; border-radius: 6px; overflow: hidden; vertical-align: middle;";
+                // Внутренний блок: отвечает за отступы от текста. Даем снизу на 1px больше (6px), сверху (5px), чтобы визуально поднять текст по центру. line-height: 1 убирает лишние пробелы шрифта.
+                const innerBase = "display: block; padding: 5px 12px 6px 12px; font-size: 11px; font-weight: bold; line-height: 1; white-space: nowrap;";
                 
                 const pTags = (profile.prefs || []).map(p => {
-                    if(p === 'Готов платить дань') return `<div style="${baseTagStyle} background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 1px solid #ca8a04; box-shadow: 0 1px 2px rgba(234,179,8,0.3);">✓ ${p}</div>`;
-                    return `<div style="${baseTagStyle} background: #dcfce7; color: #065f46; border: 1px solid #6ee7b7;">✓ ${p}</div>`;
+                    if(p === 'Готов платить дань') return `<div style="${outerBase} background: linear-gradient(135deg, #fef08a, #eab308); border: 1px solid #ca8a04; box-shadow: 0 1px 2px rgba(234,179,8,0.3);"><div style="${innerBase} color: #422006;">✓ ${p}</div></div>`;
+                    return `<div style="${outerBase} background: #dcfce7; border: 1px solid #6ee7b7;"><div style="${innerBase} color: #065f46;">✓ ${p}</div></div>`;
                 }).join('');
                 
-                const lTags = (profile.limits || []).map(l => `<div style="${baseTagStyle} background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;">✕ ${l}</div>`).join('');
+                const lTags = (profile.limits || []).map(l => `<div style="${outerBase} background: #fee2e2; border: 1px solid #fca5a5;"><div style="${innerBase} color: #991b1b;">✕ ${l}</div></div>`).join('');
                 
                 tagsHtml = `<div style="text-align: center; margin-bottom: 24px; width: 100%;">${pTags}${lTags}</div>`;
             } else {
