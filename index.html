@@ -7,6 +7,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Библиотека для генерации скриншотов -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
@@ -117,9 +118,10 @@
         .tag-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
         .tag-pref-active { background-color: #10b981 !important; border-color: #059669 !important; color: white !important; }
         .tag-limit-active { background-color: #ef4444 !important; border-color: #dc2626 !important; color: white !important; }
+        .tag-interest-active { background-color: #3b82f6 !important; border-color: #2563eb !important; color: white !important; }
         .tag-disabled { opacity: 0.25; pointer-events: none; filter: grayscale(100%); }
 
-        .tag-badge { display: inline-flex; align-items: center; justify-content: center; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-align: center; vertical-align: middle; line-height: 1.2; }
+        .tag-badge { display: inline-flex; align-items: center; justify-content: center; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; text-align: center; }
         .tag-gold-special { background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 1px solid #ca8a04; box-shadow: 0 1px 3px rgba(234,179,8,0.4); }
     </style>
 </head>
@@ -145,7 +147,7 @@
             <div class="mb-8">
                 <h1 class="text-3xl font-bold text-stone-800 mb-3">Сообщество</h1>
                 <p class="text-base text-stone-600 max-w-3xl mb-6">
-                    Изучите анкеты участников. Зеленые теги — предпочтения, красные — табу. 
+                    Изучите анкеты участников. Зеленые теги — предпочтения, красные — табу. Летающие смайлы — интересы.
                 </p>
                 <div class="flex gap-2 overflow-x-auto w-full pb-2 hide-scroll items-center">
                     <button onclick="filterProfiles('all')" class="px-5 py-2 rounded-full bg-stone-800 text-xs font-bold text-white hover:bg-stone-700 transition-colors shrink-0">Все</button>
@@ -164,7 +166,7 @@
             <div class="bg-white p-6 md:p-8 rounded-2xl shadow-card border border-stone-100">
                 <h1 class="text-3xl font-bold text-stone-800 mb-3">Создать Анкету</h1>
                 <p class="text-stone-600 mb-8 pb-6 border-b border-stone-100">
-                    Заполните данные. Вы можете размещать или обновлять анкету <b>не чаще 1 раза в 12 часов</b>.
+                    Заполните данные и выберите предпочтения. Размещать анкету можно не чаще 1 раза в 12 часов.
                 </p>
 
                 <form id="profile-form" onsubmit="showPreview(event)" class="space-y-8">
@@ -181,7 +183,7 @@
                                     Выбрать фото
                                     <input type="file" id="form-photo" accept="image/jpeg, image/png" class="hidden" onchange="previewPhoto(event)">
                                 </label>
-                                <p class="text-[10px] text-stone-500 mt-2">Отобразится крупно по центру карточки. До 2 МБ.</p>
+                                <p class="text-[10px] text-stone-500 mt-2">До 2 МБ.</p>
                             </div>
                         </div>
 
@@ -228,7 +230,7 @@
                     </div>
 
                     <div class="space-y-4 pt-6 border-t border-stone-100">
-                        <h3 class="text-lg font-bold text-stone-800 flex items-center gap-2"><span class="bg-stone-200 text-stone-700 w-6 h-6 flex items-center justify-center rounded-full text-xs">2</span> Оформление (Цвета и Фактуры)</h3>
+                        <h3 class="text-lg font-bold text-stone-800 flex items-center gap-2"><span class="bg-stone-200 text-stone-700 w-6 h-6 flex items-center justify-center rounded-full text-xs">2</span> Оформление и Рамки</h3>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-4">
                             <!-- Выбор текстуры -->
@@ -247,19 +249,39 @@
                                 </select>
                             </div>
 
+                            <!-- Цвет рамки карточки (10+ стилей) -->
+                            <div>
+                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Рамка Карточки</label>
+                                <select id="form-card-border" class="w-full px-4 py-3 border border-stone-300 rounded-lg bg-white outline-none font-bold text-stone-800 shadow-sm cursor-pointer">
+                                    <option value="default">По умолчанию</option>
+                                    <option value="#ffffff">Белоснежная</option>
+                                    <option value="#000000">Глубокая Черная</option>
+                                    <option value="#d4af37">Классическое Золото</option>
+                                    <option value="#94a3b8">Матовое Серебро</option>
+                                    <option value="#b08d57">Винтажная Бронза</option>
+                                    <option value="#dc2626">Кроваво-Красная</option>
+                                    <option value="#ea580c">Яркая Оранжевая</option>
+                                    <option value="#0284c7">Океаническая Синяя</option>
+                                    <option value="#9333ea">Мистическая Фиолетовая</option>
+                                    <option value="#10b981">Неоновая Изумрудная</option>
+                                </select>
+                            </div>
+
                             <!-- Цвет рамки фото -->
                             <div>
-                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Цвет рамки вокруг фото</label>
+                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Рамка вокруг Фото</label>
                                 <select id="form-photo-border" class="w-full px-4 py-3 border border-stone-300 rounded-lg bg-white outline-none font-bold text-stone-800 shadow-sm cursor-pointer">
                                     <option value="default">По умолчанию</option>
-                                    <option value="#d4af37">Золотая</option>
-                                    <option value="#94a3b8">Серебряная</option>
-                                    <option value="#dc2626">Красная</option>
-                                    <option value="#ea580c">Оранжевая</option>
-                                    <option value="#0284c7">Синяя</option>
-                                    <option value="#9333ea">Фиолетовая</option>
-                                    <option value="#000000">Черная</option>
-                                    <option value="#ffffff">Белая</option>
+                                    <option value="#ffffff">Белоснежная</option>
+                                    <option value="#000000">Глубокая Черная</option>
+                                    <option value="#d4af37">Классическое Золото</option>
+                                    <option value="#94a3b8">Матовое Серебро</option>
+                                    <option value="#b08d57">Винтажная Бронза</option>
+                                    <option value="#dc2626">Кроваво-Красная</option>
+                                    <option value="#ea580c">Яркая Оранжевая</option>
+                                    <option value="#0284c7">Океаническая Синяя</option>
+                                    <option value="#9333ea">Мистическая Фиолетовая</option>
+                                    <option value="#10b981">Неоновая Изумрудная</option>
                                 </select>
                             </div>
                         </div>
@@ -270,7 +292,7 @@
                         </div>
 
                         <div class="mt-4 p-5 bg-amber-50 border border-amber-200 rounded-xl shadow-inner">
-                            <p class="text-sm text-amber-900 font-bold mb-3 flex items-center gap-2">💎 Разблокировать премиум-текстуру</p>
+                            <p class="text-sm text-amber-900 font-bold mb-3 flex items-center gap-2">💎 Промокод (Снятие лимитов / VIP)</p>
                             <div class="flex flex-col sm:flex-row gap-3">
                                 <input type="text" id="form-promo" placeholder="Введите промокод..." class="flex-1 px-4 py-3 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none bg-white text-stone-900 font-mono font-bold uppercase placeholder-stone-300">
                                 <button type="button" onclick="applyPromoCode()" class="bg-amber-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-amber-700 transition-colors shadow-md whitespace-nowrap">Применить</button>
@@ -278,11 +300,34 @@
                         </div>
                     </div>
 
+                    <!-- Interests Section -->
                     <div class="space-y-4 pt-6 border-t border-stone-100">
                         <div class="flex justify-between items-end mb-4">
                             <div>
-                                <h3 class="text-lg font-bold text-emerald-700 flex items-center gap-2"><span class="bg-emerald-100 text-emerald-800 w-6 h-6 flex items-center justify-center rounded-full text-xs">3</span> Предпочтения (Нравится)</h3>
-                                <p class="text-xs text-stone-500 mt-1">Отметьте практики, которые вас заводят.</p>
+                                <h3 class="text-lg font-bold text-blue-700 flex items-center gap-2"><span class="bg-blue-100 text-blue-800 w-6 h-6 flex items-center justify-center rounded-full text-xs">🎯</span> Обычные интересы</h3>
+                                <p class="text-xs text-stone-500 mt-1">Выберите до 5 хобби. Они будут красиво летать вокруг вашего фото.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Стиль пузырьков</label>
+                            <select id="form-bubble-style" class="w-full sm:w-1/2 px-4 py-3 border border-stone-300 rounded-lg bg-white outline-none font-bold text-stone-800 shadow-sm cursor-pointer">
+                                <option value="none">Просто смайлики (Без фона)</option>
+                                <option value="white">Белые кружочки</option>
+                                <option value="black">Черные кружочки</option>
+                                <option value="accent">Цветные кружочки (Под Роль)</option>
+                            </select>
+                        </div>
+
+                        <div id="interests-container" class="flex flex-wrap gap-2">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 pt-6 border-t border-stone-100">
+                        <div class="flex justify-between items-end mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-emerald-700 flex items-center gap-2"><span class="bg-emerald-100 text-emerald-800 w-6 h-6 flex items-center justify-center rounded-full text-xs">✅</span> Предпочтения (Нравится)</h3>
                             </div>
                         </div>
                         <div id="preferences-container" class="flex flex-wrap gap-2"></div>
@@ -290,8 +335,7 @@
 
                     <div class="space-y-4 pt-6 border-t border-stone-100">
                         <div>
-                            <h3 class="text-lg font-bold text-red-700 flex items-center gap-2"><span class="bg-red-100 text-red-800 w-6 h-6 flex items-center justify-center rounded-full text-xs">4</span> Табу и Неприязнь (Лимиты)</h3>
-                            <p class="text-xs text-stone-500 mt-1">Отметьте то, что для вас категорически неприемлемо.</p>
+                            <h3 class="text-lg font-bold text-red-700 flex items-center gap-2"><span class="bg-red-100 text-red-800 w-6 h-6 flex items-center justify-center rounded-full text-xs">❌</span> Табу и Неприязнь (Лимиты)</h3>
                         </div>
                         <div id="limits-container" class="flex flex-wrap gap-2"></div>
                     </div>
@@ -349,7 +393,6 @@
         const tg = window.Telegram ? window.Telegram.WebApp : null;
         if (tg) { tg.expand(); tg.ready(); }
 
-        // Достаем Telegram ID или генерируем моковый (для тестов в браузере)
         let tgUserId = tg?.initDataUnsafe?.user?.id;
         if (!tgUserId) {
             tgUserId = localStorage.getItem('mock_tg_id');
@@ -374,11 +417,12 @@
         };
 
         let unlockedTiers = new Set(['base', 'sub-free', 'dom-free']);
+        let appliedPromoCode = '';
 
         function applyPromoCode() {
             const code = document.getElementById('form-promo').value.trim().toUpperCase();
             
-            if (code === 'BDSMKAU') {
+            if (code === 'BDSMKAU' || code === 'BEZLIM') {
                 Object.values(promoCodes).forEach(tier => unlockedTiers.add(tier));
                 const select = document.getElementById('form-tier');
                 Array.from(select.options).forEach(opt => {
@@ -387,7 +431,8 @@
                     }
                 });
                 updateTierPreview();
-                alert(`Мастер-промокод принят! Разблокированы абсолютно все стили оформления.`);
+                if (code === 'BEZLIM') appliedPromoCode = code; // Сохраняем для отправки на бэкенд
+                alert(`Мастер-промокод принят! Разблокированы все стили ${code === 'BEZLIM' ? 'и сняты лимиты по времени' : ''}.`);
                 return;
             }
 
@@ -417,7 +462,20 @@
             document.getElementById('preview-text-2').style.color = isDark ? 'rgba(255,255,255,0.7)' : 'inherit';
         }
 
-        // --- БАЗА КИНКОВ ---
+        // --- БАЗЫ ДАННЫХ ---
+        const interestsDatabase = [
+            { name: 'Спорт', emoji: '⚽' }, { name: 'Музыка', emoji: '🎵' }, { name: 'Кино', emoji: '🎬' },
+            { name: 'Рисование', emoji: '🎨' }, { name: 'Танцы', emoji: '💃' }, { name: 'Выпивка', emoji: '🍷' },
+            { name: 'Боулинг', emoji: '🎳' }, { name: 'Охота', emoji: '🎯' }, { name: 'Рыбалка', emoji: '🎣' },
+            { name: 'Пение', emoji: '🎤' }, { name: 'Книги', emoji: '📚' }, { name: 'Игры', emoji: '🎮' },
+            { name: 'Путешествия', emoji: '✈️' }, { name: 'Готовка', emoji: '🍳' }, { name: 'Фотография', emoji: '📸' },
+            { name: 'Йога', emoji: '🧘' }, { name: 'Автомобили', emoji: '🚗' }, { name: 'Мотоциклы', emoji: '🏍️' },
+            { name: 'Театр', emoji: '🎭' }, { name: 'Астрономия', emoji: '🌌' }, { name: 'Природа', emoji: '🌿' },
+            { name: 'Животные', emoji: '🐾' }, { name: 'Кофе', emoji: '☕' }, { name: 'Чай', emoji: '🍵' },
+            { name: 'Шопинг', emoji: '🛍️' }, { name: 'Скейтборд', emoji: '🛹' }, { name: 'Велосипед', emoji: '🚴' },
+            { name: 'Единоборства', emoji: '🥊' }, { name: 'Настолки', emoji: '🧩' }, { name: 'IT/Код', emoji: '💻' }
+        ];
+
         const kinksDatabase = [
             { id: 'k1', name: 'Сисси' }, { id: 'k2', name: 'Финдом' }, { id: 'k3', name: 'Переодевания' },
             { id: 'k4', name: 'Страпон (Пеггинг)' }, { id: 'k5', name: 'Пояс верности' }, { id: 'k6', name: 'Бондаж (Веревки)' },
@@ -433,35 +491,40 @@
             { id: 'k35', name: 'Виртуальные отношения' }
         ];
 
-        // Моковые профили для презентации всех стилей в ленте
         let mockProfiles = [
             {
-                id: 1, role: 'dominant', tier: 'ceramic', photoBorder: '#d4af37', username: 'mr_dom_88',
+                id: 1, role: 'dominant', tier: 'ceramic', cardBorder: '#000000', photoBorder: '#d4af37', username: 'mr_dom_88',
                 name: 'Александр', age: 34, city: 'Москва', gender: 'М',
                 desc: 'Ломаю не тело, а виртуозно подчиняю сознание. Обожаю газлайтинг и разрушение эго.',
                 lookingFor: 'Сломанную куклу с травмами. Привлекает процесс полного переподчинения.',
-                prefs: ['Газлайтинг', 'Унижение', 'Сенсорная депривация'], limits: ['Сисси', 'Порезы (Бладплей)'], avatarUrl: null
+                prefs: ['Газлайтинг', 'Унижение', 'Сенсорная депривация'], limits: ['Сисси', 'Порезы (Бладплей)'], 
+                interests: ['Спорт', 'Кофе', 'Кино', 'Автомобили'], bubbleStyle: 'accent', avatarUrl: null
             },
             {
-                id: 2, role: 'submissive', tier: 'sub-free', photoBorder: 'default', username: 'cute_brat_spb',
+                id: 2, role: 'submissive', tier: 'sub-free', cardBorder: 'default', photoBorder: 'default', username: 'cute_brat_spb',
                 name: 'Елена', age: 22, city: 'Санкт-Петербург', gender: 'Ж',
                 desc: 'Обожаю проверять нервы на прочность. Дерзю, чтобы быть наказанной.',
                 lookingFor: 'Ищу строгого Верхнего, который сможет усмирить мой пыл.',
-                prefs: ['Порка (Флоггинг)', 'Публичность'], limits: ['Унижение', 'Золотой дождь'], avatarUrl: null
+                prefs: ['Порка (Флоггинг)', 'Публичность'], limits: ['Унижение', 'Золотой дождь'], 
+                interests: ['Танцы', 'Выпивка', 'Музыка'], bubbleStyle: 'white', avatarUrl: null
             }
         ];
 
+        const CURRENT_USER_ID = 999;
         let pendingContactUsername = '';
         let currentUploadedPhotoBase64 = null;
+        
         let selectedPrefs = new Set();
         let selectedLimits = new Set();
+        let selectedInterests = new Set();
         let pendingProfile = null;
 
-        // --- ЛОГИКА ТЕГОВ ---
+        // --- ИНИЦИАЛИЗАЦИЯ ТЕГОВ И ИНТЕРЕСОВ ---
         function initTagsUI() {
             const prefsContainer = document.getElementById('preferences-container');
             const limitsContainer = document.getElementById('limits-container');
-            prefsContainer.innerHTML = ''; limitsContainer.innerHTML = '';
+            const interestsContainer = document.getElementById('interests-container');
+            prefsContainer.innerHTML = ''; limitsContainer.innerHTML = ''; interestsContainer.innerHTML = '';
 
             kinksDatabase.forEach(kink => {
                 const btnP = document.createElement('button');
@@ -479,6 +542,16 @@
 
                 prefsContainer.appendChild(btnP);
                 limitsContainer.appendChild(btnL);
+            });
+
+            interestsDatabase.forEach(interest => {
+                const btnI = document.createElement('button');
+                btnI.type = 'button';
+                btnI.className = 'tag-btn px-3 py-1.5 rounded-full text-xs font-bold shadow-sm flex items-center gap-1';
+                btnI.innerHTML = `<span>${interest.emoji}</span> <span>${interest.name}</span>`;
+                
+                btnI.onclick = () => toggleInterest(interest.name, btnI);
+                interestsContainer.appendChild(btnI);
             });
         }
 
@@ -505,6 +578,20 @@
                     clickedBtn.classList.add('tag-limit-active');
                     oppositeBtn.classList.add('tag-disabled');
                 }
+            }
+        }
+
+        function toggleInterest(itemName, btn) {
+            if (selectedInterests.has(itemName)) {
+                selectedInterests.delete(itemName);
+                btn.classList.remove('tag-interest-active');
+            } else {
+                if (selectedInterests.size >= 5) {
+                    alert('Можно выбрать не более 5 интересов!');
+                    return;
+                }
+                selectedInterests.add(itemName);
+                btn.classList.add('tag-interest-active');
             }
         }
 
@@ -576,10 +663,15 @@
                 return;
             }
 
+            // Для заглушки Звания генерируем случайное или берем первое
+            const isDom = role === 'dominant';
+            const titleStr = isDom ? "«Абсолютный Владелец»" : "«Преданный Слуга»";
+
             pendingProfile = {
                 id: tgUserId,
                 role: role,
                 tier: tier,
+                cardBorder: document.getElementById('form-card-border').value,
                 photoBorder: document.getElementById('form-photo-border').value,
                 username: document.getElementById('form-username').value.replace('@', ''),
                 name: document.getElementById('form-name').value,
@@ -590,10 +682,12 @@
                 lookingFor: document.getElementById('form-looking-for').value,
                 avatarUrl: currentUploadedPhotoBase64,
                 prefs: Array.from(selectedPrefs),
-                limits: Array.from(selectedLimits)
+                limits: Array.from(selectedLimits),
+                interests: Array.from(selectedInterests),
+                bubbleStyle: document.getElementById('form-bubble-style').value,
+                title: titleStr
             };
 
-            // Отображаем карточку в модальном окне как она будет выглядеть в ленте
             const container = document.getElementById('preview-card-container');
             container.innerHTML = createCardHTML(pendingProfile, false);
             
@@ -612,7 +706,6 @@
             btn.disabled = true;
             document.getElementById('error-message').textContent = '';
 
-            // Создаем скрытый контейнер для генерации картинки (capture)
             const offscreen = document.createElement('div');
             offscreen.style.position = 'absolute';
             offscreen.style.left = '-9999px';
@@ -643,7 +736,6 @@
 
             const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwBhw2y-RiUrqReM2s41WAsp5ZUwzPV712eYtutKB61vMULrqvtsw3qBRyRfbNiUoKY_Q/exec'; 
             try {
-                // ВНИМАНИЕ: Убрали mode: 'no-cors', чтобы прочитать JSON ответ от сервера (об ошибке 12 часов)
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -656,7 +748,8 @@
                         tags: generatedTags,
                         name: pendingProfile.name,
                         city: pendingProfile.city,
-                        imageBase64: base64Image
+                        imageBase64: base64Image,
+                        promoCode: document.getElementById('form-promo').value // Передаем промокод для BEZLIM
                     })
                 });
 
@@ -666,10 +759,10 @@
                     document.getElementById('error-message').innerText = result.message;
                     btn.innerHTML = originalText;
                     btn.disabled = false;
-                    return; // Останавливаем публикацию
+                    return; 
                 }
 
-                // Если успех:
+                // Успех
                 mockProfiles = mockProfiles.filter(p => p.id !== tgUserId);
                 mockProfiles.unshift(pendingProfile);
 
@@ -688,11 +781,14 @@
             btn.disabled = false;
         }
 
-        // --- ВЕРСТКА КАРТОЧКИ ---
+        // --- ВЕРСТКА КАРТОЧКИ С ПУЗЫРЬКАМИ ---
         function createCardHTML(profile, isCapture = false) {
+            const isDom = profile.role === 'dominant';
+            const colorClass = isDom ? 'text-orange-600' : 'text-sky-600';
             const tierClass = `card-${profile.tier || 'base'}`;
             const tierStyles = getTierStyles(profile.tier);
             
+            let cBorderCss = profile.cardBorder !== 'default' ? `border-color: ${profile.cardBorder} !important;` : '';
             let pBorderCss = profile.photoBorder !== 'default' ? `border-color: ${profile.photoBorder} !important;` : `border-color: ${tierStyles.borderMuted};`;
 
             let avatarContentCapture = profile.avatarUrl 
@@ -702,6 +798,37 @@
             let avatarContentFeed = profile.avatarUrl 
                 ? `<div style="width: 100%; height: 100%; background-image: url('${profile.avatarUrl}'); background-size: cover; background-position: center; border-radius: 50%;"></div>` 
                 : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.05); border-radius: 50%;"><span style="font-size: 32px;">${profile.gender === 'М' ? '🧔' : '👩'}</span></div>`;
+
+            // --- Генерация летающих пузырьков ---
+            let bubblesHtml = '';
+            if (profile.interests && profile.interests.length > 0) {
+                const bubbleStyle = profile.bubbleStyle || 'none';
+                
+                // Предустановленные позиции для 5 пузырьков вокруг круга
+                const bPositions = [
+                    { top: '-5%', left: '0%', size: isCapture ? '50px' : '22px', rot: '-15deg' },
+                    { top: '15%', right: '-5%', size: isCapture ? '45px' : '18px', rot: '10deg' },
+                    { bottom: '15%', left: '-5%', size: isCapture ? '55px' : '24px', rot: '-20deg' },
+                    { bottom: '-5%', right: '10%', size: isCapture ? '40px' : '16px', rot: '15deg' },
+                    { top: '-10%', left: '45%', size: isCapture ? '48px' : '20px', rot: '5deg' }
+                ];
+
+                profile.interests.forEach((interestName, idx) => {
+                    if (idx >= 5) return;
+                    const interestObj = interestsDatabase.find(i => i.name === interestName);
+                    if (!interestObj) return;
+                    
+                    const pos = bPositions[idx];
+                    let styleCss = `position: absolute; top: ${pos.top}; ${pos.left ? `left: ${pos.left};` : `right: ${pos.right};`} width: ${pos.size}; height: ${pos.size}; transform: rotate(${pos.rot}); display: flex; align-items: center; justify-content: center; font-size: calc(${pos.size} * 0.55); z-index: 20; border-radius: 50%;`;
+                    
+                    if (bubbleStyle === 'white') styleCss += ' background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2);';
+                    else if (bubbleStyle === 'black') styleCss += ' background: #1c1917; box-shadow: 0 2px 5px rgba(0,0,0,0.4); text-shadow: 0 0 2px rgba(255,255,255,0.5);';
+                    else if (bubbleStyle === 'accent') styleCss += ` background: ${isDom ? '#ea580c' : '#0284c7'}; box-shadow: 0 2px 5px rgba(0,0,0,0.3);`;
+                    else styleCss += ' background: transparent; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));';
+
+                    bubblesHtml += `<div style="${styleCss}">${interestObj.emoji}</div>`;
+                });
+            }
 
             let tagsHtml = '';
             if (isCapture) {
@@ -721,12 +848,14 @@
             }
 
             if (isCapture) {
-                // ВАРИАНТ ДЛЯ КАРТИНКИ (Увеличенное фото 240px, центрирование)
                 return `
-                <div style="width: 100%; border-radius: 24px; padding: 40px; box-sizing: border-box; ${tierStyles.bg}; overflow: hidden;">
+                <div style="width: 100%; border-radius: 24px; padding: 40px; box-sizing: border-box; ${tierStyles.bg}; ${cBorderCss} overflow: hidden;">
                     
-                    <div style="width: 240px; height: 240px; margin: 0 auto 30px; border-radius: 50%; border: 6px solid transparent; ${pBorderCss} display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; box-shadow: 0 6px 15px rgba(0,0,0,0.15);">
-                        ${avatarContentCapture}
+                    <div style="position: relative; width: 240px; height: 240px; margin: 0 auto 30px;">
+                        <div style="width: 100%; height: 100%; border-radius: 50%; border: 6px solid transparent; ${pBorderCss} display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 6px 15px rgba(0,0,0,0.15); overflow: hidden;">
+                            ${avatarContentCapture}
+                        </div>
+                        ${bubblesHtml}
                     </div>
                     
                     <div style="text-align: center; margin-bottom: 24px;">
@@ -754,15 +883,17 @@
                 </div>
                 `;
             } else {
-                // ВАРИАНТ ДЛЯ ЛЕНТЫ И ПРЕДПРОСМОТРА
-                const isDom = profile.role === 'dominant';
                 return `
-                <div class="${tierClass} rounded-2xl p-6 flex flex-col shadow-card transition-all relative overflow-hidden" data-role="${profile.role}">
+                <div class="${tierClass} rounded-2xl p-6 flex flex-col shadow-card transition-all relative overflow-hidden" data-role="${profile.role}" style="${cBorderCss}">
+                    
                     <div class="flex items-center gap-4 mb-4 w-full relative z-10">
-                        <div class="w-20 h-20 shrink-0 border-4 shadow-md relative rounded-full overflow-hidden" style="${pBorderCss}">
-                            ${avatarContentFeed}
+                        <div class="w-20 h-20 shrink-0 relative">
+                            <div class="w-full h-full border-4 shadow-md rounded-full overflow-hidden" style="${pBorderCss}">
+                                ${avatarContentFeed}
+                            </div>
+                            ${bubblesHtml}
                         </div>
-                        <div class="flex-1 min-w-0 flex flex-col justify-center">
+                        <div class="flex-1 min-w-0 flex flex-col justify-center pl-2">
                             <h3 class="font-bold text-xl leading-tight mb-1 truncate w-full">${profile.name}, ${profile.age}</h3>
                             <p class="text-sm opacity-80 flex items-center gap-1 truncate w-full"><span>📍</span> ${profile.city}</p>
                         </div>
@@ -860,12 +991,8 @@
             document.getElementById('contact-modal').classList.remove('hidden');
         }
 
-        function closeModal(id) {
-            if(id) {
-                document.getElementById(id).classList.add('hidden');
-            } else {
-                document.getElementById('contact-modal').classList.add('hidden');
-            }
+        function closeModal() {
+            document.getElementById('contact-modal').classList.add('hidden');
         }
 
         function confirmContact() {
@@ -877,7 +1004,7 @@
                     window.open(link, '_blank');
                 }
             }
-            closeModal('contact-modal');
+            closeModal();
         }
 
         window.onload = () => { 
