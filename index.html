@@ -825,10 +825,11 @@
                 });
             }
 
-            // ТЕГИ: ЖЕСТКОЕ ЦЕНТРИРОВАНИЕ ТЕКСТА
+            // ТЕГИ: ИСПРАВЛЕНИЕ ВЫРАВНИВАНИЯ (Обход бага html2canvas)
             let tagsHtml = '';
             if (isCapture) {
-                const baseTagStyle = "display: inline-flex; align-items: center; justify-content: center; height: 26px; padding: 0 10px; margin: 0 4px 8px 4px; border-radius: 6px; font-size: 12px; font-weight: bold; line-height: 1; box-sizing: border-box; white-space: nowrap;";
+                // Используем inline-block и padding вместо жесткой высоты и flexbox
+                const baseTagStyle = "display: inline-block; padding: 6px 12px; margin: 0 4px 8px 4px; border-radius: 6px; font-size: 12px; font-weight: bold; line-height: 1.2; white-space: nowrap; vertical-align: middle;";
                 
                 const pTags = (profile.prefs || []).map(p => {
                     if(p === 'Готов платить дань') return `<span style="${baseTagStyle} background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 1px solid #ca8a04; box-shadow: 0 1px 2px rgba(234,179,8,0.3);">✓ ${p}</span>`;
@@ -837,7 +838,8 @@
                 
                 const lTags = (profile.limits || []).map(l => `<span style="${baseTagStyle} background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;">✕ ${l}</span>`).join('');
                 
-                tagsHtml = `<div style="display: flex; flex-wrap: wrap; justify-content: center; margin-bottom: 24px; width: 100%;">${pTags}${lTags}</div>`;
+                // Обертка с text-align: center вместо flex
+                tagsHtml = `<div style="text-align: center; margin-bottom: 24px; width: 100%;">${pTags}${lTags}</div>`;
             } else {
                 const pTags = (profile.prefs || []).map(p => {
                     if(p === 'Готов платить дань') return `<span class="tag-badge tag-gold-special">✓ ${p}</span>`;
