@@ -828,9 +828,9 @@
             // ТЕГИ: ИСПРАВЛЕНИЕ ВЫРАВНИВАНИЯ (Обход бага html2canvas)
             let tagsHtml = '';
             if (isCapture) {
-                // Идеальное центрирование: задаем жесткую высоту (height) и равный ей line-height, убирая padding по вертикали. 
-                // Заменяем span на div для строгого блочного рендера.
-                const baseTagStyle = "display: inline-block; height: 26px; line-height: 24px; padding: 0 12px; margin: 0 4px 8px 4px; border-radius: 6px; font-size: 12px; font-weight: bold; white-space: nowrap; box-sizing: border-box; vertical-align: top;";
+                // Убрали жесткую высоту (height). Оставили только плотные внутренние отступы (padding) и line-height: 1.
+                // Теперь рамка будет туго облегать сам текст без лишнего пустого пространства.
+                const baseTagStyle = "display: inline-block; padding: 5px 10px; margin: 0 4px 8px 4px; border-radius: 6px; font-size: 13px; font-weight: bold; line-height: 1; white-space: nowrap; vertical-align: middle;";
                 
                 const pTags = (profile.prefs || []).map(p => {
                     if(p === 'Готов платить дань') return `<div style="${baseTagStyle} background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 1px solid #ca8a04; box-shadow: 0 1px 2px rgba(234,179,8,0.3);">✓ ${p}</div>`;
