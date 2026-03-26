@@ -906,10 +906,11 @@
             // РЕЖИМ ГЕНЕРАЦИИ ДЛЯ TELEGRAM (СТРОГИЙ БЛОЧНЫЙ HTML)
             // ====================================================================================================
             if (isCapture) {
+                // Hero Image Banner с безопасным фоновым изображением (чтобы избежать сплющивания html2canvas)
                 let heroBanner = `
                     <div style="width: 100%; height: 320px; position: relative; border-bottom: 2px solid ${tierStyles.borderMuted}; background-color: #e5e5e5; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                         ${profile.avatarUrl 
-                            ? `<img src="${profile.avatarUrl}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;" alt="Avatar">` 
+                            ? `<div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('${profile.avatarUrl}'); background-size: cover; background-position: center; z-index: 0;"></div>` 
                             : `<span style="font-size: 80px; position: relative; z-index: 0;">${profile.gender === 'М' ? '🧔' : '👩'}</span>`
                         }
                         <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none;">${bubblesHtml}</div>
@@ -959,10 +960,11 @@
             // РЕЖИМ ДЛЯ ПРИЛОЖЕНИЯ В TELEGRAM (TAILWIND)
             // ====================================================================================================
             
+            // Hero Image App с фоновым изображением для 100% сохранения пропорций
             let heroImageApp = `
                 <div class="w-full h-72 relative rounded-t-2xl overflow-hidden bg-slate-200 flex items-center justify-center border-b border-black/10">
                     ${profile.avatarUrl 
-                        ? `<img src="${profile.avatarUrl}" class="absolute inset-0 w-full h-full object-cover z-0" alt="Avatar">` 
+                        ? `<div class="absolute inset-0 w-full h-full bg-cover bg-center z-0" style="background-image: url('${profile.avatarUrl}');"></div>` 
                         : `<span class="text-6xl relative z-0">${profile.gender === 'М' ? '🧔' : '👩'}</span>`
                     }
                     <div class="absolute inset-0 z-10 pointer-events-none">${bubblesHtml}</div>
