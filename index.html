@@ -755,7 +755,8 @@
 
             const isDomWebhook = pendingProfile.role === 'dominant';
             const genderTag = pendingProfile.gender === 'М' ? 'М' : 'Ж';
-            const generatedTags = `#${isDomWebhook ? 'Верхний' : 'Нижний'} #${pendingProfile.city.replace(/\s+/g, '')} #${genderTag}${pendingProfile.age}`;
+            // Убрали добавление возраста к тегу пола
+            const generatedTags = `#${isDomWebhook ? 'Верхний' : 'Нижний'} #${pendingProfile.city.replace(/\s+/g, '')} #${genderTag}`;
 
             const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwDDDrg2jjJfS45XEKJX2sBBcUOOGS7b4tcc0ZkDQZyBq1koslORa-D6ltNJm5gTdHR/exec'; 
             try {
