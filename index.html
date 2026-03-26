@@ -121,9 +121,9 @@
         .tag-interest-active { background-color: #3b82f6 !important; border-color: #2563eb !important; color: white !important; }
         .tag-disabled { opacity: 0.25; pointer-events: none; filter: grayscale(100%); }
 
-        /* Овальные и уменьшенные бейджи для ленты приложения */
-        .tag-badge { display: inline-flex; align-items: center; justify-content: center; padding: 3px 8px; border-radius: 9999px; font-size: 10px; font-weight: 700; white-space: nowrap; vertical-align: middle; }
-        .role-badge { display: inline-flex; align-items: center; justify-content: center; padding: 3px 8px; border-radius: 9999px; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; vertical-align: middle; }
+        /* Овальные и УВЕЛИЧЕННЫЕ бейджи для ленты приложения */
+        .tag-badge { display: inline-flex; align-items: center; justify-content: center; padding: 6px 14px; border-radius: 9999px; font-size: 16px; font-weight: 700; white-space: nowrap; vertical-align: middle; }
+        .role-badge { display: inline-flex; align-items: center; justify-content: center; padding: 6px 14px; border-radius: 9999px; font-size: 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; vertical-align: middle; }
         .tag-gold-special { background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 1px solid #ca8a04; box-shadow: 0 1px 3px rgba(234,179,8,0.4); }
     </style>
 </head>
@@ -823,11 +823,11 @@
             let roleBadgeFeedHtml = '';
             
             if (isDom) {
-                roleBadgeCaptureHtml = `<div style="display: inline-block; padding: 4px 12px; margin-top: 14px; border-radius: 9999px; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; border: 2px solid #ea580c; color: #ea580c; background: rgba(234, 88, 12, 0.1); box-shadow: 0 0 15px rgba(234, 88, 12, 0.2); line-height: 1; vertical-align: middle;">👑 Верхний</div>`;
-                roleBadgeFeedHtml = `<div class="inline-block mt-2 px-3 py-1 rounded-full border border-orange-500/40 bg-orange-500/10 text-orange-600 shadow-[0_0_10px_rgba(234,88,12,0.2)] text-[9px] font-black uppercase tracking-widest leading-none">👑 Верхний</div>`;
+                roleBadgeCaptureHtml = `<div style="display: inline-block; padding: 8px 24px; margin-top: 14px; border-radius: 9999px; font-size: 22px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; border: 2px solid #ea580c; color: #ea580c; background: rgba(234, 88, 12, 0.1); box-shadow: 0 0 15px rgba(234, 88, 12, 0.2); line-height: 1; vertical-align: middle;">👑 Верхний</div>`;
+                roleBadgeFeedHtml = `<div class="inline-block mt-2 px-4 py-2 rounded-full border border-orange-500/40 bg-orange-500/10 text-orange-600 shadow-[0_0_10px_rgba(234,88,12,0.2)] text-[16px] font-black uppercase tracking-widest leading-none">👑 Верхний</div>`;
             } else {
-                roleBadgeCaptureHtml = `<div style="display: inline-block; padding: 4px 12px; margin-top: 14px; border-radius: 9999px; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; border: 2px solid #0284c7; color: #0284c7; background: rgba(2, 132, 199, 0.1); box-shadow: 0 0 15px rgba(2, 132, 199, 0.2); line-height: 1; vertical-align: middle;">🧎 Нижний</div>`;
-                roleBadgeFeedHtml = `<div class="inline-block mt-2 px-3 py-1 rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-600 shadow-[0_0_10px_rgba(2,132,199,0.2)] text-[9px] font-black uppercase tracking-widest leading-none">🧎 Нижний</div>`;
+                roleBadgeCaptureHtml = `<div style="display: inline-block; padding: 8px 24px; margin-top: 14px; border-radius: 9999px; font-size: 22px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; border: 2px solid #0284c7; color: #0284c7; background: rgba(2, 132, 199, 0.1); box-shadow: 0 0 15px rgba(2, 132, 199, 0.2); line-height: 1; vertical-align: middle;">🧎 Нижний</div>`;
+                roleBadgeFeedHtml = `<div class="inline-block mt-2 px-4 py-2 rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-600 shadow-[0_0_10px_rgba(2,132,199,0.2)] text-[16px] font-black uppercase tracking-widest leading-none">🧎 Нижний</div>`;
             }
 
             // --- Генерация летающих пузырьков ---
@@ -863,14 +863,14 @@
             // ТЕГИ
             let tagsHtml = '';
             if (isCapture) {
-                const baseTagStyle = "display: inline-block; padding: 4px 10px; margin: 0 4px 8px 4px; border-radius: 9999px; font-size: 11px; font-weight: bold; line-height: normal; white-space: nowrap; vertical-align: middle;";
+                const baseTagStyle = "display: inline-block; padding: 8px 16px; margin: 0 6px 12px 6px; border-radius: 9999px; font-size: 20px; font-weight: bold; line-height: normal; white-space: nowrap; vertical-align: middle;";
                 
                 const pTags = (profile.prefs || []).map(p => {
-                    if(p === 'Готов платить дань') return `<span style="${baseTagStyle} background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 1px solid #ca8a04; box-shadow: 0 1px 3px rgba(234,179,8,0.3);">✓ ${p}</span>`;
-                    return `<span style="${baseTagStyle} background: #dcfce7; color: #065f46; border: 1px solid #6ee7b7;">✓ ${p}</span>`;
+                    if(p === 'Готов платить дань') return `<span style="${baseTagStyle} background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 2px solid #ca8a04; box-shadow: 0 1px 3px rgba(234,179,8,0.3);">✓ ${p}</span>`;
+                    return `<span style="${baseTagStyle} background: #dcfce7; color: #065f46; border: 2px solid #6ee7b7;">✓ ${p}</span>`;
                 }).join('');
                 
-                const lTags = (profile.limits || []).map(l => `<span style="${baseTagStyle} background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;">✕ ${l}</span>`).join('');
+                const lTags = (profile.limits || []).map(l => `<span style="${baseTagStyle} background: #fee2e2; color: #991b1b; border: 2px solid #fca5a5;">✕ ${l}</span>`).join('');
                 
                 tagsHtml = `<div style="text-align: center; margin-bottom: 24px; width: 100%;">${pTags}${lTags}</div>`;
             } else {
@@ -879,7 +879,7 @@
                     return `<span class="tag-badge bg-emerald-100 text-emerald-800 border border-emerald-300">✓ ${p}</span>`;
                 }).join('');
                 const lTags = (profile.limits || []).map(l => `<span class="tag-badge bg-red-100 text-red-800 border border-red-300">✕ ${l}</span>`).join('');
-                tagsHtml = `<div class="mb-4 flex flex-wrap gap-1.5 w-full">${pTags}${lTags}</div>`;
+                tagsHtml = `<div class="mb-4 flex flex-wrap gap-2 w-full">${pTags}${lTags}</div>`;
             }
 
             if (isCapture) {
