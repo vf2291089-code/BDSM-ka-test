@@ -145,7 +145,12 @@
         <!-- VIEW: DATING FEED -->
         <div id="view-feed" class="tab-content fade-in block">
             <div class="mb-8">
-                <h1 class="text-3xl font-bold text-stone-800 mb-3">Сообщество</h1>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
+                    <h1 class="text-3xl font-bold text-stone-800">Сообщество</h1>
+                    <button onclick="openExternalLink('https://t.me/BDSMka_club')" class="inline-flex items-center justify-center gap-2 bg-sky-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-sky-600 transition-all shadow-md shrink-0">
+                        <span class="text-lg">✈️</span> Канал с анкетами
+                    </button>
+                </div>
                 <p class="text-base text-stone-600 max-w-3xl mb-6">
                     Изучите анкеты участников. Зеленые теги — предпочтения, красные — табу. Летающие смайлы — интересы.
                 </p>
@@ -817,6 +822,18 @@
                 ? `<div style="width: 100%; height: 100%; background-image: url('${profile.avatarUrl}'); background-size: cover; background-position: center; border-radius: 50%;"></div>` 
                 : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.05); border-radius: 50%;"><span style="font-size: 32px;">${profile.gender === 'М' ? '🧔' : '👩'}</span></div>`;
 
+            // --- БЕЙДЖ РОЛИ (Верхний / Нижний) ---
+            let roleBadgeCaptureHtml = '';
+            let roleBadgeFeedHtml = '';
+            
+            if (isDom) {
+                roleBadgeCaptureHtml = `<div style="display: inline-block; padding: 6px 16px; margin-top: 14px; border-radius: 30px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; border: 2px solid #ea580c; color: #ea580c; background: rgba(234, 88, 12, 0.1); box-shadow: 0 0 15px rgba(234, 88, 12, 0.2); line-height: 1; vertical-align: middle;">👑 Верхний</div>`;
+                roleBadgeFeedHtml = `<div class="inline-block mt-2 px-3 py-1 rounded-full border border-orange-500/40 bg-orange-500/10 text-orange-600 shadow-[0_0_10px_rgba(234,88,12,0.2)] text-[10px] font-black uppercase tracking-widest leading-none">👑 Верхний</div>`;
+            } else {
+                roleBadgeCaptureHtml = `<div style="display: inline-block; padding: 6px 16px; margin-top: 14px; border-radius: 30px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; border: 2px solid #0284c7; color: #0284c7; background: rgba(2, 132, 199, 0.1); box-shadow: 0 0 15px rgba(2, 132, 199, 0.2); line-height: 1; vertical-align: middle;">🧎 Нижний</div>`;
+                roleBadgeFeedHtml = `<div class="inline-block mt-2 px-3 py-1 rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-600 shadow-[0_0_10px_rgba(2,132,199,0.2)] text-[10px] font-black uppercase tracking-widest leading-none">🧎 Нижний</div>`;
+            }
+
             // --- Генерация летающих пузырьков ---
             let bubblesHtml = '';
             if (profile.interests && profile.interests.length > 0) {
@@ -883,6 +900,7 @@
                     <div style="text-align: center; margin-bottom: 24px;">
                         <div style="font-size: 40px; font-weight: 900; line-height: 1.1; margin-bottom: 8px; color: ${tierStyles.titleColor}; word-wrap: break-word;">${profile.name}, ${profile.age}</div>
                         <div style="font-size: 22px; opacity: 0.8; font-weight: 600; color: ${tierStyles.textColor};">📍 ${profile.city}</div>
+                        ${roleBadgeCaptureHtml}
                     </div>
 
                     ${tagsHtml}
@@ -918,6 +936,7 @@
                         <div class="flex-1 min-w-0 flex flex-col justify-center pl-2">
                             <h3 class="font-bold text-xl leading-tight mb-1 truncate w-full">${profile.name}, ${profile.age}</h3>
                             <p class="text-sm opacity-80 flex items-center gap-1 truncate w-full"><span>📍</span> ${profile.city}</p>
+                            <div>${roleBadgeFeedHtml}</div>
                         </div>
                     </div>
 
