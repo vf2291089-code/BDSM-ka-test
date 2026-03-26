@@ -759,7 +759,7 @@
             const genderTag = pendingProfile.gender === 'М' ? 'М' : 'Ж';
             const generatedTags = `#${isDomWebhook ? 'Верхний' : 'Нижний'} #${pendingProfile.city.replace(/\s+/g, '')} #${genderTag}`;
 
-            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwDDDrg2jjJfS45XEKJX2sBBcUOOGS7b4tcc0ZkDQZyBq1koslORa-D6ltNJm5gTdHR/exec'; 
+            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxdJtjTKeIJnlGbs_BF7m19j04iUyoa01cEJkrVlmLVnoF1aNs6s36dHh2EZ4Sz59FYeQ/exec'; 
             
             let responseText = "";
             try {
@@ -781,7 +781,19 @@
                 });
 
                 responseText = await response.text();
-                const result = JSON.parse(responseText);
+                
+                // ИСПРАВЛЕНИЕ: Умная обработка ответа. Если сервер вернул просто "Success", 
+                // мы не пытаемся ломать код об JSON, а сразу засчитываем успех!
+                let result = {};
+                try {
+                    result = JSON.parse(responseText);
+                } catch(e) {
+                    if (responseText.trim().toLowerCase() === "success") {
+                        result = { status: 'success', message: 'Анкета успешно размещена в Клубе!' };
+                    } else {
+                        throw new Error(responseText); // Вызываем реальную ошибку, если это не Success
+                    }
+                }
                 
                 if (result.status === 'error') {
                     if(errorMsg) errorMsg.innerText = result.message;
@@ -804,7 +816,7 @@
                 if(errorMsg) {
                     if (responseText.includes('<html')) {
                         errorMsg.innerText = "Сбой Google Script. Убедитесь, что скрипт развернут 'У всех (Anyone)'.";
-                    } else if (responseText) {
+                    } else if (responseText && !responseText.toLowerCase().includes('success')) {
                         errorMsg.innerText = "Ошибка сервера: " + responseText.substring(0, 40) + "...";
                     } else {
                         errorMsg.innerText = "Сбой сети. Сервер недоступен или блокирует запрос (CORS).";
