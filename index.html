@@ -7,7 +7,6 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Библиотека для генерации скриншотов -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
@@ -22,7 +21,7 @@
                     },
                     boxShadow: {
                         'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-                        'card': '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)'
+                        'card': '0 10px 30px -5px rgba(0, 0, 0, 0.15)',
                     }
                 }
             }
@@ -46,73 +45,53 @@
         .card-sub-free { 
             background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); 
             border: 1px solid #bae6fd; 
-            color: #0c4a6e;
         }
-        .card-sub-free .border-muted { border-color: #bae6fd; }
 
         .card-dom-free { 
             background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); 
             border: 1px solid #fed7aa; 
-            color: #7c2d12;
         }
-        .card-dom-free .border-muted { border-color: #fed7aa; }
         
         .card-gold { 
             background: linear-gradient(135deg, #fffbeb 0%, #fef08a 30%, #eab308 50%, #fef08a 70%, #fffbeb 100%); 
-            border: 2px solid #ca8a04; 
-            box-shadow: 0 10px 25px rgba(234, 179, 8, 0.3);
-            color: #422006;
+            border: 1px solid #ca8a04; 
+            box-shadow: 0 10px 25px rgba(234, 179, 8, 0.2);
         }
-        .card-gold .border-muted { border-color: #ca8a04; }
         
         .card-silver { 
             background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 50%, #94a3b8 100%); 
-            border: 2px solid #64748b; 
-            color: #0f172a;
+            border: 1px solid #64748b; 
         }
-        .card-silver .border-muted { border-color: #64748b; }
         
         .card-metal { 
             background: linear-gradient(145deg, #334155 0%, #1e293b 50%, #0f172a 100%); 
-            border: 2px solid #475569; 
+            border: 1px solid #475569; 
             color: #f8fafc;
         }
-        .card-metal .border-muted { border-color: rgba(255,255,255,0.15); }
         
         .card-latex { 
             background-color: #0a0a0a;
             background-image: 
-                linear-gradient(115deg, rgba(255,255,255,0.2) 0%, transparent 8%, transparent 40%, rgba(255,255,255,0.08) 45%, transparent 50%),
-                linear-gradient(15deg, rgba(255,255,255,0.05) 0%, transparent 10%, transparent 80%, rgba(255,255,255,0.1) 85%, transparent 100%),
-                radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 40%);
-            border: 2px solid #1e293b; 
+                linear-gradient(115deg, rgba(255,255,255,0.15) 0%, transparent 8%, transparent 40%, rgba(255,255,255,0.05) 45%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 40%);
+            border: 1px solid #262626; 
             color: #f8fafc;
-            box-shadow: inset 0 8px 20px rgba(255,255,255,0.05);
         }
-        .card-latex .border-muted { border-color: rgba(255,255,255,0.15); }
         
         .card-leather { 
             background-color: #271204; 
-            border: 3px dashed #78350f; 
+            border: 2px dashed #78350f; 
             color: #ffedd5; 
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.6);
-            background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
-            background-size: 4px 4px;
         }
-        .card-leather .border-muted { border-color: rgba(120, 53, 15, 0.5); }
 
         .card-ceramic {
             background-color: #faf9f6;
             background-image: 
-                linear-gradient(115deg, transparent 30%, rgba(0,0,0,0.6) 31%, transparent 32%),
-                linear-gradient(-45deg, transparent 60%, rgba(0,0,0,0.5) 60.5%, transparent 61.5%),
-                linear-gradient(85deg, transparent 15%, rgba(0,0,0,0.4) 15.5%, transparent 16%),
+                linear-gradient(115deg, transparent 30%, rgba(0,0,0,0.4) 31%, transparent 32%),
                 radial-gradient(circle at 30% 30%, #ffffff 0%, transparent 60%);
-            border: 3px solid #d4af37;
+            border: 1px solid #d4af37;
             color: #1c1917;
-            box-shadow: inset 0 0 20px rgba(212,175,55,0.1);
         }
-        .card-ceramic .border-muted { border-color: rgba(212, 175, 55, 0.3); }
         
         input[type="file"]::file-selector-button { display: none; }
         
@@ -121,7 +100,6 @@
         .tag-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
         .tag-pref-active { background-color: #10b981 !important; border-color: #059669 !important; color: white !important; }
         .tag-limit-active { background-color: #ef4444 !important; border-color: #dc2626 !important; color: white !important; }
-        .tag-interest-active { background-color: #3b82f6 !important; border-color: #2563eb !important; color: white !important; }
         .tag-disabled { opacity: 0.25; pointer-events: none; filter: grayscale(100%); }
     </style>
 </head>
@@ -147,12 +125,12 @@
             <div class="mb-8">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
                     <h1 class="text-3xl font-bold text-stone-800">Сообщество</h1>
-                    <button onclick="openExternalLink('https://t.me/BDSMka_club')" class="inline-flex items-center justify-center gap-2 bg-sky-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-sky-600 transition-all shadow-md shrink-0">
-                        <span class="text-lg">✈️</span> Канал с анкетами
+                    <button onclick="openExternalLink('https://t.me/BDSMka_club')" class="inline-flex items-center justify-center gap-2 bg-stone-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-stone-800 transition-all shadow-md shrink-0">
+                        ✈️ Канал с анкетами
                     </button>
                 </div>
                 <p class="text-base text-stone-600 max-w-3xl mb-6">
-                    Изучите анкеты участников. Зеленые теги — предпочтения, красные — табу. Летающие смайлы — интересы.
+                    Эксклюзивный каталог участников. Подберите партнера по совместимости и психотипу.
                 </p>
                 <div class="flex gap-2 overflow-x-auto w-full pb-2 hide-scroll items-center">
                     <button onclick="filterProfiles('all')" class="px-5 py-2 rounded-full bg-stone-800 text-xs font-bold text-white hover:bg-stone-700 transition-colors shrink-0">Все</button>
@@ -161,6 +139,7 @@
                 </div>
             </div>
 
+            <!-- Profiles Grid -->
             <div id="profiles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
                 <!-- Profiles injected via JS -->
             </div>
@@ -171,31 +150,31 @@
             <div class="bg-white p-6 md:p-8 rounded-2xl shadow-card border border-stone-100">
                 <h1 class="text-3xl font-bold text-stone-800 mb-3">Создать Анкету</h1>
                 <p class="text-stone-600 mb-8 pb-6 border-b border-stone-100">
-                    Заполните данные. <b>При публикации новой анкеты, ваша предыдущая анкета в канале будет автоматически удалена.</b>
+                    Оформите свой профиль для поиска. <b>Новая анкета автоматически заменит вашу старую в канале.</b>
                 </p>
 
                 <form id="profile-form" class="space-y-8">
                     
                     <div class="space-y-5">
-                        <h3 class="text-lg font-bold text-stone-800 flex items-center gap-2"><span class="bg-stone-200 text-stone-700 w-6 h-6 flex items-center justify-center rounded-full text-xs">1</span> Базовые данные</h3>
+                        <h3 class="text-lg font-bold text-stone-800 flex items-center gap-2"><span class="bg-stone-200 text-stone-700 w-6 h-6 flex items-center justify-center rounded-full text-xs">1</span> Фотография и База</h3>
                         
-                        <div class="bg-stonebg p-4 rounded-xl border border-stone-200 flex items-center gap-5">
-                            <div id="photo-preview-container" class="w-20 h-20 rounded-full bg-white border-2 border-dashed border-stone-300 flex items-center justify-center text-stone-400 overflow-hidden shrink-0 shadow-inner">
-                                <span class="text-2xl">📸</span>
+                        <div class="bg-stonebg p-4 rounded-xl border border-stone-200 flex flex-col sm:flex-row items-center gap-5">
+                            <div id="photo-preview-container" class="w-32 h-32 rounded-xl bg-white border-2 border-dashed border-stone-300 flex items-center justify-center text-stone-400 overflow-hidden shrink-0 shadow-inner">
+                                <span class="text-3xl">📸</span>
                             </div>
-                            <div class="flex-1">
-                                <label class="inline-block px-5 py-2.5 bg-white border border-stone-300 rounded-lg text-sm font-bold text-stone-700 hover:bg-stone-50 cursor-pointer shadow-sm transition-all">
-                                    Выбрать фото
+                            <div class="flex-1 text-center sm:text-left w-full">
+                                <label class="inline-block w-full sm:w-auto px-5 py-3 bg-white border border-stone-300 rounded-lg text-sm font-bold text-stone-700 hover:bg-stone-50 cursor-pointer shadow-sm transition-all">
+                                    Загрузить фото (Обязательно)
                                     <input type="file" id="form-photo" accept="image/jpeg, image/png" class="hidden" onchange="previewPhoto(event)">
                                 </label>
-                                <p class="text-[10px] text-stone-500 mt-2">Отобразится крупно по центру карточки. До 2 МБ.</p>
+                                <p class="text-xs text-stone-500 mt-3">Фото будет занимать половину вашей карточки. Выбирайте портрет хорошего качества (до 2 МБ).</p>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div>
                                 <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Имя / Никнейм</label>
-                                <input type="text" id="form-name" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all font-medium text-stone-900" placeholder="Например: Алекс">
+                                <input type="text" id="form-name" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all font-medium text-stone-900" placeholder="Алекс">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">@Username (Телеграм)</label>
@@ -224,26 +203,26 @@
                                 </select>
                             </div>
                             <div class="sm:col-span-2">
-                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">О себе (Коротко)</label>
-                                <textarea id="form-desc" rows="2" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all resize-none font-medium text-stone-900" placeholder="Пару слов о вашем характере..."></textarea>
+                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">О себе (Подробно)</label>
+                                <textarea id="form-desc" rows="3" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all resize-none font-medium text-stone-900" placeholder="Ваш характер, привычки, особенности..."></textarea>
                             </div>
                             <div class="sm:col-span-2">
                                 <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Кого вы ищете?</label>
-                                <textarea id="form-looking-for" rows="2" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all resize-none font-medium text-stone-900" placeholder="Ищу партнера для..."></textarea>
+                                <textarea id="form-looking-for" rows="2" required class="w-full px-4 py-3 border border-stone-200 rounded-lg bg-stonebg focus:bg-white focus:ring-2 focus:ring-stone-400 outline-none transition-all resize-none font-medium text-stone-900" placeholder="Кого вы хотите видеть рядом с собой..."></textarea>
                             </div>
                         </div>
                     </div>
 
                     <div class="space-y-4 pt-6 border-t border-stone-100">
-                        <h3 class="text-lg font-bold text-stone-800 flex items-center gap-2"><span class="bg-stone-200 text-stone-700 w-6 h-6 flex items-center justify-center rounded-full text-xs">2</span> Оформление (Цвета и Фактуры)</h3>
+                        <h3 class="text-lg font-bold text-stone-800 flex items-center gap-2"><span class="bg-stone-200 text-stone-700 w-6 h-6 flex items-center justify-center rounded-full text-xs">2</span> Оформление (VIP Статусы)</h3>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-4">
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Текстура фона</label>
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Текстура карточки</label>
                                 <select id="form-tier" onchange="updateTierPreview()" class="w-full px-4 py-3 border border-stone-300 rounded-lg bg-white outline-none font-bold text-stone-800 shadow-sm cursor-pointer">
                                     <option value="base">Белая (Бесплатно)</option>
-                                    <option value="sub-free">Голубая (Бесплатно)</option>
-                                    <option value="dom-free">Оранжевая (Бесплатно)</option>
+                                    <option value="sub-free">Светло-голубая (Бесплатно)</option>
+                                    <option value="dom-free">Светло-оранжевая (Бесплатно)</option>
                                     <option value="silver">Серебро 🔒</option>
                                     <option value="gold">Золото 🔒</option>
                                     <option value="metal">Металл 🔒</option>
@@ -252,26 +231,10 @@
                                     <option value="ceramic">Керамика 🔒</option>
                                 </select>
                             </div>
-
-                            <div>
-                                <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Цвет рамки вокруг фото</label>
-                                <select id="form-photo-border" class="w-full px-4 py-3 border border-stone-300 rounded-lg bg-white outline-none font-bold text-stone-800 shadow-sm cursor-pointer">
-                                    <option value="default">По умолчанию</option>
-                                    <option value="#d4af37">Золотая</option>
-                                    <option value="#94a3b8">Серебряная</option>
-                                    <option value="#dc2626">Красная</option>
-                                    <option value="#ea580c">Оранжевая</option>
-                                    <option value="#0284c7">Синяя</option>
-                                    <option value="#9333ea">Фиолетовая</option>
-                                    <option value="#000000">Черная</option>
-                                    <option value="#ffffff">Белая</option>
-                                </select>
-                            </div>
                         </div>
 
-                        <div id="tier-preview" class="w-full h-24 mt-2 rounded-xl flex flex-col items-center justify-center font-bold transition-all shadow-md card-base border-2 border-transparent">
-                            <span class="opacity-90" id="preview-text-1">Предпросмотр стиля</span>
-                            <span class="text-xs opacity-60 font-normal mt-1" id="preview-text-2">Текстура всей карточки</span>
+                        <div id="tier-preview" class="w-full h-16 mt-2 rounded-xl flex flex-col items-center justify-center font-bold transition-all shadow-md card-base border-2 border-transparent">
+                            <span class="opacity-90 text-sm" id="preview-text-1">Превью стиля</span>
                         </div>
 
                         <div class="mt-4 p-5 bg-amber-50 border border-amber-200 rounded-xl shadow-inner">
@@ -280,30 +243,6 @@
                                 <input type="text" id="form-promo" placeholder="Введите промокод..." class="flex-1 px-4 py-3 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none bg-white text-stone-900 font-mono font-bold uppercase placeholder-stone-300">
                                 <button type="button" onclick="applyPromoCode()" class="bg-amber-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-amber-700 transition-colors shadow-md whitespace-nowrap">Применить</button>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Interests Section -->
-                    <div class="space-y-4 pt-6 border-t border-stone-100">
-                        <div class="flex justify-between items-end mb-4">
-                            <div>
-                                <h3 class="text-lg font-bold text-blue-700 flex items-center gap-2"><span class="bg-blue-100 text-blue-800 w-6 h-6 flex items-center justify-center rounded-full text-xs">🎯</span> Обычные интересы</h3>
-                                <p class="text-xs text-stone-500 mt-1">Выберите до 5 хобби. Они будут красиво летать вокруг вашего фото.</p>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label class="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1.5">Стиль пузырьков</label>
-                            <select id="form-bubble-style" class="w-full sm:w-1/2 px-4 py-3 border border-stone-300 rounded-lg bg-white outline-none font-bold text-stone-800 shadow-sm cursor-pointer">
-                                <option value="none">Просто смайлики (Без фона)</option>
-                                <option value="white">Белые кружочки</option>
-                                <option value="black">Черные кружочки</option>
-                                <option value="accent">Цветные кружочки (Под Роль)</option>
-                            </select>
-                        </div>
-
-                        <div id="interests-container" class="flex flex-wrap gap-2">
-                            <!-- Populated via JS -->
                         </div>
                     </div>
 
@@ -325,9 +264,8 @@
 
                     <div class="pt-4">
                         <button type="button" id="preview-btn" onclick="showPreview(event)" class="w-full bg-stone-900 text-white font-bold py-5 rounded-xl hover:bg-stone-800 transition-all shadow-card text-lg flex items-center justify-center gap-2">
-                            👀 Предпросмотр Анкеты
+                            👀 Посмотреть Карточку
                         </button>
-                        <p class="text-center text-xs text-stone-500 mt-3 font-medium">Размещая или редактируя анкету, ваша старая удаляется и постится новая.</p>
                     </div>
                 </form>
             </div>
@@ -352,21 +290,21 @@
     <div id="preview-modal" class="hidden fixed inset-0 z-[110] bg-stone-900/80 backdrop-blur-md flex items-center justify-center p-4 fade-in overflow-y-auto">
         <div class="bg-white rounded-3xl w-full max-w-md my-auto shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="p-4 border-b border-stone-100 flex justify-between items-center bg-stone-50 sticky top-0 z-20">
-                <h3 class="font-bold text-stone-800">Предпросмотр карточки</h3>
+                <h3 class="font-bold text-stone-800">Превью для Ленты</h3>
                 <button onclick="closePreview()" class="text-stone-400 hover:text-stone-800 text-xl font-bold px-2">✕</button>
             </div>
             
-            <div class="p-5 overflow-y-auto bg-stonebg" id="preview-card-container">
+            <div class="p-6 overflow-y-auto bg-stonebg flex justify-center" id="preview-card-container">
                 <!-- Карточка генерируется сюда -->
             </div>
             
             <div class="p-4 border-t border-stone-100 bg-stone-50 sticky bottom-0 z-20 flex flex-col gap-2">
                 <p class="text-xs text-center text-rose-600 font-bold mb-1" id="error-message"></p>
-                <button id="confirm-publish-btn" onclick="confirmPublish()" class="w-full py-4 bg-stone-900 text-white rounded-xl font-bold shadow-md hover:bg-stone-800 transition-colors flex justify-center items-center gap-2">
-                    ✅ Разместить анкету
+                <button id="confirm-publish-btn" onclick="confirmPublish()" class="w-full py-4 bg-stone-900 text-white rounded-xl font-bold shadow-md hover:bg-stone-800 transition-colors flex justify-center items-center gap-2 text-lg">
+                    ✅ Разместить в Клубе
                 </button>
                 <button onclick="closePreview()" class="w-full py-3 bg-stone-200 text-stone-700 rounded-xl font-bold hover:bg-stone-300 transition-colors">
-                    🔙 Назад к редактированию
+                    🔙 Изменить данные
                 </button>
             </div>
         </div>
@@ -389,14 +327,10 @@
             if (tg && tg.openLink) { tg.openLink(url); } else { window.open(url, '_blank'); }
         }
 
-        // --- ЛОГИКА ПРОМОКОДОВ И ДОСТУПОВ ---
+        // --- ЛОГИКА ПРОМОКОДОВ ---
         const promoCodes = {
-            'SERB2': 'silver',
-            '1GOLD9E': 'gold',
-            '4METLL12': 'metal',
-            '3LATEX19': 'latex',
-            '45LETHE74': 'leather',
-            'KER849AMA': 'ceramic'
+            'SERB2': 'silver', '1GOLD9E': 'gold', '4METLL12': 'metal',
+            '3LATEX19': 'latex', '45LETHE74': 'leather', 'KER849AMA': 'ceramic'
         };
 
         let unlockedTiers = new Set(['base', 'sub-free', 'dom-free']);
@@ -412,14 +346,12 @@
                 const select = document.getElementById('form-tier');
                 if (select) {
                     Array.from(select.options).forEach(opt => {
-                        if (opt.text.includes('🔒')) {
-                            opt.text = opt.text.replace(' 🔒', ' 🔓 (Открыто)');
-                        }
+                        if (opt.text.includes('🔒')) { opt.text = opt.text.replace(' 🔒', ' 🔓'); }
                     });
                 }
                 updateTierPreview();
                 if (code === 'BEZLIM') appliedPromoCode = code; 
-                alert('Мастер-промокод принят! Разблокированы абсолютно все стили оформления.');
+                alert('Мастер-промокод принят!');
                 return;
             }
 
@@ -430,7 +362,7 @@
                 if (select) {
                     const option = Array.from(select.options).find(opt => opt.value === tier);
                     if (option) {
-                        option.text = option.text.replace(' 🔒', ' 🔓 (Открыто)');
+                        option.text = option.text.replace(' 🔒', ' 🔓');
                         select.value = tier;
                         updateTierPreview();
                         alert(`Промокод принят! Открыто премиум оформление.`);
@@ -446,30 +378,15 @@
             const tier = tierEl?.value || 'base';
             const preview = document.getElementById('tier-preview');
             if (preview) {
-                preview.className = `w-full h-24 mt-2 rounded-xl flex flex-col items-center justify-center font-bold transition-all shadow-md card-${tier} border-2 border-transparent`;
+                preview.className = `w-full h-16 mt-2 rounded-xl flex flex-col items-center justify-center font-bold transition-all shadow-md card-${tier} border-2 border-transparent`;
             }
             
             const isDark = (tier === 'latex' || tier === 'leather' || tier === 'metal');
             const p1 = document.getElementById('preview-text-1');
-            const p2 = document.getElementById('preview-text-2');
             if (p1) p1.style.color = isDark ? '#ffffff' : 'inherit';
-            if (p2) p2.style.color = isDark ? 'rgba(255,255,255,0.7)' : 'inherit';
         }
 
         // --- БАЗЫ ДАННЫХ ---
-        const interestsDatabase = [
-            { name: 'Спорт', emoji: '⚽' }, { name: 'Музыка', emoji: '🎵' }, { name: 'Кино', emoji: '🎬' },
-            { name: 'Рисование', emoji: '🎨' }, { name: 'Танцы', emoji: '💃' }, { name: 'Выпивка', emoji: '🍷' },
-            { name: 'Боулинг', emoji: '🎳' }, { name: 'Охота', emoji: '🎯' }, { name: 'Рыбалка', emoji: '🎣' },
-            { name: 'Пение', emoji: '🎤' }, { name: 'Книги', emoji: '📚' }, { name: 'Игры', emoji: '🎮' },
-            { name: 'Путешествия', emoji: '✈️' }, { name: 'Готовка', emoji: '🍳' }, { name: 'Фотография', emoji: '📸' },
-            { name: 'Йога', emoji: '🧘' }, { name: 'Автомобили', emoji: '🚗' }, { name: 'Мотоциклы', emoji: '🏍️' },
-            { name: 'Театр', emoji: '🎭' }, { name: 'Астрономия', emoji: '🌌' }, { name: 'Природа', emoji: '🌿' },
-            { name: 'Животные', emoji: '🐾' }, { name: 'Кофе', emoji: '☕' }, { name: 'Чай', emoji: '🍵' },
-            { name: 'Шопинг', emoji: '🛍️' }, { name: 'Скейтборд', emoji: '🛹' }, { name: 'Велосипед', emoji: '🚴' },
-            { name: 'Единоборства', emoji: '🥊' }, { name: 'Настолки', emoji: '🧩' }, { name: 'IT/Код', emoji: '💻' }
-        ];
-
         const kinksDatabase = [
             { id: 'k1', name: 'Сисси' }, { id: 'k2', name: 'Финдом' }, { id: 'k3', name: 'Переодевания' },
             { id: 'k4', name: 'Страпон (Пеггинг)' }, { id: 'k5', name: 'Пояс верности' }, { id: 'k6', name: 'Бондаж (Веревки)' },
@@ -487,20 +404,20 @@
 
         let mockProfiles = [
             {
-                id: 1, role: 'dominant', tier: 'ceramic', cardBorder: '#000000', photoBorder: '#d4af37', username: 'mr_dom_88',
+                id: 1, role: 'dominant', tier: 'metal', username: 'mr_dom_88',
                 name: 'Александр', age: 34, city: 'Москва', gender: 'М',
-                desc: 'Ломаю не тело, а виртуозно подчиняю сознание. Обожаю газлайтинг и разрушение эго.',
-                lookingFor: 'Сломанную куклу с травмами. Привлекает процесс полного переподчинения.',
-                prefs: ['Газлайтинг', 'Унижение', 'Сенсорная депривация'], limits: ['Сисси', 'Порезы (Бладплей)'], 
-                interests: ['Спорт', 'Кофе', 'Кино', 'Автомобили'], bubbleStyle: 'accent', avatarUrl: null
+                desc: 'Строгий, но справедливый. Ценю дисциплину и полную отдачу. Вне сессий - поддержка и опека. Не приемлю ложь и игры в одни ворота.',
+                lookingFor: 'Ищу послушную, искреннюю девушку для долгих отношений 24/7. Важно доверие.',
+                prefs: ['Бондаж (Веревки)', 'Дисциплина / Правила', 'Порка (Флоггинг)'], limits: ['Кровь', 'Унижение'], 
+                avatarUrl: null
             },
             {
-                id: 2, role: 'submissive', tier: 'sub-free', cardBorder: 'default', photoBorder: 'default', username: 'cute_brat_spb',
+                id: 2, role: 'submissive', tier: 'sub-free', username: 'cute_brat_spb',
                 name: 'Елена', age: 22, city: 'Санкт-Петербург', gender: 'Ж',
-                desc: 'Обожаю проверять нервы на прочность. Дерзю, чтобы быть наказанной.',
-                lookingFor: 'Ищу строгого Верхнего, который сможет усмирить мой пыл.',
-                prefs: ['Порка (Флоггинг)', 'Публичность'], limits: ['Унижение', 'Золотой дождь'], 
-                interests: ['Танцы', 'Выпивка', 'Музыка'], bubbleStyle: 'white', avatarUrl: null
+                desc: 'Дерзкая, веселая, люблю проверять рамки дозволенного. Люблю когда меня жестко ставят на место.',
+                lookingFor: 'Строгого Верхнего, который не боится трудностей и может укротить мой характер.',
+                prefs: ['Порка (Флоггинг)', 'Афтеркеа (Aftercare)', 'Публичность'], limits: ['Унижение', 'Золотой дождь'], 
+                avatarUrl: null
             }
         ];
 
@@ -510,17 +427,14 @@
         
         let selectedPrefs = new Set();
         let selectedLimits = new Set();
-        let selectedInterests = new Set();
         let pendingProfile = null;
 
-        // --- ИНИЦИАЛИЗАЦИЯ ТЕГОВ И ИНТЕРЕСОВ В ФОРМЕ ---
+        // --- ИНИЦИАЛИЗАЦИЯ ТЕГОВ ---
         function initTagsUI() {
             const prefsContainer = document.getElementById('preferences-container');
             const limitsContainer = document.getElementById('limits-container');
-            const interestsContainer = document.getElementById('interests-container');
             if(prefsContainer) prefsContainer.innerHTML = ''; 
             if(limitsContainer) limitsContainer.innerHTML = ''; 
-            if(interestsContainer) interestsContainer.innerHTML = '';
 
             kinksDatabase.forEach(kink => {
                 const btnP = document.createElement('button');
@@ -538,16 +452,6 @@
 
                 if(prefsContainer) prefsContainer.appendChild(btnP);
                 if(limitsContainer) limitsContainer.appendChild(btnL);
-            });
-
-            interestsDatabase.forEach(interest => {
-                const btnI = document.createElement('button');
-                btnI.type = 'button';
-                btnI.className = 'tag-btn px-3 py-1.5 rounded-full text-xs font-bold shadow-sm flex items-center gap-1';
-                btnI.innerHTML = `<span>${interest.emoji}</span> <span>${interest.name}</span>`;
-                
-                btnI.onclick = () => toggleInterest(interest.name, btnI);
-                if(interestsContainer) interestsContainer.appendChild(btnI);
             });
         }
 
@@ -574,20 +478,6 @@
                     clickedBtn.classList.add('tag-limit-active');
                     oppositeBtn.classList.add('tag-disabled');
                 }
-            }
-        }
-
-        function toggleInterest(itemName, btn) {
-            if (selectedInterests.has(itemName)) {
-                selectedInterests.delete(itemName);
-                btn.classList.remove('tag-interest-active');
-            } else {
-                if (selectedInterests.size >= 5) {
-                    alert('Можно выбрать не более 5 интересов!');
-                    return;
-                }
-                selectedInterests.add(itemName);
-                btn.classList.add('tag-interest-active');
             }
         }
 
@@ -647,12 +537,13 @@
         function showPreview(e) {
             if (e) e.preventDefault();
             
+            // Ручная проверка всех обязательных полей
             const requiredFields = [
                 {id: 'form-name', name: 'Имя / Никнейм'},
                 {id: 'form-username', name: '@Username (Телеграм)'},
                 {id: 'form-age', name: 'Возраст'},
                 {id: 'form-city', name: 'Город'},
-                {id: 'form-desc', name: 'О себе (Коротко)'},
+                {id: 'form-desc', name: 'О себе'},
                 {id: 'form-looking-for', name: 'Кого вы ищете?'}
             ];
             
@@ -663,6 +554,11 @@
                     if(el) el.focus();
                     return;
                 }
+            }
+
+            if (!currentUploadedPhotoBase64) {
+                alert("Пожалуйста, загрузите фотографию (это обязательно для создания анкеты).");
+                return;
             }
 
             const errorMsg = document.getElementById('error-message');
@@ -685,8 +581,6 @@
                 id: tgUserId,
                 role: role,
                 tier: tier,
-                cardBorder: document.getElementById('form-card-border')?.value || 'default',
-                photoBorder: document.getElementById('form-photo-border')?.value || 'default',
                 username: (document.getElementById('form-username')?.value || '').replace('@', ''),
                 name: document.getElementById('form-name')?.value || '',
                 age: document.getElementById('form-age')?.value || '',
@@ -696,9 +590,7 @@
                 lookingFor: document.getElementById('form-looking-for')?.value || '',
                 avatarUrl: currentUploadedPhotoBase64,
                 prefs: Array.from(selectedPrefs),
-                limits: Array.from(selectedLimits),
-                interests: Array.from(selectedInterests),
-                bubbleStyle: document.getElementById('form-bubble-style')?.value || 'none'
+                limits: Array.from(selectedLimits)
             };
 
             const container = document.getElementById('preview-card-container');
@@ -718,31 +610,40 @@
             const btn = document.getElementById('confirm-publish-btn');
             if(!btn) return;
             const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Создание карточки...';
+            btn.innerHTML = '⏳ Отправка в канал...';
             btn.disabled = true;
             
             const errorMsg = document.getElementById('error-message');
             if(errorMsg) errorMsg.textContent = '';
 
+            // СЕКРЕТ 100% УСПЕШНОГО РЕНДЕРА: 
+            // Жестко задаем ширину (420px), фон и выносим далеко за край экрана (right: -200vw).
+            // Включаем базовые шрифты (Arial), чтобы html2canvas никогда не ошибался в высотах.
             const offscreen = document.createElement('div');
-            offscreen.style.position = 'absolute';
-            offscreen.style.left = '-9999px';
+            offscreen.style.position = 'fixed';
+            offscreen.style.right = '-200vw';
             offscreen.style.top = '0';
-            offscreen.style.width = '450px'; 
-            offscreen.style.background = '#fdfbf7'; 
-            offscreen.style.padding = '0'; 
+            offscreen.style.width = '420px'; 
+            offscreen.style.padding = '20px';
+            offscreen.style.backgroundColor = '#fdfbf7'; 
             document.body.appendChild(offscreen);
 
             const tempId = 'capture_' + pendingProfile.id;
             const tempProfile = { ...pendingProfile, id: tempId };
             
+            // Генерируем жесткий табличный/блочный HTML
             offscreen.innerHTML = createCardHTML(tempProfile, true); 
             
             await new Promise(r => setTimeout(r, 600));
 
             let base64Image = null;
             try {
-                const canvas = await html2canvas(offscreen, { scale: 2, useCORS: true, backgroundColor: '#fdfbf7' });
+                const canvas = await html2canvas(offscreen.firstElementChild, { 
+                    scale: 2, 
+                    useCORS: true, 
+                    backgroundColor: '#fdfbf7', // Обязательный белый/светлый фон для JPEG
+                    logging: false
+                });
                 base64Image = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
             } catch(err) { console.error("Ошибка html2canvas:", err); }
             
@@ -754,16 +655,15 @@
 
             const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwZBP4gVVwSLpfio8yoUPPal6mxlFr_vlITntlMGz2O6LEq0lrjqRlQeRNUncL58dXI/exec'; 
             
+            let responseText = "";
             try {
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({
                         tgId: pendingProfile.id,
                         tgUsername: pendingProfile.username,
                         role: pendingProfile.role,
-                        title: pendingProfile.title || 'Не указано',
                         prefs: pendingProfile.prefs.join(', '),
                         limits: pendingProfile.limits.join(', '),
                         tags: generatedTags,
@@ -774,237 +674,192 @@
                     })
                 });
 
+                responseText = await response.text();
+                
+                let result = {};
+                try {
+                    result = JSON.parse(responseText);
+                } catch(e) {
+                    if (responseText.trim().toLowerCase() === "success") {
+                        result = { status: 'success', message: 'Анкета успешно размещена в Клубе!' };
+                    } else {
+                        throw new Error(responseText);
+                    }
+                }
+                
+                if (result.status === 'error') {
+                    if(errorMsg) errorMsg.innerText = result.message;
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    return; 
+                }
+
                 mockProfiles = mockProfiles.filter(p => p.id !== tgUserId);
                 mockProfiles.unshift(pendingProfile);
 
                 if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                alert("Анкета успешно отправлена в Клуб!");
+                alert(result.message || "Анкета успешно размещена в Клубе!");
                 
                 closePreview();
                 switchTab('feed');
 
             } catch(err) { 
-                console.error('Ошибка сервера:', err); 
-                if(errorMsg) errorMsg.innerText = "Сбой при отправке. Проверьте интернет.";
+                console.error('Ошибка сервера:', err, 'Сырой ответ сервера:', responseText); 
+                if(errorMsg) {
+                    if (responseText.includes('<html')) {
+                        errorMsg.innerText = "Сбой Google Script. Убедитесь, что скрипт развернут 'У всех (Anyone)'.";
+                    } else if (responseText && !responseText.toLowerCase().includes('success')) {
+                        errorMsg.innerText = "Ошибка сервера: " + responseText.substring(0, 40) + "...";
+                    } else {
+                        errorMsg.innerText = "Сбой сети. Сервер недоступен или блокирует запрос (CORS).";
+                    }
+                }
             }
 
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
 
-        // --- ВЕРСТКА КАРТОЧКИ (ДОСЬЕ / СТРОГИЙ МИНИМАЛИЗМ) ---
+        // --- ВЕРСТКА КАРТОЧКИ (ДОСЬЕ / HERO ФОРМАТ) ---
         function createCardHTML(profile, isCapture = false) {
             const isDom = profile.role === 'dominant';
-            const colorClass = isDom ? 'text-orange-600' : 'text-sky-600';
-            const colorHex = isDom ? '#ea580c' : '#0284c7';
-            const roleText = isDom ? 'ВЕРХНИЙ' : 'НИЖНИЙ';
+            const roleHex = isDom ? '#ea580c' : '#0284c7';
+            const roleText = isDom ? '👑 ВЕРХНИЙ' : '🧎 НИЖНИЙ';
             const tierClass = `card-${profile.tier || 'base'}`;
             const tierStyles = getTierStyles(profile.tier);
-            
-            let cBorderCss = profile.cardBorder !== 'default' ? `border-color: ${profile.cardBorder} !important;` : '';
-            let pBorderCss = profile.photoBorder !== 'default' ? `border-color: ${profile.photoBorder} !important;` : `border-color: ${tierStyles.borderMuted};`;
-
-            // --- Генерация летающих пузырьков ---
-            let bubblesHtml = '';
-            if (profile.interests && profile.interests.length > 0) {
-                const bubbleStyle = profile.bubbleStyle || 'none';
-                
-                const bPositions = isCapture 
-                ? [
-                    { top: '-2px', left: '-2px', size: '20px', rot: '-15deg' },
-                    { top: '15px', right: '-5px', size: '16px', rot: '10deg' },
-                    { bottom: '15px', left: '-5px', size: '22px', rot: '-20deg' },
-                    { bottom: '-2px', right: '5px', size: '14px', rot: '15deg' },
-                    { top: '-5px', left: '40px', size: '18px', rot: '5deg' }
-                ] 
-                : [
-                    { top: '-2%', left: '0%', size: '20px', rot: '-15deg' },
-                    { top: '15%', right: '-2%', size: '16px', rot: '10deg' },
-                    { bottom: '15%', left: '-2%', size: '22px', rot: '-20deg' },
-                    { bottom: '-2%', right: '10%', size: '14px', rot: '15deg' },
-                    { top: '-5%', left: '45%', size: '18px', rot: '5deg' }
-                ];
-
-                profile.interests.forEach((interestName, idx) => {
-                    if (idx >= 5) return;
-                    const interestObj = interestsDatabase.find(i => i.name === interestName);
-                    if (!interestObj) return;
-                    
-                    const pos = bPositions[idx];
-                    let styleCss = `position: absolute; top: ${pos.top}; ${pos.left ? `left: ${pos.left};` : `right: ${pos.right};`} width: ${pos.size}; height: ${pos.size}; transform: rotate(${pos.rot}); display: flex; align-items: center; justify-content: center; font-size: calc(${pos.size} * 0.55); z-index: 20; border-radius: 50%;`;
-                    
-                    if (bubbleStyle === 'white') styleCss += ' background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2);';
-                    else if (bubbleStyle === 'black') styleCss += ' background: #1c1917; box-shadow: 0 2px 5px rgba(0,0,0,0.4); text-shadow: 0 0 2px rgba(255,255,255,0.5);';
-                    else if (bubbleStyle === 'accent') styleCss += ` background: ${colorHex}; box-shadow: 0 2px 5px rgba(0,0,0,0.3);`;
-                    else styleCss += ' background: transparent; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));';
-
-                    bubblesHtml += `<div style="${styleCss}">${interestObj.emoji}</div>`;
-                });
-            }
 
             // ====================================================================================================
-            // РЕЖИМ ГЕНЕРАЦИИ ДЛЯ TELEGRAM (СТРОГИЙ ДОСЬЕ-ФОРМАТ БЕЗ БАГОВЫХ ТЕГОВ)
+            // РЕЖИМ ГЕНЕРАЦИИ ДЛЯ TELEGRAM (СТРОГИЙ БЛОЧНЫЙ HTML - НИКАКИХ ИСКАЖЕНИЙ)
             // ====================================================================================================
             if (isCapture) {
-                let avatarContentCapture = profile.avatarUrl 
-                    ? `<div style="width: 100%; height: 100%; background-image: url('${profile.avatarUrl}'); background-size: cover; background-position: center; border-radius: 50%;"></div>` 
-                    : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.05); border-radius: 50%;"><span style="font-size: 40px;">${profile.gender === 'М' ? '🧔' : '👩'}</span></div>`;
-
                 const prefsText = (profile.prefs || []).length > 0 ? (profile.prefs || []).join(' • ') : 'Не указано';
                 const limitsText = (profile.limits || []).length > 0 ? (profile.limits || []).join(' • ') : 'Не указано';
+                
+                // Hero Image Banner
+                let heroBanner = profile.avatarUrl 
+                    ? `<div style="width: 100%; height: 320px; background-image: url('${profile.avatarUrl}'); background-size: cover; background-position: center; position: relative; border-bottom: 2px solid ${tierStyles.borderMuted};">` 
+                    : `<div style="width: 100%; height: 280px; background-color: #e5e5e5; display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 2px solid ${tierStyles.borderMuted};"><span style="font-size: 80px;">${profile.gender === 'М' ? '🧔' : '👩'}</span>`;
+
+                // Role Badge floating on image
+                const roleBadge = `<div style="position: absolute; bottom: 16px; right: 16px; background-color: rgba(0,0,0,0.75); color: #fff; padding: 8px 16px; border-radius: 30px; font-size: 13px; font-weight: 900; letter-spacing: 1px; font-family: Arial, sans-serif; border: 1px solid rgba(255,255,255,0.2);">${roleText}</div></div>`;
 
                 return `
-                <div style="width: 450px; padding: 36px; box-sizing: border-box; ${tierStyles.bg}; ${cBorderCss} border-radius: 20px; font-family: Arial, sans-serif;">
+                <div style="width: 420px; background: ${tierStyles.bg}; border: ${tierStyles.border}; box-sizing: border-box; border-radius: 24px; overflow: hidden; font-family: Arial, sans-serif; color: ${tierStyles.textColor};">
                     
-                    <!-- Шапка (Аватар + Инфо) -->
-                    <div style="display: flex; align-items: center; margin-bottom: 28px;">
-                        <div style="position: relative; width: 84px; height: 84px; flex-shrink: 0; margin-right: 20px;">
-                            <div style="width: 100%; height: 100%; border-radius: 50%; border: 4px solid transparent; ${pBorderCss} display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); overflow: hidden; background-color: #fff;">
-                                ${avatarContentCapture}
+                    <!-- HERO БАННЕР -->
+                    ${heroBanner}
+                    ${roleBadge}
+
+                    <!-- ИНФОРМАЦИОННАЯ ЗОНА -->
+                    <div style="padding: 24px 28px;">
+                        
+                        <!-- Заголовок -->
+                        <div style="margin-bottom: 24px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: 900; line-height: 1.1; margin-bottom: 4px; color: ${tierStyles.titleColor}; text-transform: uppercase; letter-spacing: -0.5px;">${profile.name}, ${profile.age}</div>
+                            <div style="font-size: 16px; opacity: 0.7; font-weight: bold;">📍 ${profile.city}</div>
+                        </div>
+
+                        <!-- Раздельные блоки "О себе" и "Ищу" -->
+                        <div style="margin-bottom: 20px;">
+                            <div style="background-color: rgba(0,0,0,0.03); border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid ${tierStyles.borderMuted};">
+                                <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin-bottom: 6px;">О себе</div>
+                                <div style="font-size: 15px; line-height: 1.4; font-style: italic;">"${profile.desc}"</div>
                             </div>
-                            ${bubblesHtml}
+                            
+                            <div style="background-color: rgba(0,0,0,0.03); border-radius: 12px; padding: 16px; border: 1px solid ${tierStyles.borderMuted};">
+                                <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin-bottom: 6px;">Ищу</div>
+                                <div style="font-size: 15px; line-height: 1.4;">${profile.lookingFor || 'Не указано'}</div>
+                            </div>
                         </div>
-                        <div style="flex-grow: 1;">
-                            <div style="font-size: 28px; font-weight: 800; color: ${tierStyles.titleColor}; line-height: 1.1; margin-bottom: 6px;">${profile.name}, ${profile.age}</div>
-                            <div style="font-size: 15px; color: ${tierStyles.textColor}; opacity: 0.7; margin-bottom: 8px;">📍 ${profile.city}</div>
-                            <div style="color: ${colorHex}; font-size: 12px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">✦ ${roleText} ✦</div>
+
+                        <!-- Предпочтения (Минималистичные списки) -->
+                        <div style="margin-bottom: 16px; border-left: 3px solid #10b981; padding-left: 12px;">
+                            <div style="font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #10b981; margin-bottom: 4px;">✓ Нравится</div>
+                            <div style="font-size: 15px; font-weight: bold; line-height: 1.4;">${prefsText}</div>
                         </div>
-                    </div>
 
-                    <!-- Предпочтения (Простой текст) -->
-                    <div style="margin-bottom: 16px;">
-                        <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: ${tierStyles.textColor}; opacity: 0.5; margin-bottom: 4px;">Предпочтения</div>
-                        <div style="font-size: 14px; font-weight: bold; color: #059669; line-height: 1.4;">${prefsText}</div>
-                    </div>
+                        <div style="margin-bottom: 28px; border-left: 3px solid #ef4444; padding-left: 12px;">
+                            <div style="font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #ef4444; margin-bottom: 4px;">✕ Табу</div>
+                            <div style="font-size: 15px; font-weight: bold; line-height: 1.4;">${limitsText}</div>
+                        </div>
 
-                    <!-- Табу (Простой текст) -->
-                    <div style="margin-bottom: 26px;">
-                        <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: ${tierStyles.textColor}; opacity: 0.5; margin-bottom: 4px;">Табу и неприязнь</div>
-                        <div style="font-size: 14px; font-weight: bold; color: #dc2626; line-height: 1.4;">${limitsText}</div>
-                    </div>
-
-                    <!-- О себе -->
-                    <div style="margin-bottom: 18px;">
-                        <div style="font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: ${tierStyles.textColor}; opacity: 0.5; margin-bottom: 4px;">О себе</div>
-                        <div style="font-size: 15px; font-style: italic; color: ${tierStyles.textColor}; border-left: 3px solid ${tierStyles.borderMuted}; padding-left: 12px; opacity: 0.9; line-height: 1.4; word-wrap: break-word;">"${profile.desc}"</div>
-                    </div>
-
-                    <!-- Ищу -->
-                    <div style="margin-bottom: 30px;">
-                        <div style="font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: ${tierStyles.textColor}; opacity: 0.5; margin-bottom: 4px;">Ищу</div>
-                        <div style="font-size: 15px; color: ${tierStyles.textColor}; border-left: 3px solid ${tierStyles.borderMuted}; padding-left: 12px; opacity: 0.9; line-height: 1.4; word-wrap: break-word;">${profile.lookingFor || 'Не указано'}</div>
-                    </div>
-
-                    <!-- Подвал -->
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid ${tierStyles.borderMuted}; padding-top: 24px;">
-                        <img src="logo.png" style="height: 50px; width: auto;" onerror="this.outerHTML='<span style=\\'font-size:24px; font-weight:900; letter-spacing:1px; color:${tierStyles.titleColor};\\'>BDSM-ka</span>'">
-                        <img src="qr_tg.png" style="width: 80px; height: 80px; border-radius: 12px; border: 1px solid #ccc; padding: 4px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" onerror="this.style.display='none'">
+                        <!-- Подвал (Логотип и QR) -->
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid ${tierStyles.borderMuted}; padding-top: 24px;">
+                            <img src="logo.png" style="height: 50px; width: auto;" onerror="this.outerHTML='<span style=\\'font-size:24px; font-weight:900; letter-spacing:1px; color:${tierStyles.titleColor};\\'>BDSM-ka</span>'">
+                            <img src="qr_tg.png" style="width: 80px; height: 80px; border-radius: 12px; border: 1px solid #ccc; padding: 4px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" onerror="this.style.display='none'">
+                        </div>
                     </div>
                 </div>
                 `;
             }
 
             // ====================================================================================================
-            // РЕЖИМ ДЛЯ ПРИЛОЖЕНИЯ В TELEGRAM (ГИБКАЯ, СОВРЕМЕННАЯ ВЕРСТКА)
+            // РЕЖИМ ДЛЯ ПРИЛОЖЕНИЯ В TELEGRAM (TAILWIND)
             // ====================================================================================================
-            let avatarContentFeed = profile.avatarUrl 
-                ? `<img src="${profile.avatarUrl}" class="w-full h-full object-cover">` 
-                : `<div class="w-full h-full flex items-center justify-center bg-black/5"><span class="text-3xl">${profile.gender === 'М' ? '🧔' : '👩'}</span></div>`;
-
-            // Minimalist text lists instead of tags
-            const prefsStrApp = (profile.prefs || []).map(p => p === 'Готов платить дань' ? `<span class="text-amber-500">${p}</span>` : p).join(' <span class="opacity-50 mx-1">•</span> ');
-            const limitsStrApp = (profile.limits || []).join(' <span class="opacity-50 mx-1">•</span> ');
+            const prefsStrApp = (profile.prefs || []).join(' <span class="opacity-30 mx-1">•</span> ');
+            const limitsStrApp = (profile.limits || []).join(' <span class="opacity-30 mx-1">•</span> ');
+            
+            let heroImageApp = profile.avatarUrl 
+                ? `<div class="w-full h-64 bg-cover bg-center rounded-t-2xl relative" style="background-image: url('${profile.avatarUrl}')">` 
+                : `<div class="w-full h-64 bg-slate-200 flex items-center justify-center rounded-t-2xl relative"><span class="text-6xl">${profile.gender === 'М' ? '🧔' : '👩'}</span>`;
+            
+            const roleBadgeApp = `<div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur text-white px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border border-white/20">${roleText}</div></div>`;
 
             return `
-            <div class="${tierClass} rounded-2xl p-6 flex flex-col shadow-card transition-all relative overflow-hidden" data-role="${profile.role}" style="${cBorderCss}">
+            <div class="${tierClass} rounded-2xl flex flex-col shadow-card transition-all relative" data-role="${profile.role}">
                 
-                <div class="flex items-center gap-5 mb-6 w-full relative z-10">
-                    <div class="w-20 h-20 shrink-0 relative">
-                        <div class="w-full h-full border-4 shadow-md rounded-full overflow-hidden bg-white" style="${pBorderCss}">
-                            ${avatarContentFeed}
+                ${heroImageApp}
+                ${roleBadgeApp}
+
+                <div class="p-6">
+                    <div class="text-center mb-6">
+                        <h3 class="font-black text-2xl uppercase tracking-tight mb-1 text-inherit">${profile.name}, ${profile.age}</h3>
+                        <p class="text-sm opacity-70 font-bold">📍 ${profile.city}</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-3 mb-6">
+                        <div class="bg-black/5 p-4 rounded-xl border border-black/5">
+                            <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold block mb-1">О себе</span>
+                            <p class="text-sm italic leading-relaxed opacity-90">"${profile.desc}"</p>
                         </div>
-                        ${bubblesHtml}
+                        <div class="bg-black/5 p-4 rounded-xl border border-black/5">
+                            <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold block mb-1">Ищу</span>
+                            <p class="text-sm leading-relaxed opacity-90">${profile.lookingFor || 'Не указано'}</p>
+                        </div>
                     </div>
-                    <div class="flex-1 min-w-0 flex flex-col justify-center">
-                        <h3 class="font-bold text-xl leading-tight mb-1 truncate w-full">${profile.name}, ${profile.age}</h3>
-                        <p class="text-sm opacity-70 flex items-center gap-1 truncate w-full"><span>📍</span> ${profile.city}</p>
-                        <div class="${colorClass} text-xs font-black uppercase tracking-[0.15em] mt-1.5">✦ ${roleText} ✦</div>
-                    </div>
-                </div>
 
-                <div class="relative z-10 mb-4">
-                    <div class="text-[9px] font-bold uppercase tracking-widest opacity-50 mb-1">Предпочтения</div>
-                    <div class="text-sm font-bold text-emerald-600 leading-snug">${prefsStrApp || 'Не указано'}</div>
-                </div>
-                
-                <div class="relative z-10 mb-6">
-                    <div class="text-[9px] font-bold uppercase tracking-widest opacity-50 mb-1">Табу и неприязнь</div>
-                    <div class="text-sm font-bold text-red-600 leading-snug">${limitsStrApp || 'Не указано'}</div>
-                </div>
-                
-                <div class="mt-2 mb-6 relative z-10 flex-grow">
-                    <div class="mb-4">
-                        <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold block mb-1">О себе</span>
-                        <p class="text-sm italic leading-relaxed border-l-2 pl-3 opacity-90 border-black/20" style="border-color: ${tierStyles.borderMuted}">"${profile.desc}"</p>
+                    <div class="mb-4 border-l-2 border-emerald-500 pl-3">
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-1">✓ Нравится</div>
+                        <div class="text-sm font-bold leading-snug">${prefsStrApp || 'Не указано'}</div>
                     </div>
-                    <div>
-                        <span class="text-[10px] uppercase tracking-widest opacity-50 font-bold block mb-1">Ищу</span>
-                        <p class="text-sm leading-relaxed border-l-2 pl-3 opacity-90 border-black/20" style="border-color: ${tierStyles.borderMuted}">${profile.lookingFor || 'Не указано'}</p>
+                    
+                    <div class="mb-6 border-l-2 border-red-500 pl-3">
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-red-600 mb-1">✕ Табу</div>
+                        <div class="text-sm font-bold leading-snug">${limitsStrApp || 'Не указано'}</div>
                     </div>
+                    
+                    <button onclick="openContactModal('${profile.username}')" class="w-full mt-2 py-4 rounded-xl ${isDom ? 'bg-orange-600 hover:bg-orange-700' : 'bg-sky-600 hover:bg-sky-700'} text-white text-sm font-bold transition-colors shadow-md flex justify-center items-center gap-2 border-0">
+                        💬 Написать Владельцу
+                    </button>
                 </div>
-
-                <div class="mt-auto pt-4 border-t flex justify-between items-end opacity-90 relative z-10" style="border-color: ${tierStyles.borderMuted}">
-                    <img src="logo.png" alt="BDSM-ka" class="h-16 w-auto object-contain flex-shrink-0" onerror="this.outerHTML='<span class=\\'text-2xl font-black uppercase tracking-widest\\' style=\\'color:${tierStyles.titleColor}\\'>BDSM-ka</span>'">
-                    <img src="qr_tg.png" alt="QR" class="w-16 h-16 rounded-xl bg-white p-1 shadow-md border flex-shrink-0" style="border-color: ${tierStyles.borderMuted}" onerror="this.style.display='none'">
-                </div>
-                
-                <button onclick="openContactModal('${profile.username}')" class="w-full mt-5 py-3.5 rounded-xl ${isDom ? 'bg-orange-600 hover:bg-orange-700' : 'bg-sky-600 hover:bg-sky-700'} text-white text-sm font-bold transition-colors shadow-md flex justify-center items-center gap-2 relative z-10 border-0">
-                    💬 Написать Владельцу
-                </button>
             </div>
             `;
         }
 
+        // --- Вспомогательная функция для стилей карточки в Capture ---
         function getTierStyles(tier) {
-            let bg = "background: #ffffff; border: 2px solid #e7e5e4; color: #292524;";
-            let textMuted = "rgba(0,0,0,0.5)";
-            let borderMuted = "rgba(0,0,0,0.1)";
-            let titleColor = "inherit";
-            let textColor = "#292524";
+            let bg = "#ffffff"; let border = "1px solid #e7e5e4"; let titleColor = "#111111"; let textColor = "#292524"; let borderMuted = "rgba(0,0,0,0.1)";
 
-            if(tier === 'sub-free') { 
-                bg = "background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 2px solid #bae6fd; color: #0c4a6e;"; 
-                titleColor = "#0284c7"; textColor = "#0c4a6e";
-            }
-            else if(tier === 'dom-free') { 
-                bg = "background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); border: 2px solid #fed7aa; color: #7c2d12;"; 
-                titleColor = "#ea580c"; textColor = "#7c2d12";
-            }
-            else if(tier === 'gold') { 
-                bg = "background: linear-gradient(135deg, #fffbeb 0%, #fef08a 30%, #eab308 50%, #fef08a 70%, #fffbeb 100%); border: 3px solid #ca8a04; color: #422006;"; 
-                textMuted = "rgba(66, 32, 6, 0.6)"; borderMuted = "rgba(202, 138, 4, 0.3)"; titleColor = "#854d0e"; textColor = "#422006";
-            }
-            else if(tier === 'silver') { 
-                bg = "background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 50%, #94a3b8 100%); border: 3px solid #64748b; color: #0f172a;"; 
-                textColor = "#0f172a";
-            }
-            else if(tier === 'metal') { 
-                bg = "background: linear-gradient(145deg, #334155 0%, #1e293b 50%, #0f172a 100%); border: 3px solid #64748b; color: #f8fafc;"; 
-                textMuted = "rgba(255,255,255,0.6)"; borderMuted = "rgba(255,255,255,0.15)"; titleColor = "#e2e8f0"; textColor = "#f8fafc";
-            }
-            else if(tier === 'latex') { 
-                bg = "background-color: #0a0a0a; background-image: linear-gradient(115deg, rgba(255,255,255,0.2) 0%, transparent 8%, transparent 40%, rgba(255,255,255,0.08) 45%, transparent 50%), linear-gradient(15deg, rgba(255,255,255,0.05) 0%, transparent 10%, transparent 80%, rgba(255,255,255,0.1) 85%, transparent 100%), radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 40%); border: 3px solid #333333; color: #f8fafc;"; 
-                textMuted = "rgba(255,255,255,0.5)"; borderMuted = "rgba(255,255,255,0.15)"; titleColor = "#ffffff"; textColor = "#f8fafc";
-            }
-            else if(tier === 'leather') { 
-                bg = "background: #271204; border: 4px dashed #78350f; color: #ffedd5;"; 
-                textMuted = "rgba(255, 237, 213, 0.6)"; borderMuted = "rgba(120, 53, 15, 0.5)"; titleColor = "#fdba74"; textColor = "#ffedd5";
-            }
-            else if(tier === 'ceramic') { 
-                bg = "background-color: #faf9f6; background-image: linear-gradient(115deg, transparent 30%, rgba(0,0,0,0.6) 31%, transparent 32%), linear-gradient(-45deg, transparent 60%, rgba(0,0,0,0.5) 60.5%, transparent 61.5%), linear-gradient(85deg, transparent 15%, rgba(0,0,0,0.4) 15.5%, transparent 16%), radial-gradient(circle at 30% 30%, #ffffff 0%, transparent 60%); border: 3px solid #d4af37; color: #1c1917;"; 
-                textMuted = "rgba(28, 25, 23, 0.6)"; borderMuted = "rgba(212, 175, 55, 0.3)"; titleColor = "#854d0e"; textColor = "#1c1917";
-            }
-            return { bg, textMuted, borderMuted, titleColor, textColor };
+            if(tier === 'sub-free') { bg = "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)"; border = "1px solid #bae6fd"; titleColor = "#0284c7"; textColor = "#0c4a6e"; borderMuted = "rgba(2, 132, 199, 0.2)"; }
+            else if(tier === 'dom-free') { bg = "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)"; border = "1px solid #fed7aa"; titleColor = "#ea580c"; textColor = "#7c2d12"; borderMuted = "rgba(234, 88, 12, 0.2)"; }
+            else if(tier === 'gold') { bg = "linear-gradient(135deg, #fffbeb 0%, #fef08a 30%, #eab308 50%, #fef08a 70%, #fffbeb 100%)"; border = "2px solid #ca8a04"; titleColor = "#854d0e"; textColor = "#422006"; borderMuted = "rgba(202, 138, 4, 0.3)"; }
+            else if(tier === 'silver') { bg = "linear-gradient(135deg, #f8fafc 0%, #cbd5e1 50%, #94a3b8 100%)"; border = "2px solid #64748b"; textColor = "#0f172a"; borderMuted = "rgba(100, 116, 139, 0.3)"; }
+            else if(tier === 'metal') { bg = "repeating-linear-gradient(45deg, #94a3b8, #94a3b8 5px, #64748b 5px, #64748b 10px)"; border = "2px solid #334155"; titleColor = "#000"; textColor = "#000"; borderMuted = "rgba(0,0,0,0.2)"; }
+            else if(tier === 'latex') { bg = "#0a0a0a"; border = "2px solid #171717"; titleColor = "#ffffff"; textColor = "#f8fafc"; borderMuted = "rgba(255,255,255,0.15)"; }
+            else if(tier === 'leather') { bg = "#271204"; border = "2px dashed #78350f"; titleColor = "#fdba74"; textColor = "#ffedd5"; borderMuted = "rgba(120, 53, 15, 0.5)"; }
+            else if(tier === 'ceramic') { bg = "#faf9f6"; border = "2px solid #d4af37"; titleColor = "#854d0e"; textColor = "#1c1917"; borderMuted = "rgba(212, 175, 55, 0.3)"; }
+            
+            return { bg, border, titleColor, textColor, borderMuted };
         }
 
         function renderProfiles(profilesToRender) {
