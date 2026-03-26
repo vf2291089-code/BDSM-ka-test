@@ -29,7 +29,7 @@
         }
     </script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #fdfbf7; color: #292524; overflow-x: hidden; }
+        body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #fdfbf7; color: #292524; overflow-x: hidden; }
         
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
@@ -121,7 +121,28 @@
         .tag-interest-active { background-color: #3b82f6 !important; border-color: #2563eb !important; color: white !important; }
         .tag-disabled { opacity: 0.25; pointer-events: none; filter: grayscale(100%); }
 
-        .tag-badge { display: inline-flex; align-items: center; justify-content: center; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; text-align: center; }
+        /* Безопасные стили для тегов и бейджей (используют inline-flex для идеального центра) */
+        .tag-badge { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 4px 10px; 
+            border-radius: 6px; 
+            font-size: 11px; 
+            font-weight: 700; 
+            text-align: center; 
+        }
+        .role-badge { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 4px 12px; 
+            border-radius: 9999px; 
+            font-size: 10px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+        }
         .tag-gold-special { background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 1px solid #ca8a04; box-shadow: 0 1px 3px rgba(234,179,8,0.4); }
     </style>
 </head>
@@ -145,7 +166,12 @@
         <!-- VIEW: DATING FEED -->
         <div id="view-feed" class="tab-content fade-in block">
             <div class="mb-8">
-                <h1 class="text-3xl font-bold text-stone-800 mb-3">Сообщество</h1>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
+                    <h1 class="text-3xl font-bold text-stone-800">Сообщество</h1>
+                    <button onclick="openExternalLink('https://t.me/BDSMka_club')" class="inline-flex items-center justify-center gap-2 bg-sky-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-sky-600 transition-all shadow-md shrink-0">
+                        <span class="text-lg">✈️</span> Канал с анкетами
+                    </button>
+                </div>
                 <p class="text-base text-stone-600 max-w-3xl mb-6">
                     Изучите анкеты участников. Зеленые теги — предпочтения, красные — табу. Летающие смайлы — интересы.
                 </p>
@@ -169,7 +195,6 @@
                     Заполните данные. <b>При публикации новой анкеты, ваша предыдущая анкета в канале будет автоматически удалена.</b>
                 </p>
 
-                <!-- Обратите внимание: убран onsubmit, чтобы избежать конфликтов с мобильным Telegram WebApp -->
                 <form id="profile-form" class="space-y-8">
                     
                     <div class="space-y-5">
@@ -724,13 +749,17 @@
             const errorMsg = document.getElementById('error-message');
             if(errorMsg) errorMsg.textContent = '';
 
+            // СЕКРЕТ ИСПРАВЛЕНИЯ СПЛЮЩИВАНИЯ:
+            // Жестко задаем ширину (420px), фон и выносим за край экрана (right: -200vw),
+            // Включаем безопасные системные шрифты, чтобы библиотека не сбросила метрики текста!
             const offscreen = document.createElement('div');
-            offscreen.style.position = 'absolute';
-            offscreen.style.left = '-9999px';
+            offscreen.style.position = 'fixed';
+            offscreen.style.right = '-200vw';
             offscreen.style.top = '0';
-            offscreen.style.width = '400px'; 
-            offscreen.style.background = 'transparent'; 
-            offscreen.style.padding = '0'; 
+            offscreen.style.width = '420px'; 
+            offscreen.style.padding = '20px';
+            offscreen.style.backgroundColor = '#fdfbf7'; 
+            offscreen.style.fontFamily = 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
             document.body.appendChild(offscreen);
 
             const tempId = 'capture_' + pendingProfile.id;
@@ -742,7 +771,13 @@
 
             let base64Image = null;
             try {
-                const canvas = await html2canvas(offscreen, { scale: 2, useCORS: true, backgroundColor: null });
+                // Фотографируем саму карточку внутри сейф-зоны
+                const canvas = await html2canvas(offscreen.firstElementChild, { 
+                    scale: 2, 
+                    useCORS: true, 
+                    backgroundColor: null,
+                    logging: false
+                });
                 base64Image = canvas.toDataURL('image/png', 1.0).split(',')[1];
             } catch(err) { console.error("Ошибка html2canvas:", err); }
             
@@ -809,44 +844,34 @@
             let pBorderCss = profile.photoBorder !== 'default' ? `border-color: ${profile.photoBorder};` : `border-color: ${tierStyles.borderMuted};`;
 
             let avatarContent = profile.avatarUrl 
-                ? `<div style="width: 100%; height: 100%; background-image: url('${profile.avatarUrl}'); background-size: cover; background-position: center; border-radius: 50%;"></div>` 
-                : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.05); border-radius: 50%;"><span style="font-size: 32px;">${profile.gender === 'М' ? '🧔' : '👩'}</span></div>`;
+                ? `<img src="${profile.avatarUrl}" class="w-full h-full object-cover">` 
+                : `<div class="w-full h-full flex items-center justify-center bg-black/5"><span class="text-3xl">${profile.gender === 'М' ? '🧔' : '👩'}</span></div>`;
 
             // --- БЕЙДЖ РОЛИ ---
-            let roleBadgeHtml = '';
-            if (isCapture) {
-                // ИСПРАВЛЕНИЕ ДЛЯ КАРТИНКИ: Уменьшаем рамки бейджа и сужаем
-                if (isDom) {
-                    roleBadgeHtml = `<div style="display: inline-block; padding: 3px 12px 4px 12px; margin-top: 12px; border-radius: 20px; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; font-family: Arial, sans-serif; border: 2px solid #ea580c; color: #ea580c; background: rgba(234, 88, 12, 0.1); box-shadow: 0 0 10px rgba(234, 88, 12, 0.2); vertical-align: middle; box-sizing: border-box; line-height: 1;">👑 Верхний</div>`;
-                } else {
-                    roleBadgeHtml = `<div style="display: inline-block; padding: 3px 12px 4px 12px; margin-top: 12px; border-radius: 20px; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; font-family: Arial, sans-serif; border: 2px solid #0284c7; color: #0284c7; background: rgba(2, 132, 199, 0.1); box-shadow: 0 0 10px rgba(2, 132, 199, 0.2); vertical-align: middle; box-sizing: border-box; line-height: 1;">🧎 Нижний</div>`;
-                }
-            } else {
-                roleBadgeHtml = isDom
-                    ? `<div class="role-badge border border-orange-500/40 bg-orange-500/10 text-orange-600 shadow-sm mt-1">👑 Верхний</div>`
-                    : `<div class="role-badge border border-sky-500/40 bg-sky-500/10 text-sky-600 shadow-sm mt-1">🧎 Нижний</div>`;
-            }
+            const roleBadgeHtml = isDom
+                ? `<div class="role-badge border border-orange-500/40 bg-orange-500/10 text-orange-600 shadow-sm mt-1">👑 Верхний</div>`
+                : `<div class="role-badge border border-sky-500/40 bg-sky-500/10 text-sky-600 shadow-sm mt-1">🧎 Нижний</div>`;
 
-
-            // --- Генерация летающих пузырьков ---
+            // --- Генерация летающих пузырьков (Меньшие размеры) ---
             let bubblesHtml = '';
             if (profile.interests && profile.interests.length > 0) {
                 const bubbleStyle = profile.bubbleStyle || 'none';
                 
+                // Размеры уменьшены, чтобы не перекрывать текст и смотреться аккуратнее
                 const bPositions = isCapture 
                 ? [
-                    { top: '-5px', left: '-5px', size: '28px' },
-                    { top: '15px', right: '-10px', size: '24px' },
-                    { bottom: '15px', left: '-10px', size: '32px' },
-                    { bottom: '-5px', right: '5px', size: '22px' },
-                    { top: '-10px', left: '40px', size: '26px' }
+                    { top: '-2px', left: '-2px', size: '20px', rot: '-15deg' },
+                    { top: '15px', right: '-5px', size: '16px', rot: '10deg' },
+                    { bottom: '15px', left: '-5px', size: '22px', rot: '-20deg' },
+                    { bottom: '-2px', right: '5px', size: '14px', rot: '15deg' },
+                    { top: '-5px', left: '40px', size: '18px', rot: '5deg' }
                 ] 
                 : [
-                    { top: '-5%', left: '0%', size: '22px' },
-                    { top: '15%', right: '-5%', size: '18px' },
-                    { bottom: '15%', left: '-5%', size: '24px' },
-                    { bottom: '-5%', right: '10%', size: '16px' },
-                    { top: '-10%', left: '45%', size: '20px' }
+                    { top: '-2%', left: '0%', size: '20px', rot: '-15deg' },
+                    { top: '15%', right: '-2%', size: '16px', rot: '10deg' },
+                    { bottom: '15%', left: '-2%', size: '22px', rot: '-20deg' },
+                    { bottom: '-2%', right: '10%', size: '14px', rot: '15deg' },
+                    { top: '-5%', left: '45%', size: '18px', rot: '5deg' }
                 ];
 
                 profile.interests.forEach((interestName, idx) => {
@@ -855,7 +880,7 @@
                     if (!interestObj) return;
                     
                     const pos = bPositions[idx];
-                    let styleCss = `position: absolute; top: ${pos.top}; ${pos.left ? `left: ${pos.left};` : `right: ${pos.right};`} width: ${pos.size}; height: ${pos.size}; display: flex; align-items: center; justify-content: center; font-size: calc(${pos.size} * 0.55); z-index: 20; border-radius: 50%;`;
+                    let styleCss = `position: absolute; top: ${pos.top}; ${pos.left ? `left: ${pos.left};` : `right: ${pos.right};`} width: ${pos.size}; height: ${pos.size}; transform: rotate(${pos.rot}); display: flex; align-items: center; justify-content: center; font-size: calc(${pos.size} * 0.55); z-index: 20; border-radius: 50%;`;
                     
                     if (bubbleStyle === 'white') styleCss += ' background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2);';
                     else if (bubbleStyle === 'black') styleCss += ' background: #1c1917; box-shadow: 0 2px 5px rgba(0,0,0,0.4); text-shadow: 0 0 2px rgba(255,255,255,0.5);';
@@ -866,31 +891,13 @@
                 });
             }
 
-            // ТЕГИ (Нравится / Лимиты)
-            let tagsHtml = '';
-            if (isCapture) {
-                // ИСПРАВЛЕНИЕ ДЛЯ КАРТИНКИ: Очень маленькие паддинги, чтобы рамка была "в облипку".
-                // Уменьшен шрифт до 11px, line-height 1.1. Тексту некуда "падать".
-                const baseTagStyle = "display: inline-block; padding: 2px 10px 3px 10px; margin: 0 3px 6px 3px; border-radius: 6px; font-size: 11px; font-weight: bold; line-height: 1.1; font-family: Arial, sans-serif; white-space: nowrap; vertical-align: middle;";
-                
-                const pTags = (profile.prefs || []).map(p => {
-                    if(p === 'Готов платить дань') return `<div style="${baseTagStyle} background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 1px solid #ca8a04; box-shadow: 0 1px 2px rgba(234,179,8,0.3);">✓ ${p}</div>`;
-                    return `<div style="${baseTagStyle} background: #dcfce7; color: #065f46; border: 1px solid #6ee7b7;">✓ ${p}</div>`;
-                }).join('');
-                
-                const lTags = (profile.limits || []).map(l => {
-                    return `<div style="${baseTagStyle} background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;">✕ ${l}</div>`;
-                }).join('');
-
-                tagsHtml = `<div style="text-align: center; margin-bottom: 24px; width: 100%;">${pTags}${lTags}</div>`;
-            } else {
-                const pTags = (profile.prefs || []).map(p => {
-                    if(p === 'Готов платить дань') return `<span class="tag-badge tag-gold-special mr-1 mb-1">✓ ${p}</span>`;
-                    return `<span class="tag-badge bg-emerald-100 text-emerald-800 border border-emerald-300 mr-1 mb-1">✓ ${p}</span>`;
-                }).join('');
-                const lTags = (profile.limits || []).map(l => `<span class="tag-badge bg-red-100 text-red-800 border border-red-300 mr-1 mb-1">✕ ${l}</span>`).join('');
-                tagsHtml = `<div class="mb-4 flex flex-wrap w-full">${pTags}${lTags}</div>`;
-            }
+            // --- ТЕГИ ---
+            const pTags = (profile.prefs || []).map(p => {
+                if(p === 'Готов платить дань') return `<span class="tag-badge tag-gold-special mr-1 mb-1">✓ ${p}</span>`;
+                return `<span class="tag-badge bg-emerald-100 text-emerald-800 border border-emerald-300 mr-1 mb-1">✓ ${p}</span>`;
+            }).join('');
+            const lTags = (profile.limits || []).map(l => `<span class="tag-badge bg-red-100 text-red-800 border border-red-300 mr-1 mb-1">✕ ${l}</span>`).join('');
+            const tagsHtml = `<div class="mb-4 flex flex-wrap w-full">${pTags}${lTags}</div>`;
 
             let contactButtonHtml = isCapture ? '' : `
                 <button onclick="openContactModal('${profile.username}')" class="w-full mt-5 py-3.5 rounded-xl ${isDom ? 'bg-orange-600 hover:bg-orange-700' : 'bg-sky-600 hover:bg-sky-700'} text-white text-sm font-bold transition-colors shadow-md flex justify-center items-center gap-2 relative z-10 border-0">
@@ -898,45 +905,16 @@
                 </button>
             `;
 
-            if (isCapture) {
-                return `
-                <div style="width: 420px; padding: 30px; box-sizing: border-box; ${tierStyles.bg}; ${cBorderCss} border-radius: 20px;">
-                    <div style="display: flex; align-items: center; margin-bottom: 24px;">
-                        <div style="position: relative; width: 90px; height: 90px; flex-shrink: 0; margin-right: 20px;">
-                            <div style="width: 100%; height: 100%; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 4px solid transparent; ${pBorderCss} background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                                ${profile.avatarUrl ? `<img src="${profile.avatarUrl}" style="width: 100%; height: 100%; object-fit: cover;">` : `<span style="font-size:40px;">${profile.gender === 'М' ? '🧔' : '👩'}</span>`}
-                            </div>
-                            ${bubblesHtml}
-                        </div>
-                        <div style="flex-grow: 1;">
-                            <div style="font-size: 28px; font-weight: bold; color: ${tierStyles.titleColor}; margin-bottom: 6px; font-family: Arial, Helvetica, sans-serif; word-wrap: break-word;">${profile.name}, ${profile.age}</div>
-                            <div style="font-size: 16px; color: ${tierStyles.textColor}; opacity: 0.8; margin-bottom: 8px; font-family: Arial, Helvetica, sans-serif;">📍 ${profile.city}</div>
-                            ${roleBadgeHtml}
-                        </div>
-                    </div>
-
-                    ${tagsHtml}
-
-                    <div style="margin-bottom: 20px;">
-                        <div style="font-size: 12px; font-weight: bold; text-transform: uppercase; color: ${tierStyles.textColor}; opacity: 0.6; margin-bottom: 6px; font-family: Arial, Helvetica, sans-serif; letter-spacing: 1px;">О себе</div>
-                        <div style="font-size: 16px; font-style: italic; color: ${tierStyles.textColor}; border-left: 3px solid ${tierStyles.borderMuted}; padding-left: 14px; opacity: 0.95; font-family: Arial, Helvetica, sans-serif; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4;">"${profile.desc}"</div>
-                    </div>
-                    
-                    <div style="margin-bottom: 30px;">
-                        <div style="font-size: 12px; font-weight: bold; text-transform: uppercase; color: ${tierStyles.textColor}; opacity: 0.6; margin-bottom: 6px; font-family: Arial, Helvetica, sans-serif; letter-spacing: 1px;">Ищу</div>
-                        <div style="font-size: 16px; color: ${tierStyles.textColor}; border-left: 3px solid ${tierStyles.borderMuted}; padding-left: 14px; opacity: 0.95; font-family: Arial, Helvetica, sans-serif; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4;">${profile.lookingFor || 'Не указано'}</div>
-                    </div>
-
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid ${tierStyles.borderMuted}; padding-top: 24px;">
-                        <img src="logo.png" style="height: 60px; width: auto;" onerror="this.outerHTML='<span style=\\'font-size:24px; font-weight:bold; color:${tierStyles.titleColor}; font-family: Arial, Helvetica, sans-serif;\\'>BDSM-ka</span>'">
-                        <img src="qr_tg.png" style="width: 80px; height: 80px; border-radius: 12px; border: 1px solid #ccc; padding: 4px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" onerror="this.style.display='none'">
-                    </div>
+            let footerBrandingHTML = isCapture ? `
+                <div class="mt-4 pt-4 border-t flex justify-between items-end opacity-90 relative z-10" style="border-color: ${tierStyles.borderMuted}">
+                    <img src="logo.png" alt="BDSM-ka" class="h-16 w-auto object-contain flex-shrink-0" onerror="this.outerHTML='<span class=\\'text-2xl font-black uppercase tracking-widest\\' style=\\'color:${tierStyles.titleColor}\\'>BDSM-ka</span>'">
+                    <img src="qr_tg.png" alt="QR" class="w-16 h-16 rounded-xl bg-white p-1 shadow-md border flex-shrink-0" style="border-color: ${tierStyles.borderMuted}" onerror="this.style.display='none'">
                 </div>
-                `;
-            }
+            ` : '';
 
+            // Для картинки мы фиксируем ширину w-[420px], чтобы её не сплющило
             return `
-            <div class="${tierClass} rounded-2xl p-6 flex flex-col shadow-card transition-all relative overflow-hidden" data-role="${profile.role}" style="${cBorderCss} ${isCapture ? 'width: 100%; box-sizing: border-box;' : ''}">
+            <div class="${tierClass} rounded-2xl p-6 flex flex-col shadow-card transition-all relative overflow-hidden shrink-0 ${isCapture ? 'w-[420px]' : 'w-full'}" data-role="${profile.role}" style="${cBorderCss}">
                 
                 <div class="flex items-center gap-4 mb-4 w-full relative z-10">
                     <div class="w-20 h-20 shrink-0 relative">
@@ -965,11 +943,7 @@
                     </div>
                 </div>
 
-                <div class="mt-auto pt-4 border-t flex justify-between items-end opacity-90 relative z-10" style="border-color: ${tierStyles.borderMuted}">
-                    <img src="logo.png" alt="BDSM-ka" class="h-16 w-auto object-contain flex-shrink-0" onerror="this.outerHTML='<span class=\\'text-2xl font-black uppercase tracking-widest\\' style=\\'color:${tierStyles.titleColor}\\'>BDSM-ka</span>'">
-                    <img src="qr_tg.png" alt="QR" class="w-16 h-16 rounded-xl bg-white p-1 shadow-md border flex-shrink-0" style="border-color: ${tierStyles.borderMuted}" onerror="this.style.display='none'">
-                </div>
-                
+                ${footerBrandingHTML}
                 ${contactButtonHtml}
             </div>
             `;
