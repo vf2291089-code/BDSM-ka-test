@@ -828,10 +828,11 @@
             let roleBadgeFeedHtml = '';
             
             if (isDom) {
-                roleBadgeCaptureHtml = `<div style="display: inline-block; padding: 6px 16px; margin-top: 14px; border-radius: 30px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; border: 2px solid #ea580c; color: #ea580c; background: rgba(234, 88, 12, 0.1); box-shadow: 0 0 15px rgba(234, 88, 12, 0.2); line-height: 1; vertical-align: middle;">👑 Верхний</div>`;
+                // ИСПОЛЬЗУЕМ font-family: Arial и line-height = height (минус бордеры 4px)
+                roleBadgeCaptureHtml = `<div style="display: inline-block; height: 32px; line-height: 28px; padding: 0 16px; margin-top: 14px; border-radius: 30px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; font-family: Arial, sans-serif; border: 2px solid #ea580c; color: #ea580c; background: rgba(234, 88, 12, 0.1); box-shadow: 0 0 15px rgba(234, 88, 12, 0.2); vertical-align: middle; box-sizing: border-box;">👑 Верхний</div>`;
                 roleBadgeFeedHtml = `<div class="inline-block mt-2 px-3 py-1 rounded-full border border-orange-500/40 bg-orange-500/10 text-orange-600 shadow-[0_0_10px_rgba(234,88,12,0.2)] text-[10px] font-black uppercase tracking-widest leading-none">👑 Верхний</div>`;
             } else {
-                roleBadgeCaptureHtml = `<div style="display: inline-block; padding: 6px 16px; margin-top: 14px; border-radius: 30px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; border: 2px solid #0284c7; color: #0284c7; background: rgba(2, 132, 199, 0.1); box-shadow: 0 0 15px rgba(2, 132, 199, 0.2); line-height: 1; vertical-align: middle;">🧎 Нижний</div>`;
+                roleBadgeCaptureHtml = `<div style="display: inline-block; height: 32px; line-height: 28px; padding: 0 16px; margin-top: 14px; border-radius: 30px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; font-family: Arial, sans-serif; border: 2px solid #0284c7; color: #0284c7; background: rgba(2, 132, 199, 0.1); box-shadow: 0 0 15px rgba(2, 132, 199, 0.2); vertical-align: middle; box-sizing: border-box;">🧎 Нижний</div>`;
                 roleBadgeFeedHtml = `<div class="inline-block mt-2 px-3 py-1 rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-600 shadow-[0_0_10px_rgba(2,132,199,0.2)] text-[10px] font-black uppercase tracking-widest leading-none">🧎 Нижний</div>`;
             }
 
@@ -865,10 +866,13 @@
                 });
             }
 
-            // ТЕГИ: Максимально надежное центрирование для html2canvas
+            // ТЕГИ: ЖЕСТКОЕ ЦЕНТРИРОВАНИЕ ТЕКСТА БЕЗ ОТСТУПОВ
             let tagsHtml = '';
             if (isCapture) {
-                const baseTagStyle = "display: inline-block; padding: 6px 12px; margin: 0 4px 8px 4px; border-radius: 6px; font-size: 12px; font-weight: bold; line-height: normal; white-space: nowrap; vertical-align: middle;";
+                // Секрет обхода бага: НИКАКОГО vertical padding. 
+                // Задаем высоту 28px и line-height 26px (т.к. 2px уходят на рамки border). 
+                // Плюс форсируем стандартный шрифт Arial.
+                const baseTagStyle = "display: inline-block; height: 28px; line-height: 26px; padding: 0 12px; margin: 0 4px 8px 4px; border-radius: 6px; font-size: 13px; font-weight: bold; font-family: Arial, Helvetica, sans-serif; white-space: nowrap; vertical-align: middle; box-sizing: border-box;";
                 
                 const pTags = (profile.prefs || []).map(p => {
                     if(p === 'Готов платить дань') return `<span style="${baseTagStyle} background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 1px solid #ca8a04; box-shadow: 0 1px 2px rgba(234,179,8,0.3);">✓ ${p}</span>`;
