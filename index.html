@@ -113,7 +113,7 @@
         
         input[type="file"]::file-selector-button { display: none; }
         
-        /* TAG STYLES FOR APP */
+        /* TAG STYLES */
         .tag-btn { transition: all 0.2s ease; border: 2px solid #e2e8f0; background: white; color: #64748b; }
         .tag-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
         .tag-pref-active { background-color: #10b981 !important; border-color: #059669 !important; color: white !important; }
@@ -121,8 +121,7 @@
         .tag-interest-active { background-color: #3b82f6 !important; border-color: #2563eb !important; color: white !important; }
         .tag-disabled { opacity: 0.25; pointer-events: none; filter: grayscale(100%); }
 
-        .tag-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; white-space: nowrap; vertical-align: middle; }
-        .role-badge { display: inline-block; padding: 4px 10px; border-radius: 9999px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; vertical-align: middle; }
+        .tag-badge { display: inline-flex; align-items: center; justify-content: center; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; text-align: center; }
         .tag-gold-special { background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 1px solid #ca8a04; box-shadow: 0 1px 3px rgba(234,179,8,0.4); }
     </style>
 </head>
@@ -146,12 +145,7 @@
         <!-- VIEW: DATING FEED -->
         <div id="view-feed" class="tab-content fade-in block">
             <div class="mb-8">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
-                    <h1 class="text-3xl font-bold text-stone-800">Сообщество</h1>
-                    <button onclick="openExternalLink('https://t.me/BDSMka_club')" class="inline-flex items-center justify-center gap-2 bg-sky-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-sky-600 transition-all shadow-md shrink-0">
-                        <span class="text-lg">✈️</span> Канал с анкетами
-                    </button>
-                </div>
+                <h1 class="text-3xl font-bold text-stone-800 mb-3">Сообщество</h1>
                 <p class="text-base text-stone-600 max-w-3xl mb-6">
                     Изучите анкеты участников. Зеленые теги — предпочтения, красные — табу. Летающие смайлы — интересы.
                 </p>
@@ -175,6 +169,7 @@
                     Заполните данные. <b>При публикации новой анкеты, ваша предыдущая анкета в канале будет автоматически удалена.</b>
                 </p>
 
+                <!-- Обратите внимание: убран onsubmit, чтобы избежать конфликтов с мобильным Telegram WebApp -->
                 <form id="profile-form" class="space-y-8">
                     
                     <div class="space-y-5">
@@ -327,6 +322,7 @@
                     </div>
 
                     <div class="pt-4">
+                        <!-- Кнопка изменена на type="button", валидация происходит вручную -->
                         <button type="button" id="preview-btn" onclick="showPreview(event)" class="w-full bg-stone-900 text-white font-bold py-5 rounded-xl hover:bg-stone-800 transition-all shadow-card text-lg flex items-center justify-center gap-2">
                             👀 Предпросмотр Анкеты
                         </button>
@@ -421,7 +417,7 @@
                     });
                 }
                 updateTierPreview();
-                if (code === 'BEZLIM') appliedPromoCode = code; 
+                if (code === 'BEZLIM') appliedPromoCode = code; // Сохраняем для отправки на бэкенд
                 alert('Мастер-промокод принят! Разблокированы абсолютно все стили оформления.');
                 return;
             }
@@ -650,7 +646,7 @@
         function showPreview(e) {
             if (e) e.preventDefault();
             
-            // Ручная проверка полей
+            // Ручная проверка всех обязательных полей
             const requiredFields = [
                 {id: 'form-name', name: 'Имя / Никнейм'},
                 {id: 'form-username', name: '@Username (Телеграм)'},
@@ -728,33 +724,25 @@
             const errorMsg = document.getElementById('error-message');
             if(errorMsg) errorMsg.textContent = '';
 
-            // ИСПРАВЛЕНИЕ: Убрали opacity: 0. Прячем карточку просто сдвигая ее за левый край экрана (-9999px).
-            // Иначе библиотека html2canvas будет выдавать пустой/белый лист.
             const offscreen = document.createElement('div');
             offscreen.style.position = 'absolute';
             offscreen.style.left = '-9999px';
             offscreen.style.top = '0';
-            offscreen.style.width = '420px'; 
-            offscreen.style.zIndex = '-9999';
+            offscreen.style.width = '400px'; 
+            offscreen.style.background = 'transparent'; 
+            offscreen.style.padding = '0'; 
             document.body.appendChild(offscreen);
 
             const tempId = 'capture_' + pendingProfile.id;
             const tempProfile = { ...pendingProfile, id: tempId };
             
-            // ВАЖНО: передаем isCapture = true, чтобы отрисовать жесткий HTML
             offscreen.innerHTML = createCardHTML(tempProfile, true); 
             
             await new Promise(r => setTimeout(r, 600));
 
             let base64Image = null;
             try {
-                // ИСПРАВЛЕНИЕ: Фотографируем саму карточку (первый элемент), чтобы отсечь пустые края
-                const targetToRender = offscreen.firstElementChild;
-                const canvas = await html2canvas(targetToRender, { 
-                    scale: 2, 
-                    useCORS: true, 
-                    backgroundColor: null 
-                });
+                const canvas = await html2canvas(offscreen, { scale: 2, useCORS: true, backgroundColor: null });
                 base64Image = canvas.toDataURL('image/png', 1.0).split(',')[1];
             } catch(err) { console.error("Ошибка html2canvas:", err); }
             
@@ -762,10 +750,9 @@
 
             const isDomWebhook = pendingProfile.role === 'dominant';
             const genderTag = pendingProfile.gender === 'М' ? 'М' : 'Ж';
-            // Убрали добавление возраста к тегу пола
             const generatedTags = `#${isDomWebhook ? 'Верхний' : 'Нижний'} #${pendingProfile.city.replace(/\s+/g, '')} #${genderTag}`;
 
-            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwDDDrg2jjJfS45XEKJX2sBBcUOOGS7b4tcc0ZkDQZyBq1koslORa-D6ltNJm5gTdHR/exec'; 
+            const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxdJtjTKeIJnlGbs_BF7m19j04iUyoa01cEJkrVlmLVnoF1aNs6s36dHh2EZ4Sz59FYeQ/exec'; 
             try {
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
@@ -821,12 +808,31 @@
             let cBorderCss = profile.cardBorder !== 'default' ? `border-color: ${profile.cardBorder} !important;` : '';
             let pBorderCss = profile.photoBorder !== 'default' ? `border-color: ${profile.photoBorder};` : `border-color: ${tierStyles.borderMuted};`;
 
-            // --- ПУЗЫРЬКИ ИНТЕРЕСОВ ---
+            let avatarContent = profile.avatarUrl 
+                ? `<div style="width: 100%; height: 100%; background-image: url('${profile.avatarUrl}'); background-size: cover; background-position: center; border-radius: 50%;"></div>` 
+                : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.05); border-radius: 50%;"><span style="font-size: 32px;">${profile.gender === 'М' ? '🧔' : '👩'}</span></div>`;
+
+            // --- БЕЙДЖ РОЛИ ---
+            let roleBadgeHtml = '';
+            if (isCapture) {
+                // ИСПРАВЛЕНИЕ ДЛЯ КАРТИНКИ: Уменьшаем рамки бейджа и сужаем
+                if (isDom) {
+                    roleBadgeHtml = `<div style="display: inline-block; padding: 3px 12px 4px 12px; margin-top: 12px; border-radius: 20px; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; font-family: Arial, sans-serif; border: 2px solid #ea580c; color: #ea580c; background: rgba(234, 88, 12, 0.1); box-shadow: 0 0 10px rgba(234, 88, 12, 0.2); vertical-align: middle; box-sizing: border-box; line-height: 1;">👑 Верхний</div>`;
+                } else {
+                    roleBadgeHtml = `<div style="display: inline-block; padding: 3px 12px 4px 12px; margin-top: 12px; border-radius: 20px; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; font-family: Arial, sans-serif; border: 2px solid #0284c7; color: #0284c7; background: rgba(2, 132, 199, 0.1); box-shadow: 0 0 10px rgba(2, 132, 199, 0.2); vertical-align: middle; box-sizing: border-box; line-height: 1;">🧎 Нижний</div>`;
+                }
+            } else {
+                roleBadgeHtml = isDom
+                    ? `<div class="role-badge border border-orange-500/40 bg-orange-500/10 text-orange-600 shadow-sm mt-1">👑 Верхний</div>`
+                    : `<div class="role-badge border border-sky-500/40 bg-sky-500/10 text-sky-600 shadow-sm mt-1">🧎 Нижний</div>`;
+            }
+
+
+            // --- Генерация летающих пузырьков ---
             let bubblesHtml = '';
             if (profile.interests && profile.interests.length > 0) {
                 const bubbleStyle = profile.bubbleStyle || 'none';
                 
-                // Для скриншота используем жесткие пиксели, чтобы html2canvas не сходил с ума
                 const bPositions = isCapture 
                 ? [
                     { top: '-5px', left: '-5px', size: '28px' },
@@ -860,30 +866,41 @@
                 });
             }
 
-            // ====================================================================================================
-            // РЕЖИМ ГЕНЕРАЦИИ ДЛЯ TELEGRAM (МОНОЛИТНЫЙ, ЖЕСТКИЙ HTML БЕЗ СЛОЖНЫХ CSS КЛАССОВ)
-            // ====================================================================================================
+            // ТЕГИ (Нравится / Лимиты)
+            let tagsHtml = '';
             if (isCapture) {
-                // Создаем теги с жесткими паддингами без line-height, чтобы текст 100% не съезжал
+                // ИСПРАВЛЕНИЕ ДЛЯ КАРТИНКИ: Очень маленькие паддинги, чтобы рамка была "в облипку".
+                // Уменьшен шрифт до 11px, line-height 1.1. Тексту некуда "падать".
+                const baseTagStyle = "display: inline-block; padding: 2px 10px 3px 10px; margin: 0 3px 6px 3px; border-radius: 6px; font-size: 11px; font-weight: bold; line-height: 1.1; font-family: Arial, sans-serif; white-space: nowrap; vertical-align: middle;";
+                
                 const pTags = (profile.prefs || []).map(p => {
-                    const bgStyle = p === 'Готов платить дань' 
-                        ? 'background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 1px solid #ca8a04;' 
-                        : 'background: #dcfce7; color: #065f46; border: 1px solid #6ee7b7;';
-                    return `<div style="display: inline-block; padding: 6px 12px; margin: 0 6px 8px 0; border-radius: 6px; font-size: 13px; font-weight: bold; font-family: Arial, Helvetica, sans-serif; ${bgStyle}">✓ ${p}</div>`;
+                    if(p === 'Готов платить дань') return `<div style="${baseTagStyle} background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 1px solid #ca8a04; box-shadow: 0 1px 2px rgba(234,179,8,0.3);">✓ ${p}</div>`;
+                    return `<div style="${baseTagStyle} background: #dcfce7; color: #065f46; border: 1px solid #6ee7b7;">✓ ${p}</div>`;
                 }).join('');
                 
                 const lTags = (profile.limits || []).map(l => {
-                    return `<div style="display: inline-block; padding: 6px 12px; margin: 0 6px 8px 0; border-radius: 6px; font-size: 13px; font-weight: bold; font-family: Arial, Helvetica, sans-serif; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;">✕ ${l}</div>`;
+                    return `<div style="${baseTagStyle} background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;">✕ ${l}</div>`;
                 }).join('');
 
-                const roleBg = isDom ? 'background: rgba(234,88,12,0.1); color: #ea580c; border: 1px solid rgba(234,88,12,0.3);' : 'background: rgba(2,132,199,0.1); color: #0284c7; border: 1px solid rgba(2,132,199,0.3);';
-                const roleText = isDom ? '👑 ВЕРХНИЙ' : '🧎 НИЖНИЙ';
-                const roleBadge = `<div style="display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 900; letter-spacing: 1px; font-family: Arial, Helvetica, sans-serif; ${roleBg}">${roleText}</div>`;
+                tagsHtml = `<div style="text-align: center; margin-bottom: 24px; width: 100%;">${pTags}${lTags}</div>`;
+            } else {
+                const pTags = (profile.prefs || []).map(p => {
+                    if(p === 'Готов платить дань') return `<span class="tag-badge tag-gold-special mr-1 mb-1">✓ ${p}</span>`;
+                    return `<span class="tag-badge bg-emerald-100 text-emerald-800 border border-emerald-300 mr-1 mb-1">✓ ${p}</span>`;
+                }).join('');
+                const lTags = (profile.limits || []).map(l => `<span class="tag-badge bg-red-100 text-red-800 border border-red-300 mr-1 mb-1">✕ ${l}</span>`).join('');
+                tagsHtml = `<div class="mb-4 flex flex-wrap w-full">${pTags}${lTags}</div>`;
+            }
 
+            let contactButtonHtml = isCapture ? '' : `
+                <button onclick="openContactModal('${profile.username}')" class="w-full mt-5 py-3.5 rounded-xl ${isDom ? 'bg-orange-600 hover:bg-orange-700' : 'bg-sky-600 hover:bg-sky-700'} text-white text-sm font-bold transition-colors shadow-md flex justify-center items-center gap-2 relative z-10 border-0">
+                    💬 Написать Владельцу
+                </button>
+            `;
+
+            if (isCapture) {
                 return `
                 <div style="width: 420px; padding: 30px; box-sizing: border-box; ${tierStyles.bg}; ${cBorderCss} border-radius: 20px;">
-                    
-                    <!-- Header -->
                     <div style="display: flex; align-items: center; margin-bottom: 24px;">
                         <div style="position: relative; width: 90px; height: 90px; flex-shrink: 0; margin-right: 20px;">
                             <div style="width: 100%; height: 100%; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 4px solid transparent; ${pBorderCss} background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
@@ -893,17 +910,13 @@
                         </div>
                         <div style="flex-grow: 1;">
                             <div style="font-size: 28px; font-weight: bold; color: ${tierStyles.titleColor}; margin-bottom: 6px; font-family: Arial, Helvetica, sans-serif; word-wrap: break-word;">${profile.name}, ${profile.age}</div>
-                            <div style="font-size: 16px; color: ${tierStyles.textColor}; opacity: 0.8; margin-bottom: 12px; font-family: Arial, Helvetica, sans-serif;">📍 ${profile.city}</div>
-                            ${roleBadge}
+                            <div style="font-size: 16px; color: ${tierStyles.textColor}; opacity: 0.8; margin-bottom: 8px; font-family: Arial, Helvetica, sans-serif;">📍 ${profile.city}</div>
+                            ${roleBadgeHtml}
                         </div>
                     </div>
 
-                    <!-- Tags -->
-                    <div style="margin-bottom: 24px;">
-                        ${pTags}${lTags}
-                    </div>
+                    ${tagsHtml}
 
-                    <!-- Text Sections -->
                     <div style="margin-bottom: 20px;">
                         <div style="font-size: 12px; font-weight: bold; text-transform: uppercase; color: ${tierStyles.textColor}; opacity: 0.6; margin-bottom: 6px; font-family: Arial, Helvetica, sans-serif; letter-spacing: 1px;">О себе</div>
                         <div style="font-size: 16px; font-style: italic; color: ${tierStyles.textColor}; border-left: 3px solid ${tierStyles.borderMuted}; padding-left: 14px; opacity: 0.95; font-family: Arial, Helvetica, sans-serif; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4;">"${profile.desc}"</div>
@@ -914,7 +927,6 @@
                         <div style="font-size: 16px; color: ${tierStyles.textColor}; border-left: 3px solid ${tierStyles.borderMuted}; padding-left: 14px; opacity: 0.95; font-family: Arial, Helvetica, sans-serif; white-space: pre-wrap; word-wrap: break-word; line-height: 1.4;">${profile.lookingFor || 'Не указано'}</div>
                     </div>
 
-                    <!-- Footer Logos -->
                     <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid ${tierStyles.borderMuted}; padding-top: 24px;">
                         <img src="logo.png" style="height: 60px; width: auto;" onerror="this.outerHTML='<span style=\\'font-size:24px; font-weight:bold; color:${tierStyles.titleColor}; font-family: Arial, Helvetica, sans-serif;\\'>BDSM-ka</span>'">
                         <img src="qr_tg.png" style="width: 80px; height: 80px; border-radius: 12px; border: 1px solid #ccc; padding: 4px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" onerror="this.style.display='none'">
@@ -923,31 +935,13 @@
                 `;
             }
 
-            // ====================================================================================================
-            // РЕЖИМ ДЛЯ ПРИЛОЖЕНИЯ В TELEGRAM (ГИБКАЯ, СОВРЕМЕННАЯ ВЕРСТКА НА TAILWIND)
-            // ====================================================================================================
-            let avatarContentFeed = profile.avatarUrl 
-                ? `<img src="${profile.avatarUrl}" class="w-full h-full object-cover">` 
-                : `<div class="w-full h-full flex items-center justify-center bg-black/5"><span class="text-3xl">${profile.gender === 'М' ? '🧔' : '👩'}</span></div>`;
-
-            const roleBadgeHtml = isDom
-                ? `<div class="role-badge border border-orange-500/40 bg-orange-500/10 text-orange-600 shadow-sm mt-1">👑 Верхний</div>`
-                : `<div class="role-badge border border-sky-500/40 bg-sky-500/10 text-sky-600 shadow-sm mt-1">🧎 Нижний</div>`;
-
-            const pTags = (profile.prefs || []).map(p => {
-                if(p === 'Готов платить дань') return `<span class="tag-badge tag-gold-special mr-1 mb-1">✓ ${p}</span>`;
-                return `<span class="tag-badge bg-emerald-100 text-emerald-800 border border-emerald-300 mr-1 mb-1">✓ ${p}</span>`;
-            }).join('');
-            const lTags = (profile.limits || []).map(l => `<span class="tag-badge bg-red-100 text-red-800 border border-red-300 mr-1 mb-1">✕ ${l}</span>`).join('');
-            const tagsHtml = `<div class="mb-4 flex flex-wrap w-full">${pTags}${lTags}</div>`;
-
             return `
-            <div class="${tierClass} rounded-2xl p-6 flex flex-col shadow-card transition-all relative overflow-hidden" data-role="${profile.role}" style="${cBorderCss}">
+            <div class="${tierClass} rounded-2xl p-6 flex flex-col shadow-card transition-all relative overflow-hidden" data-role="${profile.role}" style="${cBorderCss} ${isCapture ? 'width: 100%; box-sizing: border-box;' : ''}">
                 
                 <div class="flex items-center gap-4 mb-4 w-full relative z-10">
                     <div class="w-20 h-20 shrink-0 relative">
                         <div class="w-full h-full border-4 shadow-md rounded-full overflow-hidden bg-white" style="${pBorderCss}">
-                            ${avatarContentFeed}
+                            ${avatarContent}
                         </div>
                         ${bubblesHtml}
                     </div>
@@ -976,9 +970,7 @@
                     <img src="qr_tg.png" alt="QR" class="w-16 h-16 rounded-xl bg-white p-1 shadow-md border flex-shrink-0" style="border-color: ${tierStyles.borderMuted}" onerror="this.style.display='none'">
                 </div>
                 
-                <button onclick="openContactModal('${profile.username}')" class="w-full mt-5 py-3.5 rounded-xl ${isDom ? 'bg-orange-600 hover:bg-orange-700' : 'bg-sky-600 hover:bg-sky-700'} text-white text-sm font-bold transition-colors shadow-md flex justify-center items-center gap-2 relative z-10 border-0">
-                    💬 Написать Владельцу
-                </button>
+                ${contactButtonHtml}
             </div>
             `;
         }
