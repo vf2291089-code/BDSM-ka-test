@@ -823,15 +823,15 @@
                 ? `<div style="width: 100%; height: 100%; background-image: url('${profile.avatarUrl}'); background-size: cover; background-position: center; border-radius: 50%;"></div>` 
                 : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.05); border-radius: 50%;"><span style="font-size: 32px;">${profile.gender === 'М' ? '🧔' : '👩'}</span></div>`;
 
-            // --- БЕЙДЖ РОЛИ (ЖЕЛЕЗОБЕТОННОЕ ЦЕНТРИРОВАНИЕ ЧЕРЕЗ ТАБЛИЦУ) ---
+            // --- БЕЙДЖ РОЛИ (ОБХОД БАГА ЧЕРЕЗ СДВИГ POSITION: RELATIVE) ---
             let roleBadgeCaptureHtml = '';
             let roleBadgeFeedHtml = '';
             
             if (isDom) {
-                roleBadgeCaptureHtml = `<div style="display: inline-block; margin-top: 14px; border-radius: 30px; border: 2px solid #ea580c; background: rgba(234, 88, 12, 0.1); overflow: hidden; box-shadow: 0 0 15px rgba(234, 88, 12, 0.2); vertical-align: middle;"><div style="display: table; height: 28px; width: 100%;"><span style="display: table-cell; vertical-align: middle; padding: 0 16px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; font-family: Arial, sans-serif; color: #ea580c; text-align: center;">👑 Верхний</span></div></div>`;
+                roleBadgeCaptureHtml = `<div style="display: inline-block; padding: 8px 16px; margin-top: 14px; border-radius: 30px; border: 2px solid #ea580c; background: rgba(234, 88, 12, 0.1); box-shadow: 0 0 15px rgba(234, 88, 12, 0.2); vertical-align: middle;"><span style="display: inline-block; position: relative; top: -2px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; font-family: Arial, sans-serif; color: #ea580c; line-height: 1.2;">👑 Верхний</span></div>`;
                 roleBadgeFeedHtml = `<div class="inline-block mt-2 px-3 py-1 rounded-full border border-orange-500/40 bg-orange-500/10 text-orange-600 shadow-[0_0_10px_rgba(234,88,12,0.2)] text-[10px] font-black uppercase tracking-widest leading-none">👑 Верхний</div>`;
             } else {
-                roleBadgeCaptureHtml = `<div style="display: inline-block; margin-top: 14px; border-radius: 30px; border: 2px solid #0284c7; background: rgba(2, 132, 199, 0.1); overflow: hidden; box-shadow: 0 0 15px rgba(2, 132, 199, 0.2); vertical-align: middle;"><div style="display: table; height: 28px; width: 100%;"><span style="display: table-cell; vertical-align: middle; padding: 0 16px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; font-family: Arial, sans-serif; color: #0284c7; text-align: center;">🧎 Нижний</span></div></div>`;
+                roleBadgeCaptureHtml = `<div style="display: inline-block; padding: 8px 16px; margin-top: 14px; border-radius: 30px; border: 2px solid #0284c7; background: rgba(2, 132, 199, 0.1); box-shadow: 0 0 15px rgba(2, 132, 199, 0.2); vertical-align: middle;"><span style="display: inline-block; position: relative; top: -2px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; font-family: Arial, sans-serif; color: #0284c7; line-height: 1.2;">🧎 Нижний</span></div>`;
                 roleBadgeFeedHtml = `<div class="inline-block mt-2 px-3 py-1 rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-600 shadow-[0_0_10px_rgba(2,132,199,0.2)] text-[10px] font-black uppercase tracking-widest leading-none">🧎 Нижний</div>`;
             }
 
@@ -865,20 +865,20 @@
                 });
             }
 
-            // ТЕГИ: ЖЕЛЕЗОБЕТОННОЕ ЦЕНТРИРОВАНИЕ ЧЕРЕЗ ТАБЛИЦУ
+            // ТЕГИ: ОБХОД БАГА ЧЕРЕЗ СДВИГ POSITION: RELATIVE
             let tagsHtml = '';
             if (isCapture) {
-                // Метод Матрешки (Table-Cell): 100% центрирует текст вместе с иконками и эмодзи внутри html2canvas.
-                const wrapperBase = "display: inline-block; margin: 0 4px 8px 4px; border-radius: 6px; overflow: hidden; vertical-align: middle;";
-                const tableBase = "display: table; height: 26px; width: 100%;";
-                const cellBase = "display: table-cell; vertical-align: middle; padding: 0 12px; font-size: 12px; font-weight: bold; font-family: Arial, sans-serif; white-space: nowrap; text-align: center;";
+                // Мы убрали 'display: table', так как библиотека его просто стирает.
+                // Возвращаем надежные отступы (padding) и физически двигаем текст вверх на 2 пикселя через top: -2px.
+                const wrapperBase = "display: inline-block; margin: 0 4px 8px 4px; padding: 6px 12px; border-radius: 6px; vertical-align: middle;";
+                const textBase = "display: inline-block; position: relative; top: -2px; font-size: 12px; font-weight: bold; font-family: Arial, sans-serif; white-space: nowrap; line-height: 1.2;";
                 
                 const pTags = (profile.prefs || []).map(p => {
-                    if(p === 'Готов платить дань') return `<div style="${wrapperBase} background: linear-gradient(135deg, #fef08a, #eab308); border: 1px solid #ca8a04; box-shadow: 0 1px 2px rgba(234,179,8,0.3);"><div style="${tableBase}"><span style="${cellBase} color: #422006;">✓ ${p}</span></div></div>`;
-                    return `<div style="${wrapperBase} background: #dcfce7; border: 1px solid #6ee7b7;"><div style="${tableBase}"><span style="${cellBase} color: #065f46;">✓ ${p}</span></div></div>`;
+                    if(p === 'Готов платить дань') return `<div style="${wrapperBase} background: linear-gradient(135deg, #fef08a, #eab308); border: 1px solid #ca8a04; box-shadow: 0 1px 2px rgba(234,179,8,0.3);"><span style="${textBase} color: #422006;">✓ ${p}</span></div>`;
+                    return `<div style="${wrapperBase} background: #dcfce7; border: 1px solid #6ee7b7;"><span style="${textBase} color: #065f46;">✓ ${p}</span></div>`;
                 }).join('');
                 
-                const lTags = (profile.limits || []).map(l => `<div style="${wrapperBase} background: #fee2e2; border: 1px solid #fca5a5;"><div style="${tableBase}"><span style="${cellBase} color: #991b1b;">✕ ${l}</span></div></div>`).join('');
+                const lTags = (profile.limits || []).map(l => `<div style="${wrapperBase} background: #fee2e2; border: 1px solid #fca5a5;"><span style="${textBase} color: #991b1b;">✕ ${l}</span></div>`).join('');
                 
                 tagsHtml = `<div style="text-align: center; margin-bottom: 24px; width: 100%;">${pTags}${lTags}</div>`;
             } else {
