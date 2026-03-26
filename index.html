@@ -121,7 +121,29 @@
         .tag-interest-active { background-color: #3b82f6 !important; border-color: #2563eb !important; color: white !important; }
         .tag-disabled { opacity: 0.25; pointer-events: none; filter: grayscale(100%); }
 
-        .tag-badge { display: inline-flex; align-items: center; justify-content: center; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; text-align: center; }
+        /* --- 100% БЕЗОПАСНЫЕ СТИЛИ ТЕГОВ ДЛЯ ГЕНЕРАТОРА КАРТИНОК --- */
+        .tag-badge { 
+            display: inline-block; 
+            padding: 4px 8px; 
+            border-radius: 6px; 
+            font-size: 11px; 
+            font-weight: 700; 
+            line-height: 1; 
+            white-space: nowrap; 
+            vertical-align: middle; 
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            line-height: 1;
+            vertical-align: middle;
+        }
+        
         .tag-gold-special { background: linear-gradient(135deg, #fef08a, #eab308); color: #422006; border: 1px solid #ca8a04; box-shadow: 0 1px 3px rgba(234,179,8,0.4); }
     </style>
 </head>
@@ -174,7 +196,6 @@
                     Заполните данные. <b>При публикации новой анкеты, ваша предыдущая анкета в канале будет автоматически удалена.</b>
                 </p>
 
-                <!-- Обратите внимание: убран onsubmit, чтобы избежать конфликтов с мобильным Telegram WebApp -->
                 <form id="profile-form" class="space-y-8">
                     
                     <div class="space-y-5">
@@ -327,7 +348,6 @@
                     </div>
 
                     <div class="pt-4">
-                        <!-- Кнопка изменена на type="button", валидация происходит вручную -->
                         <button type="button" id="preview-btn" onclick="showPreview(event)" class="w-full bg-stone-900 text-white font-bold py-5 rounded-xl hover:bg-stone-800 transition-all shadow-card text-lg flex items-center justify-center gap-2">
                             👀 Предпросмотр Анкеты
                         </button>
@@ -733,7 +753,7 @@
             offscreen.style.position = 'absolute';
             offscreen.style.left = '-9999px';
             offscreen.style.top = '0';
-            offscreen.style.width = '480px'; 
+            offscreen.style.width = '400px'; /* Идеальная ширина карточки 1 в 1 как на телефоне */
             offscreen.style.background = 'transparent'; 
             offscreen.style.padding = '0'; 
             document.body.appendChild(offscreen);
@@ -805,7 +825,7 @@
             btn.disabled = false;
         }
 
-        // --- ВЕРСТКА КАРТОЧКИ С ПУЗЫРЬКАМИ ---
+        // --- ВЕРСТКА КАРТОЧКИ ---
         function createCardHTML(profile, isCapture = false) {
             const isDom = profile.role === 'dominant';
             const colorClass = isDom ? 'text-orange-600' : 'text-sky-600';
@@ -815,26 +835,14 @@
             let cBorderCss = profile.cardBorder !== 'default' ? `border-color: ${profile.cardBorder} !important;` : '';
             let pBorderCss = profile.photoBorder !== 'default' ? `border-color: ${profile.photoBorder} !important;` : `border-color: ${tierStyles.borderMuted};`;
 
-            let avatarContentCapture = profile.avatarUrl 
-                ? `<div style="width: 100%; height: 100%; background-image: url('${profile.avatarUrl}'); background-size: cover; background-position: center; border-radius: 50%;"></div>` 
-                : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.05); border-radius: 50%;"><span style="font-size: 64px;">${profile.gender === 'М' ? '🧔' : '👩'}</span></div>`;
-
-            let avatarContentFeed = profile.avatarUrl 
+            let avatarContent = profile.avatarUrl 
                 ? `<div style="width: 100%; height: 100%; background-image: url('${profile.avatarUrl}'); background-size: cover; background-position: center; border-radius: 50%;"></div>` 
                 : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.05); border-radius: 50%;"><span style="font-size: 32px;">${profile.gender === 'М' ? '🧔' : '👩'}</span></div>`;
 
-            // --- БЕЙДЖ РОЛИ (Уменьшенные рамки и асимметричный отступ) ---
-            let roleBadgeCaptureHtml = '';
-            let roleBadgeFeedHtml = '';
-            
-            if (isDom) {
-                // Сделали рамку компактнее: padding сверху всего 2px, снизу 6px. Текст 12px вместо 14px.
-                roleBadgeCaptureHtml = `<div style="display: inline-block; padding: 2px 14px 6px 14px; margin-top: 12px; border-radius: 20px; border: 2px solid #ea580c; background: rgba(234, 88, 12, 0.1); box-shadow: 0 0 10px rgba(234, 88, 12, 0.2); vertical-align: middle;"><span style="display: inline-block; position: relative; top: -1px; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; font-family: Arial, sans-serif; color: #ea580c; line-height: 1;">👑 Верхний</span></div>`;
-                roleBadgeFeedHtml = `<div class="inline-block mt-2 px-3 py-1 rounded-full border border-orange-500/40 bg-orange-500/10 text-orange-600 shadow-[0_0_10px_rgba(234,88,12,0.2)] text-[10px] font-black uppercase tracking-widest leading-none">👑 Верхний</div>`;
-            } else {
-                roleBadgeCaptureHtml = `<div style="display: inline-block; padding: 2px 14px 6px 14px; margin-top: 12px; border-radius: 20px; border: 2px solid #0284c7; background: rgba(2, 132, 199, 0.1); box-shadow: 0 0 10px rgba(2, 132, 199, 0.2); vertical-align: middle;"><span style="display: inline-block; position: relative; top: -1px; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; font-family: Arial, sans-serif; color: #0284c7; line-height: 1;">🧎 Нижний</span></div>`;
-                roleBadgeFeedHtml = `<div class="inline-block mt-2 px-3 py-1 rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-600 shadow-[0_0_10px_rgba(2,132,199,0.2)] text-[10px] font-black uppercase tracking-widest leading-none">🧎 Нижний</div>`;
-            }
+            // --- БЕЙДЖ РОЛИ ---
+            const roleBadgeHtml = isDom
+                ? `<div class="role-badge border border-orange-500/40 bg-orange-500/10 text-orange-600 shadow-sm mt-1">👑 Верхний</div>`
+                : `<div class="role-badge border border-sky-500/40 bg-sky-500/10 text-sky-600 shadow-sm mt-1">🧎 Нижний</div>`;
 
             // --- Генерация летающих пузырьков ---
             let bubblesHtml = '';
@@ -842,11 +850,11 @@
                 const bubbleStyle = profile.bubbleStyle || 'none';
                 
                 const bPositions = [
-                    { top: '-5%', left: '0%', size: isCapture ? '50px' : '22px', rot: '-15deg' },
-                    { top: '15%', right: '-5%', size: isCapture ? '45px' : '18px', rot: '10deg' },
-                    { bottom: '15%', left: '-5%', size: isCapture ? '55px' : '24px', rot: '-20deg' },
-                    { bottom: '-5%', right: '10%', size: isCapture ? '40px' : '16px', rot: '15deg' },
-                    { top: '-10%', left: '45%', size: isCapture ? '48px' : '20px', rot: '5deg' }
+                    { top: '-5%', left: '0%', size: '22px', rot: '-15deg' },
+                    { top: '15%', right: '-5%', size: '18px', rot: '10deg' },
+                    { bottom: '15%', left: '-5%', size: '24px', rot: '-20deg' },
+                    { bottom: '-5%', right: '10%', size: '16px', rot: '15deg' },
+                    { top: '-10%', left: '45%', size: '20px', rot: '5deg' }
                 ];
 
                 profile.interests.forEach((interestName, idx) => {
@@ -866,109 +874,58 @@
                 });
             }
 
-            // ТЕГИ: Уменьшенные рамки и асимметричный отступ (компенсация бага)
-            let tagsHtml = '';
-            if (isCapture) {
-                // Сужаем рамки (padding сверху 2px, снизу 6px). 
-                // Уменьшаем шрифт до 11px, чтобы теги смотрелись очень аккуратно и не занимали много места.
-                const wrapperBase = "display: inline-block; margin: 0 3px 6px 3px; padding: 2px 8px 6px 8px; border-radius: 5px; vertical-align: middle;";
-                const textBase = "display: inline-block; position: relative; top: -1px; font-size: 11px; font-weight: bold; font-family: Arial, sans-serif; white-space: nowrap; line-height: 1;";
-                
-                const pTags = (profile.prefs || []).map(p => {
-                    if(p === 'Готов платить дань') return `<div style="${wrapperBase} background: linear-gradient(135deg, #fef08a, #eab308); border: 1px solid #ca8a04; box-shadow: 0 1px 2px rgba(234,179,8,0.3);"><span style="${textBase} color: #422006;">✓ ${p}</span></div>`;
-                    return `<div style="${wrapperBase} background: #dcfce7; border: 1px solid #6ee7b7;"><span style="${textBase} color: #065f46;">✓ ${p}</span></div>`;
-                }).join('');
-                
-                const lTags = (profile.limits || []).map(l => `<div style="${wrapperBase} background: #fee2e2; border: 1px solid #fca5a5;"><span style="${textBase} color: #991b1b;">✕ ${l}</span></div>`).join('');
-                
-                tagsHtml = `<div style="text-align: center; margin-bottom: 24px; width: 100%;">${pTags}${lTags}</div>`;
-            } else {
-                const pTags = (profile.prefs || []).map(p => {
-                    if(p === 'Готов платить дань') return `<span class="tag-badge tag-gold-special">✓ ${p}</span>`;
-                    return `<span class="tag-badge bg-emerald-100 text-emerald-800 border border-emerald-300">✓ ${p}</span>`;
-                }).join('');
-                const lTags = (profile.limits || []).map(l => `<span class="tag-badge bg-red-100 text-red-800 border border-red-300">✕ ${l}</span>`).join('');
-                tagsHtml = `<div class="mb-4 flex flex-wrap gap-1.5 w-full">${pTags}${lTags}</div>`;
-            }
+            // ТЕГИ:
+            const pTags = (profile.prefs || []).map(p => {
+                if(p === 'Готов платить дань') return `<span class="tag-badge tag-gold-special mr-1 mb-1">✓ ${p}</span>`;
+                return `<span class="tag-badge bg-emerald-100 text-emerald-800 border border-emerald-300 mr-1 mb-1">✓ ${p}</span>`;
+            }).join('');
+            const lTags = (profile.limits || []).map(l => `<span class="tag-badge bg-red-100 text-red-800 border border-red-300 mr-1 mb-1">✕ ${l}</span>`).join('');
+            const tagsHtml = `<div class="mb-4 flex flex-wrap w-full">${pTags}${lTags}</div>`;
 
-            if (isCapture) {
-                return `
-                <div style="width: 100%; border-radius: 24px; padding: 40px; box-sizing: border-box; ${tierStyles.bg}; ${cBorderCss} overflow: hidden;">
-                    
-                    <div style="position: relative; width: 240px; height: 240px; margin: 0 auto 30px;">
-                        <div style="width: 100%; height: 100%; border-radius: 50%; border: 6px solid transparent; ${pBorderCss} display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 6px 15px rgba(0,0,0,0.15); overflow: hidden;">
-                            ${avatarContentCapture}
+            let contactButtonHtml = isCapture ? '' : `
+                <button onclick="openContactModal('${profile.username}')" class="w-full mt-5 py-3.5 rounded-xl ${isDom ? 'bg-orange-600 hover:bg-orange-700' : 'bg-sky-600 hover:bg-sky-700'} text-white text-sm font-bold transition-colors shadow-md flex justify-center items-center gap-2 relative z-10 border-0">
+                    💬 Написать Владельцу
+                </button>
+            `;
+
+            return `
+            <div class="${tierClass} rounded-2xl p-6 flex flex-col shadow-card transition-all relative overflow-hidden" data-role="${profile.role}" style="${cBorderCss} ${isCapture ? 'width: 100%; box-sizing: border-box;' : ''}">
+                
+                <div class="flex items-center gap-4 mb-4 w-full relative z-10">
+                    <div class="w-20 h-20 shrink-0 relative">
+                        <div class="w-full h-full border-4 shadow-md rounded-full overflow-hidden bg-white" style="${pBorderCss}">
+                            ${avatarContent}
                         </div>
                         ${bubblesHtml}
                     </div>
-                    
-                    <div style="text-align: center; margin-bottom: 24px;">
-                        <div style="font-size: 40px; font-weight: 900; line-height: 1.1; margin-bottom: 8px; color: ${tierStyles.titleColor}; word-wrap: break-word;">${profile.name}, ${profile.age}</div>
-                        <div style="font-size: 22px; opacity: 0.8; font-weight: 600; color: ${tierStyles.textColor};">📍 ${profile.city}</div>
-                        ${roleBadgeCaptureHtml}
-                    </div>
-
-                    ${tagsHtml}
-
-                    <div style="text-align: left; margin-bottom: 20px;">
-                        <div style="font-size: 18px; margin-bottom: 16px; border-left: 4px solid ${tierStyles.borderMuted}; padding-left: 16px;">
-                            <span style="font-weight: 800; color: ${tierStyles.titleColor}; text-transform: uppercase; font-size: 13px; letter-spacing: 1px;">О себе:</span><br>
-                            <span style="font-style: italic; color: ${tierStyles.textColor}; opacity: 0.95; line-height: 1.5;">"${profile.desc}"</span>
-                        </div>
-                        <div style="font-size: 18px; border-left: 4px solid ${tierStyles.borderMuted}; padding-left: 16px;">
-                            <span style="font-weight: 800; color: ${tierStyles.titleColor}; text-transform: uppercase; font-size: 13px; letter-spacing: 1px;">Ищу:</span><br>
-                            <span style="color: ${tierStyles.textColor}; opacity: 0.95; line-height: 1.5;">${profile.lookingFor || 'Не указано'}</span>
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 40px; padding-top: 30px; border-top: 2px solid ${tierStyles.borderMuted}; display: flex; justify-content: space-between; align-items: flex-end;">
-                        <img src="logo.png" style="height: 150px; width: auto; max-width: 250px; object-fit: contain; object-position: left bottom; flex-shrink: 0; display: block;" onerror="this.outerHTML='<span style=\\'font-size:48px; font-weight:900; color:${tierStyles.titleColor}; line-height: 1;\\'>BDSM-ka</span>'">
-                        <img src="qr_tg.png" style="width: 130px; height: 130px; border-radius: 16px; background: white; padding: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); flex-shrink: 0; display: block;" onerror="this.style.display='none'">
+                    <div class="flex-1 min-w-0 flex flex-col justify-center pl-2">
+                        <h3 class="font-bold text-xl leading-tight mb-1 truncate w-full">${profile.name}, ${profile.age}</h3>
+                        <p class="text-sm opacity-80 flex items-center gap-1 truncate w-full"><span>📍</span> ${profile.city}</p>
+                        <div>${roleBadgeHtml}</div>
                     </div>
                 </div>
-                `;
-            } else {
-                return `
-                <div class="${tierClass} rounded-2xl p-6 flex flex-col shadow-card transition-all relative overflow-hidden" data-role="${profile.role}" style="${cBorderCss}">
-                    
-                    <div class="flex items-center gap-4 mb-4 w-full relative z-10">
-                        <div class="w-20 h-20 shrink-0 relative">
-                            <div class="w-full h-full border-4 shadow-md rounded-full overflow-hidden" style="${pBorderCss}">
-                                ${avatarContentFeed}
-                            </div>
-                            ${bubblesHtml}
-                        </div>
-                        <div class="flex-1 min-w-0 flex flex-col justify-center pl-2">
-                            <h3 class="font-bold text-xl leading-tight mb-1 truncate w-full">${profile.name}, ${profile.age}</h3>
-                            <p class="text-sm opacity-80 flex items-center gap-1 truncate w-full"><span>📍</span> ${profile.city}</p>
-                            <div>${roleBadgeFeedHtml}</div>
-                        </div>
-                    </div>
 
-                    <div class="relative z-10 mt-2">${tagsHtml}</div>
-                    
-                    <div class="mt-2 mb-6 relative z-10">
-                        <div class="mb-3">
-                            <span class="text-[10px] uppercase tracking-widest opacity-60 font-bold block mb-1">О себе</span>
-                            <p class="text-sm italic leading-relaxed border-l-2 pl-3 opacity-90 border-black/20">"${profile.desc}"</p>
-                        </div>
-                        <div>
-                            <span class="text-[10px] uppercase tracking-widest opacity-60 font-bold block mb-1">Ищу</span>
-                            <p class="text-sm leading-relaxed border-l-2 pl-3 opacity-90 border-black/20">${profile.lookingFor || 'Не указано'}</p>
-                        </div>
+                <div class="relative z-10 mt-2">${tagsHtml}</div>
+                
+                <div class="mt-2 mb-6 relative z-10 flex-grow">
+                    <div class="mb-3">
+                        <span class="text-[10px] uppercase tracking-widest opacity-60 font-bold block mb-1">О себе</span>
+                        <p class="text-sm italic leading-relaxed border-l-2 pl-3 opacity-90 border-black/20" style="border-color: ${tierStyles.borderMuted}">"${profile.desc}"</p>
                     </div>
-
-                    <div class="mt-auto pt-4 border-t border-black/10 flex justify-between items-end opacity-90 border-muted relative z-10">
-                        <img src="logo.png" alt="BDSM-ka" class="h-20 w-auto object-contain flex-shrink-0" onerror="this.outerHTML='<span class=\\'text-3xl font-black uppercase tracking-widest text-muted\\'>BDSM-ka</span>'">
-                        <img src="qr_tg.png" alt="QR" class="w-16 h-16 rounded-xl bg-white p-1 shadow-md border border-black/10 flex-shrink-0" onerror="this.style.display='none'">
+                    <div>
+                        <span class="text-[10px] uppercase tracking-widest opacity-60 font-bold block mb-1">Ищу</span>
+                        <p class="text-sm leading-relaxed border-l-2 pl-3 opacity-90 border-black/20" style="border-color: ${tierStyles.borderMuted}">${profile.lookingFor || 'Не указано'}</p>
                     </div>
-                    
-                    <button onclick="openContactModal('${profile.username}')" class="w-full mt-5 py-3.5 rounded-xl ${isDom ? 'bg-orange-600 hover:bg-orange-700' : 'bg-sky-600 hover:bg-sky-700'} text-white text-sm font-bold transition-colors shadow-md flex justify-center items-center gap-2 relative z-10 border-0">
-                        💬 Написать Владельцу
-                    </button>
                 </div>
-                `;
-            }
+
+                <div class="mt-auto pt-4 border-t flex justify-between items-end opacity-90 relative z-10" style="border-color: ${tierStyles.borderMuted}">
+                    <img src="logo.png" alt="BDSM-ka" class="h-16 w-auto object-contain flex-shrink-0" onerror="this.outerHTML='<span class=\\'text-2xl font-black uppercase tracking-widest\\' style=\\'color:${tierStyles.titleColor}\\'>BDSM-ka</span>'">
+                    <img src="qr_tg.png" alt="QR" class="w-16 h-16 rounded-xl bg-white p-1 shadow-md border flex-shrink-0" style="border-color: ${tierStyles.borderMuted}" onerror="this.style.display='none'">
+                </div>
+                
+                ${contactButtonHtml}
+            </div>
+            `;
         }
 
         function getTierStyles(tier) {
