@@ -728,15 +728,14 @@
             const errorMsg = document.getElementById('error-message');
             if(errorMsg) errorMsg.textContent = '';
 
-            // Создаем абсолютно прозрачный и изолированный контейнер для генерации картинки
+            // ИСПРАВЛЕНИЕ: Убрали opacity: 0. Прячем карточку просто сдвигая ее за левый край экрана (-9999px).
+            // Иначе библиотека html2canvas будет выдавать пустой/белый лист.
             const offscreen = document.createElement('div');
             offscreen.style.position = 'absolute';
-            offscreen.style.left = '0';
+            offscreen.style.left = '-9999px';
             offscreen.style.top = '0';
             offscreen.style.width = '420px'; 
-            offscreen.style.opacity = '0';
             offscreen.style.zIndex = '-9999';
-            offscreen.style.background = '#fdfbf7'; 
             document.body.appendChild(offscreen);
 
             const tempId = 'capture_' + pendingProfile.id;
@@ -749,7 +748,13 @@
 
             let base64Image = null;
             try {
-                const canvas = await html2canvas(offscreen, { scale: 2, useCORS: true, backgroundColor: null });
+                // ИСПРАВЛЕНИЕ: Фотографируем саму карточку (первый элемент), чтобы отсечь пустые края
+                const targetToRender = offscreen.firstElementChild;
+                const canvas = await html2canvas(targetToRender, { 
+                    scale: 2, 
+                    useCORS: true, 
+                    backgroundColor: null 
+                });
                 base64Image = canvas.toDataURL('image/png', 1.0).split(',')[1];
             } catch(err) { console.error("Ошибка html2canvas:", err); }
             
@@ -757,6 +762,7 @@
 
             const isDomWebhook = pendingProfile.role === 'dominant';
             const genderTag = pendingProfile.gender === 'М' ? 'М' : 'Ж';
+            // Убрали добавление возраста к тегу пола
             const generatedTags = `#${isDomWebhook ? 'Верхний' : 'Нижний'} #${pendingProfile.city.replace(/\s+/g, '')} #${genderTag}`;
 
             const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwDDDrg2jjJfS45XEKJX2sBBcUOOGS7b4tcc0ZkDQZyBq1koslORa-D6ltNJm5gTdHR/exec'; 
